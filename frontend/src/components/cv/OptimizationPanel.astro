@@ -1,0 +1,484 @@
+---
+import SegmentedControl from '../primitives/SegmentedControl.astro';
+import StatusPill from '../primitives/StatusPill.astro';
+import CodeBlock from '../primitives/CodeBlock.astro';
+import Overlay from '../primitives/Overlay.astro';
+
+interface Props {
+  role?: string;
+}
+
+const { role = 'ai-engineer' } = Astro.props;
+---
+
+<Overlay id="cv-rule-diff-overlay" class="cv-rule-diff-overlay" aria-label="Rule diff preview">
+  <div class="cv-rule-diff-modal" role="dialog" aria-modal="true" aria-labelledby="cv-rule-diff-title">
+    <header class="cv-rule-diff-header">
+      <h2 id="cv-rule-diff-title" class="cv-rule-diff-title">Apply Optimization Rule</h2>
+      <button type="button" class="cv-rule-diff-close" id="cv-rule-diff-close" aria-label="Close">
+        <i class="codicon codicon-close" aria-hidden="true"></i>
+      </button>
+    </header>
+    <div class="cv-rule-diff-body">
+      <div class="cv-rule-diff-meta">
+        <StatusPill id="cv-rule-diff-priority" variant="default" size="sm"></StatusPill>
+        <span id="cv-rule-diff-category" class="cv-rule-diff-category"></span>
+      </div>
+      <p id="cv-rule-diff-rule" class="cv-rule-diff-rule"></p>
+      <div class="cv-rule-diff-diff">
+        <div class="cv-rule-diff-col">
+          <h4>Current (Before)</h4>
+          <pre id="cv-rule-diff-before" class="cv-rule-diff-code"></pre>
+        </div>
+        <div class="cv-rule-diff-col">
+          <h4>Suggested (After)</h4>
+          <pre id="cv-rule-diff-after" class="cv-rule-diff-code"></pre>
+        </div>
+      </div>
+      <p id="cv-rule-diff-note" class="cv-rule-diff-note"></p>
+    </div>
+    <footer class="cv-rule-diff-footer">
+      <button type="button" class="cv-builder__btn" id="cv-rule-diff-reject">Reject</button>
+      <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-rule-diff-accept">Accept & Apply</button>
+    </footer>
+  </div>
+</Overlay>
+
+<div class="cv-optimization-panel" id="cv-optimization-panel" data-role="optimization-panel">
+  <header class="cv-optimization-header">
+    <h2 class="cv-optimization-title">CV Optimization</h2>
+    <div class="cv-optimization-score" id="cv-optimization-score">
+      <span class="cv-optimization-score-value" id="cv-score-value">—</span>
+      <span class="cv-optimization-score-label">/ 100</span>
+    </div>
+  </header>
+
+  <div class="cv-optimization-metrics" id="cv-optimization-metrics">
+    <div class="cv-metric">
+      <span class="cv-metric-value" id="cv-keyword-coverage">—</span>
+      <span class="cv-metric-label">Keyword Coverage</span>
+    </div>
+    <div class="cv-metric">
+      <span class="cv-metric-value" id="cv-critical-gaps">—</span>
+      <span class="cv-metric-label">Critical Gaps</span>
+    </div>
+    <div class="cv-metric">
+      <span class="cv-metric-value" id="cv-role-matches">—</span>
+      <span class="cv-metric-label">Role Matches</span>
+    </div>
+  </div>
+
+  <div class="cv-optimization-controls">
+    <SegmentedControl
+      id="cv-role-filter"
+      options={[
+        { value: 'all', label: 'All Roles' },
+        { value: 'frontend', label: 'Frontend' },
+        { value: 'ai-engineer', label: 'AI Engineer' },
+        { value: 'fullstack', label: 'Fullstack' },
+      ]}
+      value="ai-engineer"
+      ariaLabel="Filter optimization rules by target role"
+    />
+  </div>
+
+  <div class="cv-optimization-tabs" role="tablist" aria-label="Rule categories">
+    <button role="tab" class="cv-optimization-tab active" data-category="all" aria-selected="true">All</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Frontend" aria-selected="false">Frontend</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Backend" aria-selected="false">Backend</button>
+    <button role="tab" class="cv-optimization-tab" data-category="DevOps" aria-selected="false">DevOps</button>
+    <button role="tab" class="cv-optimization-tab" data-category="AI/ML" aria-selected="false">AI/ML</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Data" aria-selected="false">Data</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Danish CV" aria-selected="false">Danish CV</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Generative AI" aria-selected="false">GenAI</button>
+    <button role="tab" class="cv-optimization-tab" data-category="MLOps" aria-selected="false">MLOps</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Fullstack" aria-selected="false">Fullstack</button>
+    <button role="tab" class="cv-optimization-tab" data-category="Tailoring" aria-selected="false">Tailoring</button>
+  </div>
+
+  <div class="cv-optimization-rules" id="cv-optimization-rules" role="tabpanel" aria-label="Optimization rules">
+    <div class="cv-optimization-loading" id="cv-optimization-loading">
+      <i class="codicon codicon-loading codicon-modifier-spin" aria-hidden="true"></i>
+      <span>Loading optimization rules...</span>
+    </div>
+    <ul class="cv-rules-list" id="cv-rules-list" hidden></ul>
+    <p class="cv-optimization-empty" id="cv-optimization-empty" hidden>No rules match the current filters.</p>
+  </div>
+
+  <div class="cv-optimization-actions">
+    <button type="button" class="cv-builder__btn" id="cv-refresh-optimization">
+      <i class="codicon codicon-refresh" aria-hidden="true"></i> Refresh from Server
+    </button>
+  </div>
+</div>
+
+<style>
+  .cv-optimization-panel {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .cv-optimization-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .cv-optimization-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .cv-optimization-score {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-1);
+    background: var(--bg-elevated);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
+  }
+
+  .cv-optimization-score-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .cv-optimization-score-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .cv-optimization-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+
+  .cv-metric {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    text-align: center;
+  }
+
+  .cv-metric-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .cv-metric-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-top: var(--space-1);
+  }
+
+  .cv-optimization-controls {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .cv-optimization-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: var(--space-2);
+  }
+
+  .cv-optimization-tab {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .cv-optimization-tab:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .cv-optimization-tab.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--bg-primary);
+  }
+
+  .cv-optimization-rules {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .cv-optimization-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+    gap: var(--space-2);
+  }
+
+  .cv-rules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .cv-rule-item {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    transition: border-color var(--transition-fast);
+  }
+
+  .cv-rule-item:hover {
+    border-color: var(--color-primary);
+  }
+
+  .cv-rule-item.applied {
+    opacity: 0.6;
+    background: var(--bg-tertiary);
+  }
+
+  .cv-rule-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .cv-rule-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cv-rule-title {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+  }
+
+  .cv-rule-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .cv-rule-gap {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .cv-rule-gap.critical { color: var(--color-error); }
+  .cv-rule-gap.high { color: var(--color-warning); }
+  .cv-rule-gap.medium { color: var(--color-info); }
+  .cv-rule-gap.low { color: var(--text-secondary); }
+
+  .cv-rule-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .cv-rule-action {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    min-height: auto;
+  }
+
+  .cv-rule-action:not-applied-badge {
+    font-size: var(--text-xs);
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  .cv-optimization-empty {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+  }
+
+  .cv-optimization-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-default);
+    margin-top: auto;
+  }
+
+  /* Diff Modal */
+  .cv-rule-diff-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-4);
+  }
+
+  .cv-rule-diff-overlay[hidden] {
+    display: none;
+  }
+
+  .cv-rule-diff-modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-nous);
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cv-rule-diff-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .cv-rule-diff-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .cv-rule-diff-close {
+    background: transparent;
+    border: none;
+    padding: var(--space-1);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .cv-rule-diff-close:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+  }
+
+  .cv-rule-diff-body {
+    padding: var(--space-4);
+    overflow-y: auto;
+    max-height: 60vh;
+  }
+
+  .cv-rule-diff-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .cv-rule-diff-category {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cv-rule-diff-rule {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+    line-height: 1.5;
+  }
+
+  .cv-rule-diff-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .cv-rule-diff-col h4 {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cv-rule-diff-code {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow: auto;
+  }
+
+  .cv-rule-diff-code:first-of-type {
+    border-left: 3px solid var(--color-error);
+  }
+
+  .cv-rule-diff-code:last-of-type {
+    border-left: 3px solid var(--color-success);
+  }
+
+  .cv-rule-diff-note {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .cv-rule-diff-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--border-default);
+  }
+
+  @media (max-width: 640px) {
+    .cv-rule-diff-diff {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

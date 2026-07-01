@@ -4,6 +4,7 @@ import SegmentedControl from '../../components/primitives/SegmentedControl.astro
 import SearchField from '../../components/primitives/SearchField.astro';
 import CodeBlock from '../../components/primitives/CodeBlock.astro';
 import Loader from '../../components/primitives/Loader.astro';
+import OptimizationPanel from '../../components/cv/OptimizationPanel.astro';
 
 const steps = [
   { id: 'profile', label: 'Profile', icon: 'account' },
@@ -118,6 +119,7 @@ const steps = [
       <div id="cv-step-review" class="cv-builder__panel" hidden>
         <h2 class="cv-builder__panel-title">Review & Export</h2>
         <div id="cv-review-code"></div>
+        <OptimizationPanel client:load />
         <div class="cv-builder__export">
           <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-json"><i class="codicon codicon-json" aria-hidden="true"></i> Export JSON</button>
           <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-md"><i class="codicon codicon-markdown" aria-hidden="true"></i> Export MD</button>
