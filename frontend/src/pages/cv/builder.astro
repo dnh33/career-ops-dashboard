@@ -489,8 +489,47 @@ const steps = [
     a.click();
   });
 
-  document.getElementById('cv-export-pdf')?.addEventListener('click', () => {
-    window.print();
+  document.getElementById('cv-export-pdf')?.addEventListener('click', async () => {
+    const btn = document.getElementById('cv-export-pdf');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="codicon codicon-loading codicon-modifier-spin" aria-hidden="true"></i> Generating...';
+
+    try {
+      const response = await fetch('/api/cv/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'Ojy29OB8AJwvBAXZuF-244Su_L9RswRzpKSM5u8I2xE'
+        },
+        body: JSON.stringify({
+          profile: state.profile,
+          experience: state.experience,
+          skills: state.skills,
+          education: state.education,
+          role_target: state.profile.roleTarget || 'AI Engineer'
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.detail || 'PDF generation failed');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cv.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('Failed to generate PDF: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="codicon codicon-file-pdf" aria-hidden="true"></i> Export PDF';
+    }
   });
 
   stepControl?.addEventListener('change', (event) => {

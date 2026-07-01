@@ -1,11 +1,14 @@
 """CV endpoint — separate from profile for cleaner API."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from typing import Optional
 
 from app.config import CONFIG_DIR
 from app.services import cv_optimize
+from app.services.pdf.cv_pdf import generate_cv_pdf
 
 router = APIRouter(tags=["cv"])
 CV_FILE = CONFIG_DIR / "cv.md"
@@ -34,6 +37,14 @@ class CvOptimizeResponse(BaseModel):
     rules: list[CvOptimizeRule]
 
 
+class CvGenerateRequest(BaseModel):
+    profile: dict
+    experience: list[dict]
+    skills: list[dict]
+    education: list[dict]
+    role_target: str = "AI Engineer"
+
+
 @router.get("/cv")
 async def get_cv():
     if CV_FILE.exists():
@@ -60,3 +71,23 @@ async def get_cv_optimize(
         roleMatches=payload["roleMatches"],
         rules=[CvOptimizeRule(**rule) for rule in payload["rules"]],
     )
+
+
+@router.post("/cv/generate")
+async def generate_cv(request: CvGenerateRequest):
+    """Generate PDF CV from builder JSON."""
+    try:
+        pdf_bytes = generate_cv_pdf(
+            profile=request.profile,
+            experience=request.experience,
+            skills=request.skills,
+            education=request.education,
+            role_target=request.role_target,
+        )
+        return StreamingResponse(
+            iter([pdf_bytes]),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=cv.pdf"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
