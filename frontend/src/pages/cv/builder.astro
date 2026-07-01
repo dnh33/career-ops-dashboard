@@ -1,0 +1,892 @@
+---
+import HermesLayout from '../../layouts/HermesLayout.astro';
+import SegmentedControl from '../../components/primitives/SegmentedControl.astro';
+import SearchField from '../../components/primitives/SearchField.astro';
+import CodeBlock from '../../components/primitives/CodeBlock.astro';
+import Loader from '../../components/primitives/Loader.astro';
+
+const steps = [
+  { id: 'profile', label: 'Profile', icon: 'account' },
+  { id: 'experience', label: 'Experience', icon: 'briefcase' },
+  { id: 'skills', label: 'Skills', icon: 'symbol-keyword' },
+  { id: 'education', label: 'Education', icon: 'mortar-board' },
+  { id: 'review', label: 'Review', icon: 'check' },
+];
+---
+
+<HermesLayout
+  title="CV Builder"
+  pageTitle="CV Builder"
+  description="Multi-step CV editor with live preview — profile, experience, skills, education, and export."
+  currentPath="/cv/builder"
+>
+  <div class="cv-builder">
+    <aside class="cv-builder__steps" aria-label="Builder steps">
+      <SegmentedControl
+        options={steps}
+        value="profile"
+        name="cv-step"
+        vertical
+        ariaLabel="CV builder steps"
+        class="cv-builder__step-control"
+      />
+    </aside>
+
+    <div class="cv-builder__workspace">
+      <div id="cv-step-profile" class="cv-builder__panel">
+        <h2 class="cv-builder__panel-title">Profile</h2>
+        <SearchField name="role-target" placeholder="Target role (e.g. AI Engineer)…" ariaLabel="Target role" class="cv-builder__role-search" />
+        <div class="cv-builder__fields">
+          <label class="cv-builder__field"><span>Name</span><input type="text" id="cv-name" autocomplete="name" /></label>
+          <label class="cv-builder__field"><span>Email</span><input type="email" id="cv-email" autocomplete="email" /></label>
+          <label class="cv-builder__field"><span>Phone</span><input type="tel" id="cv-phone" autocomplete="tel" /></label>
+          <label class="cv-builder__field"><span>LinkedIn</span><input type="url" id="cv-linkedin" placeholder="https://linkedin.com/in/…" /></label>
+          <label class="cv-builder__field"><span>GitHub</span><input type="url" id="cv-github" placeholder="https://github.com/…" /></label>
+          <label class="cv-builder__field cv-builder__field--full"><span>Summary</span><textarea id="cv-summary" rows="3"></textarea></label>
+        </div>
+      </div>
+
+      <div id="cv-step-experience" class="cv-builder__panel" hidden>
+        <header class="cv-builder__panel-header">
+          <h2 class="cv-builder__panel-title">Experience</h2>
+          <button type="button" class="cv-builder__btn" id="cv-add-experience"><i class="codicon codicon-add" aria-hidden="true"></i> Add</button>
+        </header>
+        <div class="data-table-panel">
+          <div class="data-table-panel__scroll">
+            <table class="data-table" aria-label="Work experience">
+              <thead>
+                <tr>
+                  <th scope="col">Company</th>
+                  <th scope="col">Role</th>
+                  <th scope="col" class="hermes-mono" data-mono="true">Start</th>
+                  <th scope="col" class="hermes-mono" data-mono="true">End</th>
+                  <th scope="col">Location</th>
+                  <th scope="col">Bullets</th>
+                </tr>
+              </thead>
+              <tbody id="cv-experience-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="cv-step-skills" class="cv-builder__panel" hidden>
+        <header class="cv-builder__panel-header">
+          <h2 class="cv-builder__panel-title">Skills</h2>
+          <button type="button" class="cv-builder__btn" id="cv-add-skill"><i class="codicon codicon-add" aria-hidden="true"></i> Add</button>
+        </header>
+        <div id="cv-skills-tags" class="cv-builder__tags"></div>
+        <div class="data-table-panel">
+          <div class="data-table-panel__scroll">
+            <table class="data-table" aria-label="Skills">
+              <thead>
+                <tr>
+                  <th scope="col">Skill</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Level</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody id="cv-skills-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="cv-step-education" class="cv-builder__panel" hidden>
+        <header class="cv-builder__panel-header">
+          <h2 class="cv-builder__panel-title">Education</h2>
+          <button type="button" class="cv-builder__btn" id="cv-add-education"><i class="codicon codicon-add" aria-hidden="true"></i> Add</button>
+        </header>
+        <div class="data-table-panel">
+          <div class="data-table-panel__scroll">
+            <table class="data-table" aria-label="Education">
+              <thead>
+                <tr>
+                  <th scope="col">Institution</th>
+                  <th scope="col">Degree</th>
+                  <th scope="col" class="hermes-mono" data-mono="true">Start</th>
+                  <th scope="col" class="hermes-mono" data-mono="true">End</th>
+                </tr>
+              </thead>
+              <tbody id="cv-education-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="cv-step-review" class="cv-builder__panel" hidden>
+        <h2 class="cv-builder__panel-title">Review & Export</h2>
+        <div id="cv-review-code"></div>
+        <div class="cv-builder__export">
+          <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-json"><i class="codicon codicon-json" aria-hidden="true"></i> Export JSON</button>
+          <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-md"><i class="codicon codicon-markdown" aria-hidden="true"></i> Export MD</button>
+          <button type="button" class="cv-builder__btn" id="cv-export-pdf"><i class="codicon codicon-file-pdf" aria-hidden="true"></i> Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="cv-builder__preview" aria-label="Live CV preview">
+      <header class="cv-builder__preview-header">
+        <span class="cv-builder__preview-label">Live Preview</span>
+      </header>
+      <article id="cv-preview" class="cv-builder__preview-doc"></article>
+    </aside>
+  </div>
+
+  <div id="cv-edit-overlay" class="cv-builder__overlay-backdrop" hidden role="presentation">
+    <div class="cv-builder__overlay" role="dialog" aria-modal="true" aria-label="Edit entry">
+      <header class="cv-builder__overlay-header">
+        <h2 class="cv-builder__overlay-title" id="cv-edit-title">Edit</h2>
+        <button type="button" class="cv-builder__overlay-close" id="cv-edit-close" aria-label="Close"><i class="codicon codicon-close" aria-hidden="true"></i></button>
+      </header>
+      <div class="cv-builder__overlay-body" id="cv-edit-form"></div>
+      <footer class="cv-builder__overlay-footer">
+        <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-edit-save">Save</button>
+      </footer>
+    </div>
+  </div>
+</HermesLayout>
+
+<script>
+  const STORAGE_KEY = 'hermes-cv-builder';
+  let activeStep = 'profile';
+  let editContext = null;
+
+  const defaultState = {
+    profile: {
+      name: 'Daniel',
+      email: 'daniel@example.dk',
+      phone: '+45 00 00 00 00',
+      roleTarget: 'AI Engineer',
+      linkedin: 'https://linkedin.com/in/daniel',
+      github: 'https://github.com/daniel',
+      summary: 'Collaborative engineer delivering efficient, sustainable AI-powered tools with production React and Python experience.',
+    },
+    experience: [
+      { id: 'exp-1', company: 'Career Ops', role: 'Fullstack Developer', start: '2024-01', end: 'Present', location: 'Copenhagen', bullets: 'Built Hermes dashboard with Astro + FastAPI\nIntegrated OpenRouter LLM evaluation pipeline' },
+      { id: 'exp-2', company: 'Freelance', role: 'Frontend Developer', start: '2022-06', end: '2023-12', location: 'Remote', bullets: 'React 19 + TypeScript client projects\nDesign systems with Tailwind CSS v4' },
+    ],
+    skills: [
+      { id: 'sk-1', name: 'TypeScript', category: 'Frontend', level: 'Expert' },
+      { id: 'sk-2', name: 'React', category: 'Frontend', level: 'Expert' },
+      { id: 'sk-3', name: 'Python', category: 'Backend', level: 'Expert' },
+      { id: 'sk-4', name: 'Docker', category: 'DevOps', level: 'Expert' },
+      { id: 'sk-5', name: 'AWS', category: 'Cloud', level: 'Learning' },
+      { id: 'sk-6', name: 'LLM Integration', category: 'AI', level: 'Expert' },
+    ],
+    education: [
+      { id: 'edu-1', institution: 'DTU', degree: 'MSc Computer Science', start: '2018', end: '2020' },
+    ],
+  };
+
+  let state = structuredClone(defaultState);
+
+  const stepControl = document.querySelector('.cv-builder__step-control');
+  const previewEl = document.getElementById('cv-preview');
+  const roleSearch = document.querySelector('.cv-builder__role-search input');
+
+  function loadState() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) state = JSON.parse(stored);
+    } catch { /* use default */ }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderPreview();
+    renderReview();
+  }
+
+  function showStep(step) {
+    activeStep = step;
+    ['profile', 'experience', 'skills', 'education', 'review'].forEach((id) => {
+      document.getElementById(`cv-step-${id}`)?.toggleAttribute('hidden', id !== step);
+    });
+  }
+
+  function levelVariant(level) {
+    if (level === 'Expert') return 'primary';
+    if (level === 'Learning') return 'warning';
+    return 'neutral';
+  }
+
+  function renderProfileFields() {
+    const p = state.profile;
+    document.getElementById('cv-name').value = p.name || '';
+    document.getElementById('cv-email').value = p.email || '';
+    document.getElementById('cv-phone').value = p.phone || '';
+    document.getElementById('cv-linkedin').value = p.linkedin || '';
+    document.getElementById('cv-github').value = p.github || '';
+    document.getElementById('cv-summary').value = p.summary || '';
+    if (roleSearch) roleSearch.value = p.roleTarget || '';
+  }
+
+  function renderExperienceTable() {
+    const tbody = document.getElementById('cv-experience-body');
+    if (!tbody) return;
+    tbody.innerHTML = state.experience.map((row) => `
+      <tr data-edit="experience" data-id="${row.id}" tabindex="0" role="button">
+        <td>${row.company}</td>
+        <td>${row.role}</td>
+        <td class="hermes-mono" data-mono="true">${row.start}</td>
+        <td class="hermes-mono" data-mono="true">${row.end}</td>
+        <td>${row.location}</td>
+        <td>${row.bullets.split('\n').length} bullets</td>
+      </tr>
+    `).join('');
+    bindEditRows(tbody);
+  }
+
+  function renderSkillsTable() {
+    const tbody = document.getElementById('cv-skills-body');
+    const tags = document.getElementById('cv-skills-tags');
+    if (!tbody || !tags) return;
+    tags.innerHTML = state.skills.map((skill) => `
+      <span class="status-pill status-pill--${levelVariant(skill.level)}">${skill.name}</span>
+    `).join('');
+    tbody.innerHTML = state.skills.map((row) => `
+      <tr data-edit="skill" data-id="${row.id}" tabindex="0" role="button">
+        <td>${row.name}</td>
+        <td>${row.category}</td>
+        <td><span class="status-pill status-pill--${levelVariant(row.level)}">${row.level}</span></td>
+        <td><button type="button" class="cv-builder__remove" data-remove-skill="${row.id}" aria-label="Remove ${row.name}"><i class="codicon codicon-trash" aria-hidden="true"></i></button></td>
+      </tr>
+    `).join('');
+    bindEditRows(tbody);
+    tbody.querySelectorAll('[data-remove-skill]').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        state.skills = state.skills.filter((s) => s.id !== btn.getAttribute('data-remove-skill'));
+        saveState();
+        renderSkillsTable();
+      });
+    });
+  }
+
+  function renderEducationTable() {
+    const tbody = document.getElementById('cv-education-body');
+    if (!tbody) return;
+    tbody.innerHTML = state.education.map((row) => `
+      <tr data-edit="education" data-id="${row.id}" tabindex="0" role="button">
+        <td>${row.institution}</td>
+        <td>${row.degree}</td>
+        <td class="hermes-mono" data-mono="true">${row.start}</td>
+        <td class="hermes-mono" data-mono="true">${row.end}</td>
+      </tr>
+    `).join('');
+    bindEditRows(tbody);
+  }
+
+  function bindEditRows(container) {
+    container.querySelectorAll('[data-edit]').forEach((row) => {
+      const open = () => openEdit(row.getAttribute('data-edit'), row.getAttribute('data-id'));
+      row.addEventListener('click', open);
+      row.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+      });
+    });
+  }
+
+  function renderPreview() {
+    if (!previewEl) return;
+    const p = state.profile;
+    previewEl.innerHTML = `
+      <h1 class="cv-builder__preview-name">${p.name || 'Your Name'}</h1>
+      <p class="cv-builder__preview-target hermes-mono" data-mono="true">${p.roleTarget || 'Target Role'}</p>
+      <p class="cv-builder__preview-contact hermes-mono" data-mono="true">${[p.email, p.phone].filter(Boolean).join(' · ')}</p>
+      <p class="cv-builder__preview-links hermes-mono" data-mono="true">${[p.linkedin, p.github].filter(Boolean).map((u) => u.replace('https://', '')).join(' · ')}</p>
+      ${p.summary ? `<section><h3>Profile</h3><p>${p.summary}</p></section>` : ''}
+      <section>
+        <h3>Experience</h3>
+        ${state.experience.map((exp) => `
+          <div class="cv-builder__preview-entry">
+            <div class="cv-builder__preview-entry-head">
+              <strong>${exp.role}</strong> — ${exp.company}
+              <span class="hermes-mono" data-mono="true">${exp.start} – ${exp.end}</span>
+            </div>
+            <ul>${exp.bullets.split('\n').filter(Boolean).map((b) => `<li>${b}</li>`).join('')}</ul>
+          </div>
+        `).join('')}
+      </section>
+      <section>
+        <h3>Skills</h3>
+        <p>${state.skills.map((s) => `<span class="status-pill status-pill--${levelVariant(s.level)}">${s.name}</span>`).join(' ')}</p>
+      </section>
+      <section>
+        <h3>Education</h3>
+        ${state.education.map((edu) => `
+          <div class="cv-builder__preview-entry">
+            <strong>${edu.degree}</strong> — ${edu.institution}
+            <span class="hermes-mono" data-mono="true">${edu.start} – ${edu.end}</span>
+          </div>
+        `).join('')}
+      </section>
+    `;
+  }
+
+  function toMarkdown() {
+    const p = state.profile;
+    let md = `# ${p.name}\n**${p.roleTarget}**\n${p.email} · ${p.phone}\n\n## Profile\n${p.summary}\n\n## Experience\n`;
+    state.experience.forEach((exp) => {
+      md += `\n### ${exp.role} — ${exp.company}\n*${exp.start} – ${exp.end} · ${exp.location}*\n`;
+      exp.bullets.split('\n').filter(Boolean).forEach((b) => { md += `- ${b}\n`; });
+    });
+    md += `\n## Skills\n${state.skills.map((s) => `- ${s.name} (${s.category}, ${s.level})`).join('\n')}\n`;
+    md += `\n## Education\n${state.education.map((e) => `- ${e.degree}, ${e.institution} (${e.start}–${e.end})`).join('\n')}\n`;
+    return md;
+  }
+
+  function renderReview() {
+    const el = document.getElementById('cv-review-code');
+    if (!el) return;
+    const json = JSON.stringify(state, null, 2);
+    el.innerHTML = `<figure class="code-block"><figcaption class="code-block__header"><span class="code-block__lang">json</span></figcaption><pre class="code-block__pre"><code class="code-block__code hermes-mono" data-mono="true">${json.replace(/</g, '&lt;')}</code></pre></figure>`;
+  }
+
+  function openEdit(type, id) {
+    editContext = { type, id };
+    const overlay = document.getElementById('cv-edit-overlay');
+    const form = document.getElementById('cv-edit-form');
+    const title = document.getElementById('cv-edit-title');
+    if (!overlay || !form || !title) return;
+
+    if (type === 'experience') {
+      const row = state.experience.find((r) => r.id === id);
+      title.textContent = 'Edit Experience';
+      form.innerHTML = `
+        <label class="cv-builder__field"><span>Company</span><input id="edit-company" value="${row?.company || ''}" /></label>
+        <label class="cv-builder__field"><span>Role</span><input id="edit-role" value="${row?.role || ''}" /></label>
+        <label class="cv-builder__field"><span>Start</span><input id="edit-start" value="${row?.start || ''}" /></label>
+        <label class="cv-builder__field"><span>End</span><input id="edit-end" value="${row?.end || ''}" /></label>
+        <label class="cv-builder__field"><span>Location</span><input id="edit-location" value="${row?.location || ''}" /></label>
+        <label class="cv-builder__field cv-builder__field--full"><span>Bullets (one per line)</span><textarea id="edit-bullets" rows="4">${row?.bullets || ''}</textarea></label>
+      `;
+    } else if (type === 'skill') {
+      const row = state.skills.find((r) => r.id === id);
+      title.textContent = 'Edit Skill';
+      form.innerHTML = `
+        <label class="cv-builder__field"><span>Skill</span><input id="edit-name" value="${row?.name || ''}" /></label>
+        <label class="cv-builder__field"><span>Category</span><input id="edit-category" value="${row?.category || ''}" /></label>
+        <label class="cv-builder__field"><span>Level</span><input id="edit-level" value="${row?.level || 'Some'}" /></label>
+      `;
+    } else if (type === 'education') {
+      const row = state.education.find((r) => r.id === id);
+      title.textContent = 'Edit Education';
+      form.innerHTML = `
+        <label class="cv-builder__field"><span>Institution</span><input id="edit-institution" value="${row?.institution || ''}" /></label>
+        <label class="cv-builder__field"><span>Degree</span><input id="edit-degree" value="${row?.degree || ''}" /></label>
+        <label class="cv-builder__field"><span>Start</span><input id="edit-start" value="${row?.start || ''}" /></label>
+        <label class="cv-builder__field"><span>End</span><input id="edit-end" value="${row?.end || ''}" /></label>
+      `;
+    }
+
+    overlay.removeAttribute('hidden');
+  }
+
+  function closeEdit() {
+    document.getElementById('cv-edit-overlay')?.setAttribute('hidden', '');
+    editContext = null;
+  }
+
+  document.getElementById('cv-edit-close')?.addEventListener('click', closeEdit);
+  document.getElementById('cv-edit-overlay')?.addEventListener('click', (event) => {
+    if (event.target?.id === 'cv-edit-overlay') closeEdit();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeEdit();
+  });
+
+  document.getElementById('cv-edit-save')?.addEventListener('click', () => {
+    if (!editContext) return;
+    const { type, id } = editContext;
+    if (type === 'experience') {
+      const row = state.experience.find((r) => r.id === id);
+      if (row) {
+        row.company = document.getElementById('edit-company')?.value || '';
+        row.role = document.getElementById('edit-role')?.value || '';
+        row.start = document.getElementById('edit-start')?.value || '';
+        row.end = document.getElementById('edit-end')?.value || '';
+        row.location = document.getElementById('edit-location')?.value || '';
+        row.bullets = document.getElementById('edit-bullets')?.value || '';
+      }
+      renderExperienceTable();
+    } else if (type === 'skill') {
+      const row = state.skills.find((r) => r.id === id);
+      if (row) {
+        row.name = document.getElementById('edit-name')?.value || '';
+        row.category = document.getElementById('edit-category')?.value || '';
+        row.level = document.getElementById('edit-level')?.value || '';
+      }
+      renderSkillsTable();
+    } else if (type === 'education') {
+      const row = state.education.find((r) => r.id === id);
+      if (row) {
+        row.institution = document.getElementById('edit-institution')?.value || '';
+        row.degree = document.getElementById('edit-degree')?.value || '';
+        row.start = document.getElementById('edit-start')?.value || '';
+        row.end = document.getElementById('edit-end')?.value || '';
+      }
+      renderEducationTable();
+    }
+    closeEdit();
+    saveState();
+  });
+
+  function bindProfileInputs() {
+    const fields = ['cv-name', 'cv-email', 'cv-phone', 'cv-linkedin', 'cv-github', 'cv-summary'];
+    const keys = ['name', 'email', 'phone', 'linkedin', 'github', 'summary'];
+    fields.forEach((id, i) => {
+      document.getElementById(id)?.addEventListener('input', (event) => {
+        state.profile[keys[i]] = event.target.value;
+        saveState();
+      });
+    });
+    roleSearch?.addEventListener('input', (event) => {
+      state.profile.roleTarget = event.target.value;
+      saveState();
+    });
+  }
+
+  document.getElementById('cv-add-experience')?.addEventListener('click', () => {
+    const id = `exp-${Date.now()}`;
+    state.experience.push({ id, company: 'New Company', role: 'Role', start: '2025-01', end: 'Present', location: 'Copenhagen', bullets: 'Achievement bullet' });
+    saveState();
+    renderExperienceTable();
+    openEdit('experience', id);
+  });
+
+  document.getElementById('cv-add-skill')?.addEventListener('click', () => {
+    const id = `sk-${Date.now()}`;
+    state.skills.push({ id, name: 'New Skill', category: 'Other', level: 'Some' });
+    saveState();
+    renderSkillsTable();
+    openEdit('skill', id);
+  });
+
+  document.getElementById('cv-add-education')?.addEventListener('click', () => {
+    const id = `edu-${Date.now()}`;
+    state.education.push({ id, institution: 'University', degree: 'Degree', start: '2020', end: '2024' });
+    saveState();
+    renderEducationTable();
+    openEdit('education', id);
+  });
+
+  document.getElementById('cv-export-json')?.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cv.json';
+    a.click();
+  });
+
+  document.getElementById('cv-export-md')?.addEventListener('click', () => {
+    const blob = new Blob([toMarkdown()], { type: 'text/markdown' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cv.md';
+    a.click();
+  });
+
+  document.getElementById('cv-export-pdf')?.addEventListener('click', () => {
+    window.print();
+  });
+
+  stepControl?.addEventListener('change', (event) => {
+    showStep(event.detail?.value || 'profile');
+  });
+
+  loadState();
+  renderProfileFields();
+  renderExperienceTable();
+  renderSkillsTable();
+  renderEducationTable();
+  renderPreview();
+  renderReview();
+  bindProfileInputs();
+</script>
+
+<style>
+  .cv-builder {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: var(--space-5);
+    min-height: 32rem;
+  }
+
+  @media (min-width: 1280px) {
+    .cv-builder {
+      grid-template-columns: 11rem minmax(0, 1fr) min(22rem, 30vw);
+      margin-right: calc(-1 * var(--page-inset-x));
+    }
+  }
+
+  .cv-builder__steps {
+    border-right: 1px solid var(--stroke-hairline);
+    padding-right: var(--space-3);
+  }
+
+  .cv-builder__workspace {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .cv-builder__panel-title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-lg);
+  }
+
+  .cv-builder__panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+  }
+
+  .cv-builder__panel-header .cv-builder__panel-title {
+    margin: 0;
+  }
+
+  .cv-builder__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .cv-builder__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .cv-builder__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .cv-builder__field input,
+  .cv-builder__field textarea {
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    min-height: auto;
+    border-radius: var(--radius-sm);
+  }
+
+  .cv-builder__field input:focus,
+  .cv-builder__field textarea:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  .cv-builder__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    min-height: 36px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+
+  .cv-builder__btn:hover {
+    background: var(--bg-hover);
+  }
+
+  .cv-builder__btn--strong {
+    color: var(--color-primary);
+    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  }
+
+  .cv-builder__remove {
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    min-height: auto;
+    padding: var(--space-1);
+    cursor: pointer;
+  }
+
+  .cv-builder__remove:hover {
+    color: var(--ui-error);
+  }
+
+  .cv-builder__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .cv-builder__export {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--stroke-hairline);
+  }
+
+  .cv-builder__preview {
+    display: none;
+    flex-direction: column;
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-nous);
+    box-shadow: var(--shadow-nous);
+    min-height: 100%;
+  }
+
+  @media (min-width: 1280px) {
+    .cv-builder__preview {
+      display: flex;
+    }
+  }
+
+  .cv-builder__preview-header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+    background: var(--bg-panel);
+  }
+
+  .cv-builder__preview-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .cv-builder__preview-doc {
+    padding: var(--space-5);
+    overflow-y: auto;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    line-height: 1.55;
+  }
+
+  .cv-builder__preview-name {
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+  }
+
+  .cv-builder__preview-target {
+    margin: 0 0 var(--space-2);
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+  }
+
+  .cv-builder__preview-contact,
+  .cv-builder__preview-links {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  .cv-builder__preview-doc h3 {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--stroke-hairline);
+    padding-bottom: var(--space-1);
+  }
+
+  .cv-builder__preview-entry {
+    margin-bottom: var(--space-3);
+  }
+
+  .cv-builder__preview-entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+
+  .cv-builder__preview-doc ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    color: var(--text-secondary);
+  }
+
+  .data-table-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .data-table-panel__scroll {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .data-table thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+    background: var(--bg-panel);
+  }
+
+  .data-table tbody td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .data-table tbody tr[data-edit] {
+    cursor: pointer;
+  }
+
+  .data-table tbody tr[data-edit]:hover td {
+    background: var(--bg-hover);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    border: 1px solid var(--stroke-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--bg-panel);
+  }
+
+  .status-pill--primary {
+    color: var(--color-primary);
+    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+
+  .status-pill--warning {
+    color: var(--ui-warning);
+    border-color: color-mix(in srgb, var(--ui-warning) 30%, transparent);
+    background: var(--tag-warning-bg);
+  }
+
+  .status-pill--neutral {
+    color: var(--tag-muted-fg);
+    border-color: color-mix(in srgb, var(--text-tertiary) 30%, transparent);
+    background: var(--tag-muted-bg);
+  }
+
+  .cv-builder__overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--bg-chrome) 55%, transparent);
+  }
+
+  .cv-builder__overlay {
+    width: 100%;
+    max-width: 28rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--stroke-nous);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .cv-builder__overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .cv-builder__overlay-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-family: var(--font-ui);
+    font-weight: 600;
+  }
+
+  .cv-builder__overlay-close {
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    min-height: auto;
+    padding: var(--space-1);
+    cursor: pointer;
+  }
+
+  .cv-builder__overlay-body {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .cv-builder__overlay-footer {
+    padding: var(--space-4);
+    border-top: 1px solid var(--stroke-hairline);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .code-block {
+    margin: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+    overflow: hidden;
+  }
+
+  .code-block__header {
+    display: flex;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--stroke-hairline);
+    background: var(--bg-card);
+  }
+
+  .code-block__lang {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  .code-block__pre {
+    margin: 0;
+    padding: var(--space-3);
+    overflow-x: auto;
+    font-size: var(--text-sm);
+    max-height: 20rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cv-builder__btn {
+      transition: none;
+    }
+  }
+</style>

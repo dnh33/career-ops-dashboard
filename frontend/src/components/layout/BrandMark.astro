@@ -1,0 +1,41 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 32, class: className = '' } = Astro.props;
+---
+
+<div class:list={['brand-mark', className]} style={`--brand-size: ${size}px`}>
+  <img
+    src="/images/nous-girl.svg"
+    alt="Career Ops"
+    class="brand-mark__image"
+    width={size}
+    height={size}
+    loading="eager"
+  />
+</div>
+
+<style>
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--brand-size);
+    height: var(--brand-size);
+    flex-shrink: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+    overflow: hidden;
+  }
+
+  .brand-mark__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

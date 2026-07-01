@@ -1,0 +1,197 @@
+---
+import BrandMark from './BrandMark.astro';
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: string;
+}
+
+interface Props {
+  currentPath?: string;
+  collapsed?: boolean;
+}
+
+const { currentPath = '/', collapsed = false } = Astro.props;
+
+const navItems: NavItem[] = [
+  { href: '/', label: 'Dashboard', icon: 'home' },
+  { href: '/evaluate', label: 'Evaluate', icon: 'beaker' },
+  { href: '/tracker', label: 'Tracker', icon: 'list-unordered' },
+  { href: '/reports', label: 'Reports', icon: 'graph' },
+  { href: '/market', label: 'Market', icon: 'pulse' },
+  { href: '/companies', label: 'Companies', icon: 'organization' },
+  { href: '/cv/builder', label: 'CV Builder', icon: 'edit' },
+  { href: '/cv/optimize', label: 'CV Optimize', icon: 'lightbulb' },
+  { href: '/scan', label: 'Scan', icon: 'search' },
+  { href: '/pipeline', label: 'Pipeline', icon: 'git-branch' },
+  { href: '/output', label: 'Output', icon: 'file' },
+  { href: '/profile', label: 'Profile', icon: 'account' },
+  { href: '/tools', label: 'Tools', icon: 'tools' },
+  { href: '/settings', label: 'Settings', icon: 'settings-gear' },
+];
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+}
+---
+
+<aside class:list={['hermes-sidebar', collapsed && 'hermes-sidebar--collapsed']} aria-label="Sidebar navigation">
+  <div class="hermes-sidebar__brand">
+    <BrandMark size={collapsed ? 24 : 28} />
+    {!collapsed && <span class="hermes-sidebar__title">Career Ops</span>}
+    <button type="button" class="hermes-sidebar__toggle" id="sidebar-collapse-toggle" aria-label="Toggle sidebar">
+      <i class:list={['codicon', collapsed ? 'codicon-chevron-right' : 'codicon-chevron-left']} aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <nav class="hermes-sidebar__nav" role="navigation">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        class:list={['hermes-sidebar__link', isActive(item.href) && 'hermes-sidebar__link--active']}
+        aria-current={isActive(item.href) ? 'page' : undefined}
+        title={collapsed ? item.label : undefined}
+      >
+        <i class:list={['codicon', `codicon-${item.icon}`, 'hermes-sidebar__icon']} aria-hidden="true"></i>
+        {!collapsed && <span class="hermes-sidebar__label">{item.label}</span>}
+      </a>
+    ))}
+  </nav>
+</aside>
+
+<script>
+  const toggle = document.getElementById('sidebar-collapse-toggle');
+  const sidebar = document.querySelector('.hermes-sidebar');
+  const STORAGE_KEY = 'hermes-sidebar-collapsed';
+
+  if (sidebar) {
+    const stored = localStorage.getItem(STORAGE_KEY) === 'true';
+    sidebar.classList.toggle('hermes-sidebar--collapsed', stored);
+  }
+
+  toggle?.addEventListener('click', () => {
+    if (!sidebar) return;
+    const next = !sidebar.classList.contains('hermes-sidebar--collapsed');
+    sidebar.classList.toggle('hermes-sidebar--collapsed', next);
+    localStorage.setItem(STORAGE_KEY, String(next));
+  });
+</script>
+
+<style>
+  .hermes-sidebar {
+    position: fixed;
+    inset: var(--topbar-height) auto 0 0;
+    width: var(--sidebar-width);
+    display: none;
+    flex-direction: column;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--stroke-hairline);
+    z-index: var(--z-sticky);
+    transition: width var(--transition-base);
+  }
+
+  @media (min-width: 1024px) {
+    .hermes-sidebar {
+      display: flex;
+    }
+  }
+
+  .hermes-sidebar--collapsed {
+    width: 3.5rem;
+  }
+
+  .hermes-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .hermes-sidebar__title {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hermes-sidebar--collapsed .hermes-sidebar__title {
+    display: none;
+  }
+
+  .hermes-sidebar__toggle {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    min-height: auto;
+    padding: 0;
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-elevated);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .hermes-sidebar--collapsed .hermes-sidebar__toggle {
+    margin-left: 0;
+  }
+
+  .hermes-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-2);
+    gap: var(--space-1);
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .hermes-sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-left: 3px solid transparent;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    font-family: var(--font-ui);
+    text-decoration: none;
+    min-height: 36px;
+    transition: color var(--transition-base), background-color var(--transition-base);
+  }
+
+  .hermes-sidebar__link:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .hermes-sidebar__link--active {
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border-left-color: var(--color-primary);
+    padding-left: calc(var(--space-3) - 3px);
+  }
+
+  .hermes-sidebar__icon {
+    font-size: var(--text-base);
+    flex-shrink: 0;
+  }
+
+  .hermes-sidebar--collapsed .hermes-sidebar__label {
+    display: none;
+  }
+
+  .hermes-sidebar--collapsed .hermes-sidebar__link {
+    justify-content: center;
+    padding-inline: var(--space-2);
+  }
+</style>

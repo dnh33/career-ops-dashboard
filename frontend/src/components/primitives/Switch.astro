@@ -1,0 +1,141 @@
+---
+import type { SwitchProps } from './types';
+
+interface Props extends SwitchProps {}
+
+const {
+  name,
+  label,
+  description,
+  checked = false,
+  disabled = false,
+  class: className = '',
+} = Astro.props;
+
+const inputId = `switch-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<label class:list={['hermes-switch', disabled && 'hermes-switch--disabled', className]}>
+  <input
+    type="checkbox"
+    role="switch"
+    id={inputId}
+    name={name}
+    class="hermes-switch__input"
+    checked={checked}
+    disabled={disabled}
+    aria-checked={checked}
+  />
+  <span class="hermes-switch__track" aria-hidden="true">
+    <span class="hermes-switch__thumb"></span>
+  </span>
+  <span class="hermes-switch__content">
+    <span class="hermes-switch__label">{label}</span>
+    {description && <span class="hermes-switch__description">{description}</span>}
+  </span>
+</label>
+
+<script define:vars={{ inputId }}>
+  const input = document.getElementById(inputId);
+  input?.addEventListener('change', () => {
+    input.setAttribute('aria-checked', input.checked ? 'true' : 'false');
+    input.dispatchEvent(new CustomEvent('toggle', { detail: { checked: input.checked }, bubbles: true }));
+  });
+</script>
+
+<style>
+  .hermes-switch {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--stroke-hairline);
+    cursor: pointer;
+    min-height: auto;
+  }
+
+  .hermes-switch:last-child {
+    border-bottom: none;
+  }
+
+  .hermes-switch--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .hermes-switch__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    min-height: auto;
+  }
+
+  .hermes-switch__track {
+    flex-shrink: 0;
+    position: relative;
+    width: 2.75rem;
+    height: 1.5rem;
+    margin-top: 2px;
+    background: var(--bg-hover);
+    border: 1px solid var(--stroke-hairline);
+    border-radius: var(--radius-full);
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .hermes-switch__thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(1.5rem - 6px);
+    height: calc(1.5rem - 6px);
+    background: var(--bg-elevated);
+    border: 1px solid var(--stroke-nous);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-nous);
+    transition: transform var(--transition-base);
+  }
+
+  .hermes-switch__input:checked + .hermes-switch__track {
+    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .hermes-switch__input:checked + .hermes-switch__track .hermes-switch__thumb {
+    transform: translateX(1.25rem);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .hermes-switch__input:focus-visible + .hermes-switch__track {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
+    outline-offset: 2px;
+  }
+
+  .hermes-switch__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hermes-switch__label {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .hermes-switch__description {
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    line-height: 1.4;
+  }
+</style>

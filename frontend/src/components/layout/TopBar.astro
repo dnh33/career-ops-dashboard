@@ -1,0 +1,130 @@
+---
+import BrandMark from './BrandMark.astro';
+import SearchField from '../primitives/SearchField.astro';
+import SegmentedControl from '../primitives/SegmentedControl.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import UserAvatar from './UserAvatar.astro';
+import type { SegmentedOption } from '../primitives/types';
+
+interface Props {
+  currentPath?: string;
+  searchPlaceholder?: string;
+  userName?: string;
+  userInitials?: string;
+}
+
+const {
+  currentPath = '/',
+  searchPlaceholder = 'Search dashboard…',
+  userName = 'Daniel',
+  userInitials = 'D',
+} = Astro.props;
+
+const navOptions: SegmentedOption[] = [
+  { id: '/', label: 'Dashboard', icon: 'home' },
+  { id: '/evaluate', label: 'Evaluate', icon: 'beaker' },
+  { id: '/tracker', label: 'Tracker', icon: 'list-unordered' },
+  { id: '/reports', label: 'Reports', icon: 'graph' },
+  { id: '/market', label: 'Market', icon: 'pulse' },
+];
+
+const activeNav = navOptions.find((option) =>
+  option.id === '/' ? currentPath === '/' : currentPath.startsWith(option.id)
+)?.id ?? '/';
+---
+
+<header class="topbar">
+  <div class="topbar__start">
+    <BrandMark size={28} />
+    <span class="topbar__brand">Career Ops</span>
+  </div>
+
+  <nav class="topbar__nav" aria-label="Primary navigation">
+    <SegmentedControl
+      options={navOptions}
+      value={activeNav}
+      compact
+      ariaLabel="Primary navigation"
+      class="topbar__segmented"
+    />
+  </nav>
+
+  <div class="topbar__end">
+    <SearchField placeholder={searchPlaceholder} class="topbar__search" />
+    <ThemeToggle />
+    <UserAvatar name={userName} initials={userInitials} />
+  </div>
+</header>
+
+<script>
+  document.querySelectorAll('.topbar__segmented').forEach((control) => {
+    control.addEventListener('change', (event) => {
+      const detail = (event as CustomEvent<{ value: string }>).detail;
+      if (detail?.value) window.location.href = detail.value;
+    });
+  });
+</script>
+
+<style>
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--topbar-height);
+    padding: 0 var(--page-inset-x);
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .topbar__start {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+  }
+
+  .topbar__brand {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .topbar__nav {
+    flex: 1;
+    display: none;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .topbar__nav {
+      display: flex;
+    }
+  }
+
+  .topbar__end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .topbar__search {
+    display: none;
+    min-width: 12rem;
+    max-width: 16rem;
+  }
+
+  @media (min-width: 1024px) {
+    .topbar__search {
+      display: flex;
+    }
+  }
+</style>

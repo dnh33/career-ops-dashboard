@@ -1,0 +1,142 @@
+---
+// CompanyHeatmap — Company hiring heatmap card grid
+// Receives data from MarketOverview class via global reference
+// Renders cards dynamically based on API data
+---
+<div class="company-heatmap-container" id="companyGridContainer">
+  <!-- Cards will be populated by MarketOverview.renderCompanyHeatmap() -->
+  <div class="company-card-placeholder">
+    <div class="empty-row">Loading company data...</div>
+  </div>
+</div>
+
+<style>
+  .company-grid {
+    display: grid;
+    gap: 1rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .company-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    padding: 0.75rem 0.875rem;
+    transition: transform 200ms ease, border-color 200ms ease;
+    cursor: pointer;
+  }
+
+  .company-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent-primary) 25%, var(--border-default));
+  }
+
+  .company-card:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .company-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .company-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .company-card-temperature {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .company-card-temperature.hot {
+    background: var(--error);
+    color: var(--text-primary);
+  }
+
+  .company-card-temperature.warm {
+    background: var(--warning);
+    color: var(--text-primary);
+  }
+
+  .company-card-temperature.cool {
+    background: var(--info);
+    color: var(--text-primary);
+  }
+
+  .company-card-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .company-card-salary {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .company-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .company-card-view {
+    color: var(--accent-primary);
+    font-weight: 500;
+  }
+
+  .company-card-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+  }
+
+  .empty-row {
+    font-style: italic;
+  }
+
+  /* Responsive grid */
+  @media (min-width: 640px) {
+    .company-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .company-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Horizontal scroll for mobile */
+  @media (max-width: 639px) {
+    .company-grid {
+      display: flex;
+      overflow-x: auto;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      scroll-snap-type: x mandatory;
+    }
+
+    .company-card {
+      flex: 0 0 200px;
+      scroll-snap-align: start;
+    }
+  }
+</style>

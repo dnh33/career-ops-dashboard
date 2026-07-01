@@ -1,0 +1,56 @@
+---
+import type { LoaderProps } from './types';
+
+interface Props extends LoaderProps {}
+
+const {
+  label = 'Loading',
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['loader', `loader--${size}`, className]} role="status" aria-live="polite" aria-label={label}>
+  <span class="loader__spinner" aria-hidden="true"></span>
+  {label && <span class="loader__label">{label}</span>}
+</div>
+
+<style>
+  .loader {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+  }
+
+  .loader__spinner {
+    display: inline-block;
+    border: 2px solid var(--stroke-hairline);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-full);
+    animation: loader-spin var(--transition-slow) linear infinite;
+  }
+
+  .loader--sm .loader__spinner {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .loader--md .loader__spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .loader--lg .loader__spinner {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  @keyframes loader-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

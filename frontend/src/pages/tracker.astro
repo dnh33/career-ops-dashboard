@@ -1,0 +1,415 @@
+---
+// Tracker page — Application tracker table with live data from /api/tracker
+// Columns: #, Date, Company, Role, Score, Status, Actions
+import HermesLayout from '../layouts/HermesLayout.astro';
+
+// scoreToGrade function inlined for SSR compatibility during prerendering
+const scoreToGrade = (score: number | null | undefined): string => {
+  if (score == null || score === 0) return 'G';
+  if (score >= 4.5) return 'A';
+  if (score >= 3.75) return 'B';
+  if (score >= 3.0) return 'C';
+  if (score >= 2.25) return 'D';
+  if (score >= 1.5) return 'E';
+  if (score >= 0.75) return 'F';
+  return 'G';
+};
+
+const gradeClass = (grade: string): string => {
+  const g = grade.toUpperCase();
+  if (g === 'A' || g === 'B') return 'grade-badge grade-badge-high';
+  if (g === 'C') return 'grade-badge grade-badge-mid';
+  return 'grade-badge grade-badge-low';
+};
+---
+
+<HermesLayout title="Tracker" currentPath="/tracker" pageTitle="Application Tracker" description="Track and manage all your job applications.">
+  <main class="content-container">
+    <div class="mb-6 sm:mb-8 flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-2">Application Tracker</h2>
+        <p class="text-[var(--text-secondary)] text-sm max-w-2xl">Track and manage all your job applications.</p>
+      </div>
+      <span id="tracker-count" class="text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-primary)] px-2.5 py-1 rounded-full whitespace-nowrap mt-1">Loading...</span>
+    </div>
+
+    <!-- Filters -->
+    <section class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-4 mb-6" aria-label="Filters">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex-1 relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+          <input type="text" id="filter-search" placeholder="Search by company or role..." class="w-full h-10 pl-10 pr-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-[var(--shadow-focus)] text-sm transition-colors" aria-label="Search by company or role" />
+        </div>
+        <div class="flex gap-2 items-center">
+          <label for="filter-status" class="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide whitespace-nowrap">Status</label>
+          <select id="filter-status" class="h-10 px-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent-primary)] focus-ring-visible transition-colors cursor-pointer" aria-label="Filter by status">
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading state -->
+    <div id="tracker-loading" class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-8 mb-6">
+      <div class="flex items-center gap-3 mb-4"><div class="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></div><span class="text-sm font-medium text-[var(--text-primary)]">Loading applications...</span></div>
+      <div class="space-y-3">
+        <div class="skeleton skeleton-text h-4 w-full rounded card-interactive"></div>
+        <div class="skeleton skeleton-text h-4 w-5/6 rounded card-interactive"></div>
+        <div class="skeleton skeleton-text h-4 w-4/6 rounded card-interactive"></div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="tracker-error" class="hidden bg-[var(--bg-secondary)] border border-red-900/40 rounded-lg p-6 mb-6" role="alert">
+      <div class="flex items-start gap-4">
+        <svg class="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+        <div class="flex-1">
+          <h4 class="text-red-400 font-semibold mb-1">Failed to load applications</h4>
+          <p class="text-[var(--text-secondary)] text-sm mb-3" id="tracker-error-msg">Could not fetch data from the server.</p>
+          <button type="button" id="error-retry-btn" class="px-4 py-2 text-sm font-medium text-red-400 border border-red-900/40 rounded-md hover:bg-red-900/20 transition-colors focus:outline-none focus-ring-danger">Retry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop table -->
+    <div id="tracker-table-wrapper" class="hidden md:block bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg overflow-hidden mb-6">
+      <table class="w-full text-sm" role="table" aria-label="Job applications">
+        <thead>
+          <tr class="border-b border-[var(--border-default)] bg-[var(--text-inverse)]/50">
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="number" scope="col">
+              <span class="inline-flex items-center gap-1"># <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="date" scope="col">
+              <span class="inline-flex items-center gap-1">Date <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="company" scope="col">
+              <span class="inline-flex items-center gap-1">Company <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="role" scope="col">
+              <span class="inline-flex items-center gap-1">Role <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="score" scope="col">
+              <span class="inline-flex items-center gap-1">Score <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none" data-sort="status" scope="col">
+              <span class="inline-flex items-center gap-1">Status <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+            </th>
+            <th class="text-right px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tracker-tbody" class="divide-y divide-[var(--border-default)]/60"></tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div id="tracker-cards" class="md:hidden space-y-3 mb-6"></div>
+
+    <!-- Empty state -->
+    <div id="tracker-empty" class="hidden flex-col items-center justify-center py-16 text-center">
+      <svg class="w-16 h-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+      <p class="text-[var(--text-secondary)] text-lg mb-2">No applications tracked yet</p>
+      <p class="text-[var(--text-muted)] text-sm">Add applications via the API to see them here.</p>
+    </div>
+  </main>
+</HermesLayout>
+
+<script type="module">
+  import { scoreToGrade, gradeClass } from '../utils/colors';
+  // ===== Career Ops Dashboard — Tracker Page =====
+  // Fetches GET /api/tracker, renders sortable/filterable table
+  // Columns: #, Date, Company, Role, Score, Status, Actions
+
+  interface TrackerEntry {
+    number: number;
+    date: string;
+    company: string;
+    role: string;
+    score: number | null;
+    status: string;
+    applied: string;
+    link: string;
+  }
+
+  // ===== State =====
+  let allItems: TrackerEntry[] = [];
+  let filterStatus = 'all';
+  let filterSearch = '';
+  let sortKey: keyof TrackerEntry = 'number';
+  let sortDir: 'asc' | 'desc' = 'asc';
+
+  // ===== Element refs =====
+  const tbody = document.getElementById('tracker-tbody') as HTMLTableSectionElement;
+  const cards = document.getElementById('tracker-cards') as HTMLDivElement;
+  const wrapper = document.getElementById('tracker-table-wrapper') as HTMLDivElement;
+  const emptyEl = document.getElementById('tracker-empty') as HTMLDivElement;
+  const countEl = document.getElementById('tracker-count') as HTMLSpanElement;
+  const searchEl = document.getElementById('filter-search') as HTMLInputElement;
+  const statusEl = document.getElementById('filter-status') as HTMLSelectElement;
+  const loadingEl = document.getElementById('tracker-loading') as HTMLDivElement;
+  const errorEl = document.getElementById('tracker-error') as HTMLDivElement;
+  const errorMsg = document.getElementById('tracker-error-msg') as HTMLParagraphElement;
+  const retryBtn = document.getElementById('error-retry-btn') as HTMLButtonElement;
+
+  // ===== Status color mapping (matches backend VALID_STATUSES) =====
+  const statusStyles: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+    Evaluated: { bg: 'bg-blue-900/50', text: 'text-blue-300', border: 'border-blue-700/50', dot: 'bg-blue-400' },
+    Applied:   { bg: 'bg-emerald-900/50', text: 'text-emerald-300', border: 'border-emerald-700/50', dot: 'bg-emerald-400' },
+    Responded: { bg: 'bg-violet-900/50', text: 'text-violet-300', border: 'border-violet-700/50', dot: 'bg-violet-400' },
+    Interview: { bg: 'bg-amber-900/50', text: 'text-amber-300', border: 'border-amber-700/50', dot: 'bg-amber-400' },
+    Offer:     { bg: 'bg-green-900/50', text: 'text-green-200', border: 'border-green-600/50', dot: 'bg-green-300' },
+    Rejected:  { bg: 'bg-red-900/50', text: 'text-red-300', border: 'border-red-700/50', dot: 'bg-red-400' },
+    Discarded: { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-secondary)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--text-muted)]' },
+    SKIP:      { bg: 'bg-[var(--bg-tertiary)]/60', text: 'text-[var(--text-muted)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--border-hover)]' },
+  };
+
+  // Read accent from CSS custom property (single source of truth in globals.css)
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim();
+
+  // ===== Score coloring (uses shared utility) =====
+  function scoreColor(score: number | null): { bg: string; text: string } {
+    if (score === null) return { bg: 'var(--bg-tertiary)', text: 'var(--text-muted)' };
+    const grade = scoreToGrade(score);
+    const el = document.createElement('div');
+    el.className = gradeClass(grade);
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundColor, text: cs.color };
+  }
+
+  function scorePill(score: number | null): string {
+    if (score === null) return '<span class="text-xs text-[var(--text-muted)]">—</span>';
+    const grade = scoreToGrade(score);
+    return '<span class="' + gradeClass(grade) + ' inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-md">' + score.toFixed(1) + '</span>';
+  }
+
+  const VALID_STATUSES = ['Evaluated', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
+
+  // ===== Render helpers =====
+  function statusBadge(status: string): string {
+    const s = statusStyles[status] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--text-secondary)]' };
+    return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border ' + s.bg + ' ' + s.text + ' ' + s.border + '"><span class="w-1.5 h-1.5 rounded-full ' + s.dot + '"></span>' + status + '</span>';
+  }
+
+  function statusSelect(num: number, current: string): string {
+    const opts = VALID_STATUSES.map(s =>
+      '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>'
+    ).join('');
+    const s = statusStyles[current] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]' };
+    return '<select class="status-select ' + s.bg + ' ' + s.text + ' inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border border-transparent hover:border-[var(--border-hover)] bg-transparent text-[var(--text-secondary)] focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/20 cursor-pointer appearance-none pr-5" data-number="' + num + '" title="Change status">' + opts + '</select>';
+  }
+
+  function fmtDate(d: string): string {
+    if (!d) return '—';
+    // Handle YYYY-MM-DD or ISO
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return d;
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - dt.getTime()) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    if (diff < 7) return diff + 'd ago';
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: dt.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+  }
+
+  // ===== Filtering =====
+  function getFiltered(): TrackerEntry[] {
+    let items = allItems;
+    if (filterStatus !== 'all') {
+      items = items.filter(i => i.status === filterStatus);
+    }
+    if (filterSearch) {
+      const q = filterSearch.toLowerCase();
+      items = items.filter(i => i.company.toLowerCase().includes(q) || i.role.toLowerCase().includes(q));
+    }
+    return items;
+  }
+
+  // ===== Sorting =====
+  function sortItems(items: TrackerEntry[]): TrackerEntry[] {
+    return items.slice().sort((a, b) => {
+      let cmp = 0;
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      if (aVal === null || aVal === undefined) cmp = -1;
+      else if (bVal === null || bVal === undefined) cmp = 1;
+      else if (typeof aVal === 'number' && typeof bVal === 'number') cmp = aVal - bVal;
+      else cmp = String(aVal).localeCompare(String(bVal));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  // ===== Populate status filter =====
+  function populateStatusFilter(): void {
+    const statuses = new Set(allItems.map(i => i.status).filter(Boolean));
+    const sorted = Array.from(statuses).sort();
+    statusEl.innerHTML = '<option value="all">All</option>';
+    for (const s of sorted) {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      statusEl.appendChild(opt);
+    }
+  }
+
+  // ===== Render =====
+  function render(): void {
+    const filtered = sortItems(getFiltered());
+    countEl.textContent = filtered.length + ' application' + (filtered.length !== 1 ? 's' : '');
+
+    if (filtered.length === 0) {
+      emptyEl.classList.remove('hidden');
+      emptyEl.classList.add('flex');
+      wrapper.classList.add('hidden');
+      cards.classList.add('hidden');
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    emptyEl.classList.remove('flex');
+    wrapper.classList.remove('hidden');
+    cards.classList.remove('hidden');
+
+    // Desktop table rows
+    tbody.innerHTML = filtered.map((item, i) => {
+      const bg = i % 2 === 0 ? 'bg-transparent' : 'bg-[var(--text-inverse)]/30';
+      return '<tr class=\\"' + bg + ' hover:bg-[var(--bg-tertiary)]/50 transition-colors group cursor-pointer card-interactive\\" data-number=\\"' + item.number + '\\" title=\\"View report for ' + item.company + '\\">' +
+        '<td class="px-4 py-3 text-[var(--text-muted)] font-mono text-xs">' + item.number + '</td>' +
+        '<td class="px-4 py-3 text-[var(--text-secondary)] text-xs whitespace-nowrap">' + fmtDate(item.date) + '</td>' +
+        '<td class="px-4 py-3 font-medium text-[var(--text-primary)] whitespace-nowrap truncate max-w-[200px]">' + escapeHtml(item.company) + '</td>' +
+        '<td class="px-4 py-3 text-[var(--text-primary)] truncate max-w-[180px]">' + escapeHtml(item.role) + '</td>' +
+        '<td class="px-4 py-3">' + scorePill(item.score) + '</td>' +
+        '<td class="px-4 py-3">' + statusSelect(item.number, item.status) + '</td>' +
+        '<td class="px-4 py-3 text-right">' +
+          '<a href="/reports/by-tracker/' + item.number + '" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-' + accentColor + ' hover:bg-' + accentColor + '/10 rounded transition-colors" title="View report" onclick="event.stopPropagation()">' +
+            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>' +
+            'View' +
+          '</a>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    // Mobile cards
+    cards.innerHTML = filtered.map(item =>
+      '<article class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-4 hover:border-[var(--border-hover)] transition-colors cursor-pointer card-interactive" data-number="' + item.number + '">' +
+        '<div class="flex items-start justify-between mb-2">' +
+          '<div class="flex-1 min-w-0">' +
+            '<h4 class="text-sm font-semibold text-[var(--text-primary)] truncate">' + escapeHtml(item.company) + '</h4>' +
+            '<p class="text-xs text-[var(--text-secondary)] mt-0.5">' + escapeHtml(item.role) + '</p>' +
+          '</div>' +
+          scorePill(item.score) +
+        '</div>' +
+        '<div class="flex items-center justify-between mt-3">' +
+          statusSelect(item.number, item.status) +
+          '<span class="text-xs text-[var(--text-muted)]">' + fmtDate(item.date) + '</span>' +
+        '</div>' +
+      '</article>'
+    ).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('[data-sort]').forEach(th => {
+      const key = th.getAttribute('data-sort') as keyof TrackerEntry;
+      const icon = th.querySelector('svg');
+      if (!icon) return;
+      if (key === sortKey) {
+        icon.style.opacity = '1';
+        icon.innerHTML = sortDir === 'asc'
+          ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>'
+          : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>';
+      } else {
+        icon.style.opacity = '0.5';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>';
+      }
+    });
+  }
+
+  function escapeHtml(s: string): string {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // ===== Row click → navigate to report =====
+  function handleRowClick(e: Event): void {
+    const row = (e.target as HTMLElement).closest('[data-number]');
+    if (!row) return;
+    const num = row.getAttribute('data-number');
+    if (num) window.location.href = '/reports/by-tracker/' + num;
+  }
+
+  tbody.addEventListener('click', handleRowClick);
+  cards.addEventListener('click', handleRowClick);
+
+  // ===== Status change handler (PATCH /api/tracker) =====
+  async function handleStatusChange(e: Event): Promise<void> {
+    const select = (e.target as HTMLElement).closest('.status-select') as HTMLSelectElement;
+    if (!select) return;
+    const num = parseInt(select.getAttribute('data-number') || '0', 10);
+    const newStatus = select.value;
+    e.stopPropagation();
+    select.disabled = true;
+    try {
+      const resp = await fetch('/api/tracker', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: num, status: newStatus }),
+      });
+      if (!resp.ok) throw new Error('Patch failed: ' + resp.status);
+      // Update local state
+      const item = allItems.find(i => i.number === num);
+      if (item) item.status = newStatus;
+      render();
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      select.disabled = false;
+    }
+  }
+
+  // Re-attach on each render via event delegation
+  tbody.addEventListener('change', handleStatusChange);
+  cards.addEventListener('change', handleStatusChange);
+
+  // ===== Sort handlers =====
+  document.querySelectorAll('[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.getAttribute('data-sort') as keyof TrackerEntry;
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = 'asc';
+      }
+      render();
+    });
+  });
+
+  // ===== Filter handlers =====
+  searchEl.addEventListener('input', () => { filterSearch = searchEl.value; render(); });
+  statusEl.addEventListener('change', () => { filterStatus = statusEl.value; render(); });
+
+  // ===== Fetch data =====
+  async function fetchData(): Promise<void> {
+    loadingEl.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+    wrapper.classList.add('hidden');
+    cards.classList.add('hidden');
+    emptyEl.classList.add('hidden');
+
+    try {
+      const resp = await fetch('/api/tracker');
+      if (!resp.ok) throw new Error('Server returned ' + resp.status);
+      const data = await resp.json();
+      allItems = data.items || [];
+      populateStatusFilter();
+      loadingEl.classList.add('hidden');
+      render();
+    } catch (err: any) {
+      loadingEl.classList.add('hidden');
+      errorMsg.textContent = err.message || 'Could not fetch data from the server.';
+      errorEl.classList.remove('hidden');
+    }
+  }
+
+  retryBtn.addEventListener('click', fetchData);
+
+  // ===== Init =====
+  fetchData();
+</script>

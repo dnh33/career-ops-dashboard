@@ -1,0 +1,133 @@
+---
+import HermesLayout from '../layouts/HermesLayout.astro';
+---
+
+<HermesLayout title="Reports" currentPath="/reports" pageTitle="All Reports" description="Evaluation history with A-G scoring">
+  <main class="content-container">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <div>
+        <h1 style="font-size: 1.25rem; font-weight: 700; font-family: var(--font-display); margin: 0;">All Reports</h1>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.25rem 0 0;">Evaluation history with A-G scoring</p>
+      </div>
+      <a href="/evaluate" class="toolbar-btn toolbar-btn-primary">+ Evaluate Job</a>
+    </div>
+
+    <!-- Toolbar: Search + Sort + Filter -->
+    <div class="toolbar" style="gap: 0.75rem;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--text-muted); flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="search-input" class="toolbar-input" placeholder="Filter by company or role..." />
+      <select id="sort-select" class="toolbar-btn" style="font-family: inherit;">
+        <option value="date_desc">Newest</option>
+        <option value="date_asc">Oldest</option>
+        <option value="score_desc">Best Score</option>
+        <option value="score_asc">Worst Score</option>
+      </select>
+    </div>
+
+    <!-- Data Table -->
+    <div class="panel" style="border-radius: 0 0 8px 8px; border-top: none;">
+      <div class="panel-scroll" style="max-height: calc(100dvh - 220px);">
+        <table class="dash-table" id="reports-table">
+          <thead>
+            <tr>
+              <th style="width: 52px;">Grade</th>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Archetype</th>
+              <th style="width: 70px;">Date</th>
+              <th style="width: 80px;">Legitimacy</th>
+              <th style="width: 60px;">PDF</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <tr><td colspan="7" class="empty-row">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p id="reports-meta" style="font-size: 0.6875rem; color: var(--text-muted); margin-top: 0.5rem;"></p>
+  </main>
+</HermesLayout>
+
+<script>
+  import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
+
+  let allReports = [];
+
+  function relDate(d) {
+    if (!d) return '—';
+    const diff = (Date.now() - new Date(d).getTime()) / 86400000;
+    if (diff < 1) return 'Today';
+    if (diff < 2) return 'Yesterday';
+    if (diff < 7) return `${Math.floor(diff)}d ago`;
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function legitTag(l) {
+    const lc = (l || '').toLowerCase();
+    if (lc.includes('high') || lc.includes('legit')) return 'tag-green';
+    if (lc.includes('scam') || lc.includes('fake')) return 'tag-red';
+    if (lc.includes('medium') || lc.includes('medium')) return 'tag-amber';
+    return 'tag-gray';
+  }
+
+  async function loadReports() {
+    try {
+      const res = await fetch('/api/reports?limit=100');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      allReports = data.reports || [];
+      renderReports();
+      document.getElementById('reports-meta').textContent = `Showing ${allReports.length} reports`;
+    } catch {
+      document.getElementById('reports-tbody').innerHTML = '<tr><td colspan="7" class="empty-row">Failed to load reports <button class="toolbar-btn" id="reports-retry-btn" style="margin-left: 0.5rem;">Retry</button></td></tr>';
+      document.getElementById('reports-retry-btn')?.addEventListener('click', loadReports);
+    }
+  }
+
+  function renderReports() {
+    const tbody = document.getElementById('reports-tbody');
+    const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+    const sort = document.getElementById('sort-select').value;
+
+    let filtered = allReports.filter(r => {
+      if (!query) return true;
+      return (r.company || '').toLowerCase().includes(query) || (r.role || '').toLowerCase().includes(query);
+    });
+
+    filtered.sort((a, b) => {
+      if (sort === 'date_desc') return (b.date || '').localeCompare(a.date || '');
+      if (sort === 'date_asc') return (a.date || '').localeCompare(b.date || '');
+      if (sort === 'score_desc') return (b.score || 0) - (a.score || 0);
+      return (a.score || 0) - (b.score || 0);
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-row">${query ? 'No matches' : 'No reports yet'}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+      const g = scoreToGrade(r.score);
+      const c = gradeColorVars(g);
+      return `<tr class="dash-table-row" onclick="window.location='/report?id=${r.id}'">
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 0.6875rem; font-weight: 700; background: ${c['bg']}; color: ${c['text']};">${g}</span>
+        </td>
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;">${r.company || '—'}</td>
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;">${r.role || '—'}</td>
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle; color: var(--text-muted);">${r.archetype || '—'}</td>
+        <td style="padding: 0.5rem 0.75rem; vertical-purpose: middle; color: var(--text-muted);">${relDate(r.date)}</td>
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle;">
+          ${r.legitimacy ? `<span class="tag ${legitTag(r.legitimacy)}">${r.legitimacy.split(' ')[0]}</span>` : '—'}
+        </td>
+        <td style="padding: 0.5rem 0.75rem; vertical-align: middle; text-align: center;">${r.pdf ? '✓' : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('search-input').addEventListener('input', renderReports);
+  document.getElementById('sort-select').addEventListener('change', renderReports);
+  document.addEventListener('DOMContentLoaded', loadReports);
+</script>

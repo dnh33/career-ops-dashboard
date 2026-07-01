@@ -1,0 +1,27 @@
+{
+  "name": "career-ops-dashboard",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "astro build",
+    "preview": "astro preview",
+    "audit:slop": "bash scripts/anti-slop-audit.sh",
+    "audit:a11y": "node scripts/a11y-audit.mjs",
+    "audit:perf": "node scripts/perf-budget.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@vscode/codicons": "^0.0.45",
+    "astro": "^7.0.3",
+    "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.12.1",
+    "chrome-launcher": "^1.2.1",
+    "lighthouse": "^13.4.0",
+    "playwright": "^1.61.1",
+    "typescript": "^6.0.3"
+  }
+}

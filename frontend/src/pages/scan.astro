@@ -1,0 +1,359 @@
+---
+// Scan page — Job board scanner with form, progress, results, and error states
+// Deviation fix: layout-06 — high severity
+// Implements: ScanForm, ScanProgress, ScanResultsList, empty/error states, responsive layout
+import HermesLayout from '../layouts/HermesLayout.astro';
+import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
+
+// ---- Scan data model (placeholder until API wires up) ----
+interface ScanResult {
+  id: string;
+  title: string;
+  company: string;
+  score: number;
+  url: string;
+  location?: string;
+}
+---
+
+<HermesLayout title="Scan Job Boards" currentPath="/scan" pageTitle="Job Board Scanner" description="Scan public ATS APIs for new job postings matching your criteria. Configure filters below and run a scan to discover opportunities.">
+  <main class="content-container">
+    <!-- Page header -->
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-2">Job Board Scanner</h2>
+      <p class="text-[var(--text-secondary)] text-sm max-w-2xl">
+        Scan public ATS APIs for new job postings matching your criteria. Configure filters below and run a scan to discover opportunities.
+      </p>
+    </div>
+
+    <!-- ===== 1. ScanForm ===== -->
+    <section class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6 mb-6">
+      <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-4">Scan Configuration</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_200px_200px_auto] gap-3 sm:gap-4 items-end">
+        <!-- Job board URL -->
+        <div class="flex flex-col gap-1.5">
+          <label for="board-url" class="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Job Board URL
+          </label>
+          <input
+            id="board-url"
+            name="boardUrl"
+            type="url"
+            placeholder="https://careers.company.com/jobs"
+            class="w-full h-11 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-[var(--shadow-focus)] font-mono text-sm transition-colors"
+          />
+        </div>
+
+        <!-- Keyword filter -->
+        <div class="flex flex-col gap-1.5">
+          <label for="keyword" class="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Keywords
+          </label>
+          <input
+            id="keyword"
+            name="keyword"
+            type="text"
+            placeholder="AI, consultant..."
+            class="w-full h-11 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-[var(--shadow-focus)] text-sm transition-colors"
+          />
+        </div>
+
+        <!-- Location filter -->
+        <div class="flex flex-col gap-1.5">
+          <label for="location" class="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide">
+            Location
+          </label>
+          <input
+            id="location"
+            name="location"
+            type="text"
+            placeholder="Hjørring, Remote..."
+            class="w-full h-11 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-[var(--shadow-focus)] text-sm transition-colors"
+          />
+        </div>
+
+        <!-- Scan button -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-transparent select-none" aria-hidden="true">
+            Submit
+          </label>
+          <button
+            type="button"
+            id="scan-btn"
+            class="h-11 px-6 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] font-semibold text-sm rounded-md transition-colors focus:outline-none focus-ring-visible disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            Run Scan
+          </button>
+        </div>
+      </div>
+
+      <!-- Form validation hint -->
+      <p id="form-error" class="mt-3 text-xs text-[var(--error)] hidden" role="alert">
+        Please enter a valid job board URL to start scanning.
+      </p>
+    </section>
+
+    <!-- ===== 2. ScanProgress ===== -->
+    <section id="scan-progress" class="hidden mb-6" aria-live="polite" aria-atomic="true">
+      <div class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-6">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></div>
+            <span class="text-sm font-medium text-[var(--text-primary)]">Scanning job board…</span>
+          </div>
+          <span id="progress-count" class="text-sm font-mono text-[var(--accent-primary)]">0 jobs found</span>
+        </div>
+        <div class="w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+          <div
+            id="progress-bar"
+            class="h-full w-[0%] bg-gradient-to-r from-[var(--accent-muted)] to-[var(--accent-primary)] rounded-full transition-all duration-500 ease-out"
+          ></div>
+        </div>
+        <p id="progress-status" class="mt-2 text-xs text-[var(--text-muted)]">Connecting to job board API…</p>
+      </div>
+    </section>
+
+    <!-- ===== 3. ScanResultsList ===== -->
+    <section id="scan-results" class="hidden" aria-label="Scan results">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">Scan Results</h3>
+        <span id="results-total" class="text-sm text-[var(--text-secondary)] font-mono">0 postings</span>
+      </div>
+
+      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <!-- Dynamically populated by client script -->
+      </div>
+    </section>
+
+    <!-- ===== 4. Empty state ===== -->
+    <section id="scan-empty" class="flex flex-col items-center justify-center py-16 text-center">
+      <svg class="w-16 h-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      <p class="text-[var(--text-secondary)] text-lg mb-2">No scan results — configure and run a scan</p>
+      <p class="text-[var(--text-muted)] text-sm">Enter a job board URL and filters above, then click "Run Scan" to discover job postings.</p>
+    </section>
+
+    <!-- ===== 5. Error state ===== -->
+    <section id="scan-error" class="hidden bg-[var(--bg-secondary)] border border-[var(--error)]/30 rounded-lg p-6 mb-6" role="alert">
+      <div class="flex items-start gap-4">
+        <svg class="w-6 h-6 text-[var(--error)] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <div class="flex-1">
+          <h4 class="text-[var(--error)] font-semibold mb-1">Scan failed — check job board connection</h4>
+          <p class="text-[var(--text-secondary)] text-sm mb-3">
+            Could not connect to the job board API. Verify the URL is correct and the board supports public API access.
+          </p>
+          <button
+            type="button"
+            id="error-retry-btn"
+            class="px-4 py-2 text-sm font-medium text-[var(--error)] border border-[var(--error)]/40 rounded-md hover:bg-[var(--error)]/10 transition-colors focus:outline-none focus-ring-danger"
+          >
+            Retry Scan
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</HermesLayout>
+
+<script type="module">
+  import { scoreToGrade, gradeColorVars } from '../utils/colors';
+  // ===== Client-side scan interaction =====
+  // Simulates scan progress; wires to /api/scan when backend is ready (see task t-api-scan)
+
+  const scanBtn = document.getElementById('scan-btn') as HTMLButtonElement;
+  const formError = document.getElementById('form-error')!;
+  const progressSection = document.getElementById('scan-progress')!;
+  const progressBar = document.getElementById('progress-bar')!;
+  const progressCount = document.getElementById('progress-count')!;
+  const progressStatus = document.getElementById('progress-status')!;
+  const resultsSection = document.getElementById('scan-results')!;
+  const resultsGrid = document.getElementById('results-grid')!;
+  const resultsTotal = document.getElementById('results-total')!;
+  const emptyState = document.getElementById('scan-empty')!;
+  const errorState = document.getElementById('scan-error')!;
+  const errorRetryBtn = document.getElementById('error-retry-btn')!;
+
+  let scanRunning = false;
+
+  function showEl(el: HTMLElement) { el.classList.remove('hidden'); }
+  function hideEl(el: HTMLElement) { el.classList.add('hidden'); }
+
+  function resetUI() {
+    hideEl(progressSection);
+    hideEl(resultsSection);
+    hideEl(emptyState);
+    hideEl(errorState);
+    progressBar.style.width = '0%';
+    progressCount.textContent = '0 jobs found';
+    progressStatus.textContent = 'Connecting to job board API…';
+  }
+
+  function renderScore(score: number): string {
+    const letterGrade = scoreToGrade(score);
+    const cv = gradeColorVars(letterGrade);
+    const r = 17;
+    const c = 2 * Math.PI * r;
+    const offset = c - (Math.max(0, Math.min(5, score)) / 5) * c;
+
+    return `
+      <div class="inline-flex flex-col items-center gap-0.5" role="img" aria-label="Score: ${score.toFixed(1)} out of 5. Grade ${letterGrade}">
+        <div class="relative flex items-center justify-center rounded-full" style="width:36px;height:36px;background:${cv.bg};">
+          <svg width="36" height="36" class="absolute inset-0 -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5"/>
+            <circle cx="18" cy="18" r="${r}" fill="none" stroke="${cv.stroke}" stroke-width="2.5" stroke-linecap="round"
+              stroke-dasharray="${c}" stroke-dashoffset="${offset}" style="transition: stroke-dashoffset 600ms ease-out;"/>
+          </svg>
+          <span class="relative font-bold text-xs" style="color:${cv.text};">${letterGrade}</span>
+        </div>
+        <span class="text-[10px] text-[var(--text-muted)] font-mono">${score.toFixed(1)}</span>
+      </div>
+    `;
+  }
+
+  interface ScanResult { title: string; company: string; location?: string; score: number; url: string }
+  function renderResults(results: ScanResult[]) {
+    resultsSection.classList.remove('hidden');
+    resultsTotal.textContent = `${results.length} posting${results.length !== 1 ? 's' : ''}`;
+    resultsGrid.innerHTML = results.map(r => `
+      <article class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-4 sm:p-5 hover:border-[var(--accent-primary)]/40 transition-colors group cursor-pointer card-interactive">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent-primary)] transition-colors">${r.title}</h4>
+            <p class="text-xs text-[var(--text-secondary)] mt-0.5">${r.company}${r.location ? ` · ${r.location}` : ''}</p>
+          </div>
+          ${renderScore(r.score)}
+        </div>
+        <div class="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border-default)]">
+          <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] font-mono truncate max-w-[180px]" title="${r.url}">
+            ${r.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+          </a>
+          <button
+            type="button"
+            class="ml-3 px-3 py-1.5 text-xs font-medium text-[var(--accent-primary)] border border-[var(--accent-primary)]/30 rounded-md hover:bg-[var(--accent-primary)]/10 transition-colors flex-shrink-0"
+            onclick="window.dispatchEvent(new CustomEvent('scan:evaluate', { detail: ${JSON.stringify(r).replace(/</g, '\\u003c')} }))"
+          >
+            Evaluate this posting
+          </button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  async function runScan() {
+    if (scanRunning) return;
+
+    const urlInput = document.getElementById('board-url') as HTMLInputElement;
+    const url = urlInput.value.trim();
+
+    if (!url || !url.startsWith('http')) {
+      showEl(formError);
+      urlInput.focus();
+      return;
+    }
+
+    hideEl(formError);
+    resetUI();
+    showEl(progressSection);
+    hideEl(resultsSection);
+    hideEl(emptyState);
+    scanRunning = true;
+    scanBtn.disabled = true;
+    scanBtn.textContent = 'Scanning…';
+
+    try {
+      // Trigger the real scan via API
+      progressBar.style.width = '15%';
+      progressCount.textContent = 'Starting scan…';
+      progressStatus.textContent = 'Triggering job board scanner…';
+
+      const scanResp = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dry_run: false }),
+      });
+      if (!scanResp.ok) throw new Error('Scan request failed: ' + scanResp.status);
+
+      // Poll for status until complete
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        const statusResp = await fetch('/api/scan/status');
+        const status = await statusResp.json();
+
+        const pct = Math.min(15 + (i * 1.5), 95);
+        progressBar.style.width = `${pct}%`;
+        progressStatus.textContent = status.status === 'running'
+          ? 'Scanning job boards…'
+          : status.status === 'completed'
+            ? 'Scan complete!'
+            : status.status === 'error'
+              ? 'Scan failed'
+              : 'Waiting…';
+
+        if (status.results && status.results.length > 0) {
+          progressCount.textContent = `${status.results.length} result${status.results.length !== 1 ? 's' : ''}`;
+        }
+
+        if (status.status === 'completed' || status.status === 'error') {
+          if (status.status === 'error') throw new Error(status.error || 'Scan failed');
+          progressBar.style.width = '100%';
+          progressCount.textContent = `${status.results.length} result${status.results.length !== 1 ? 's' : ''}`;
+
+          // Parse scan output lines into result cards
+          const results = status.results
+            .filter((line: string) => line && !line.startsWith('#') && !line.startsWith('---'))
+            .map((line: string, idx: number) => {
+              // Try to parse "title | company | url" or just show the line
+              const parts = line.split('|').map((s: string) => s.trim());
+              if (parts.length >= 3) {
+                return { id: String(idx + 1), title: parts[0], company: parts[1], score: 0, url: parts[2], location: parts[3] || '' };
+              }
+              return { id: String(idx + 1), title: line, company: '', score: 0, url: '', location: '' };
+            });
+
+          await new Promise(r => setTimeout(r, 400));
+          hideEl(progressSection);
+
+          if (results.length > 0) {
+            renderResults(results);
+          } else {
+            showEl(emptyState);
+          }
+          break;
+        }
+      }
+
+    } catch (err) {
+      hideEl(progressSection);
+      showEl(errorState);
+      console.error('Scan failed:', err);
+    } finally {
+      scanRunning = false;
+      scanBtn.disabled = false;
+      scanBtn.textContent = 'Run Scan';
+    }
+  }
+
+  scanBtn.addEventListener('click', runScan);
+  errorRetryBtn.addEventListener('click', runScan);
+
+  // Intercept form submit for keyboard UX
+  const inputs = document.querySelectorAll('#board-url, #keyword, #location');
+  inputs.forEach((input) => {
+    (input as HTMLElement).addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter') runScan();
+    });
+  });
+
+  // Navigate to evaluate page when user clicks "Evaluate this posting"
+  window.addEventListener('scan:evaluate', ((e: CustomEvent) => {
+    const d = e.detail;
+    if (d && d.url) {
+      window.location.href = '/evaluate?url=' + encodeURIComponent(d.url);
+    } else {
+      window.location.href = '/evaluate';
+    }
+  }) as EventListener);
+</script>

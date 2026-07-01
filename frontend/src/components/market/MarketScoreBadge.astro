@@ -1,0 +1,110 @@
+---
+// MarketScoreBadge — Market score badge (0-100 with color coding)
+interface Props {
+  score: number | null;
+  grade: string | null;
+  visible: boolean;
+}
+
+const { score, grade, visible } = Astro.props;
+
+if (!visible || score === null) {
+  // Render nothing if not visible or no score
+}
+---
+
+<div class="market-score-badge" data-visible={visible}>
+  <div class="score-ring-container">
+    <svg class="score-ring" viewBox="0 0 120 120" width="80" height="80">
+      <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border-default)" stroke-width="6" />
+      <circle
+        id="score-progress"
+        cx="60"
+        cy="60"
+        r="54"
+        fill="none"
+        stroke-width="6"
+        stroke-linecap="round"
+        stroke-dasharray="339.292"
+        style="stroke: var(--score-color); stroke-dashoffset: calc(339.292 - ({score} / 100) * 339.292);"
+      />
+    </svg>
+    <span class="score-value">{score ?? '—'}</span>
+  </div>
+  <div class="score-info">
+    <span class="score-label">Market Score</span>
+    <span class="score-grade" style="color: var(--score-color);">{grade || '—'}</span>
+  </div>
+  <p class="score-hint">
+    {score !== null && score >= 75 ? 'Strong market fit' : score !== null && score >= 50 ? 'Moderate market fit — room to grow' : 'Weak market fit — significant gaps'}
+  </p>
+</div>
+
+<style>
+  .market-score-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    min-width: 140px;
+  }
+
+  .score-ring-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  .score-ring {
+    transform: rotate(-90deg);
+  }
+
+  .score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .score-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .score-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+
+  .score-grade {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .score-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0;
+    max-width: 160px;
+  }
+
+  /* Color definitions via CSS variables set by parent */
+  .market-score-badge[data-visible="true"] {
+    --score-color: var(--grade-mid);
+  }
+</style>

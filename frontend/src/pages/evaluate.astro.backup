@@ -1,0 +1,426 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MarketScoreBadge from '../components/market/MarketScoreBadge.astro';
+import GapAnalysisPanel from '../components/market/GapAnalysisPanel.astro';
+
+const API_BASE = '';
+---
+
+<BaseLayout title="Evaluate">
+  <main class="content-container">
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-2">Job Evaluation</h2>
+      <p class="text-[var(--text-secondary)] text-sm max-w-2xl">Paste a job description or fetch one from a URL to get an A-G evaluation report.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- LEFT: Input form -->
+      <section class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6 h-fit">
+        <div class="flex gap-1 mb-4 border-b border-[var(--border-default)]" role="tablist" aria-label="Input method">
+          <button id="tab-paste" role="tab" aria-selected="true" aria-controls="panel-paste" class="px-4 py-2 text-sm font-medium text-[var(--text-primary)] border-b-2 border-[var(--accent-primary)] transition-colors">Paste Text</button>
+          <button id="tab-url" role="tab" aria-selected="false" aria-controls="panel-url" class="px-4 py-2 text-sm font-medium text-[var(--text-muted)] border-b-2 border-transparent hover:text-[var(--text-primary)] transition-colors">From URL</button>
+        </div>
+        <div id="panel-paste" role="tabpanel" aria-labelledby="tab-paste">
+          <label for="jd-textarea" class="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Job Description</label>
+          <textarea id="jd-textarea" rows="12" placeholder="Paste the full job description here..." class="w-full px-4 py-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 font-mono text-sm transition-colors resize-y min-h-[200px]"></textarea>
+          <div class="flex items-center justify-between mt-2">
+            <span id="char-count" class="text-xs text-[var(--text-muted)]">0 characters</span>
+            <button type="button" id="clear-btn" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors hidden">Clear</button>
+          </div>
+        </div>
+        <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" class="hidden">
+          <label for="jd-url" class="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Job Posting URL</label>
+          <div class="flex gap-2">
+            <input id="jd-url" type="url" placeholder="https://careers.company.com/jobs/12345" class="flex-1 h-11 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 font-mono text-sm transition-colors" />
+            <button type="button" id="fetch-btn" class="h-11 px-5 bg-[var(--border-hover)] hover:bg-[var(--border-hover)] text-[var(--text-primary)] text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">Fetch</button>
+          </div>
+          <p id="fetch-error" class="mt-2 text-xs text-red-400 hidden" role="alert">Could not fetch from this URL. Check the link or paste the text directly.</p>
+        </div>
+        <div class="mt-5 pt-4 border-t border-[var(--border-default)]">
+          <button type="button" id="evaluate-btn" class="card-interactive w-full sm:w-auto h-12 px-8 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] font-semibold text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40 disabled:opacity-40 disabled:cursor-not-allowed">Evaluate Job Description</button>
+          <p class="mt-2 text-xs text-[var(--text-muted)] hidden" id="evaluate-hint">Enter at least 50 characters to evaluate</p>
+        </div>
+      </section>
+
+      <!-- RIGHT: Results area -->
+      <section class="space-y-6">
+        <div id="eval-empty" class="flex flex-col items-center justify-center py-16 text-center bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg">
+          <svg class="w-16 h-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          <p class="text-[var(--text-secondary)] text-lg font-medium mb-1">Paste a JD to get started</p>
+          <p class="text-[var(--text-muted)] text-sm">Enter a job description and click Evaluate to see your A-G score and detailed feedback.</p>
+        </div>
+
+        <div id="eval-loading" class="hidden space-y-4" aria-busy="true" aria-label="Evaluating job description">
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
+            <div class="flex items-center gap-3 mb-4"><div class="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></div><span class="text-sm font-medium text-[var(--text-primary)]">Analyzing job description...</span></div>
+            <div class="w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden"><div id="loading-bar" class="h-full w-[0%] bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-hover)] rounded-full transition-all duration-300 ease-out"></div></div>
+            <p id="loading-status" class="mt-2 text-xs text-[var(--text-muted)]">Parsing content...</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div></div>
+          <div class="space-y-2"><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-full rounded"></div><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-4/5 rounded"></div><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-3/5 rounded"></div></div>
+        </div>
+
+        <div id="eval-results" class="hidden space-y-6" aria-label="Evaluation results">
+          <!-- Market Score & Gap Analysis -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" id="market-insights" style="display: none;">
+            <div class="lg:col-span-1">
+              <MarketScoreBadge id="market-badge" score={0} grade={null} visible={false} />
+            </div>
+            <div class="lg:col-span-2">
+              <GapAnalysisPanel id="gap-panel" gaps={[]} suggestions={[]} strengths={[]} visible={false} />
+            </div>
+          </div>
+
+          <!-- Company Fit Section -->
+          <div id="company-fit-section" class="hidden" style="display: none;">
+            <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Company Fit</h3>
+                <div class="flex items-center gap-3">
+                  <label for="company-select" class="text-sm text-[var(--text-secondary)]">Re-evaluate for:</label>
+                  <select id="company-select" class="h-10 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 transition-colors">
+                    <option value="">Select a target company...</option>
+                  </select>
+                </div>
+              </div>
+              <div id="company-fit-content" class="space-y-4"></div>
+            </div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-6 sm:p-8">
+            <div class="flex flex-col items-center gap-6">
+              <div id="score-card" class="flex flex-col items-center" role="img" aria-label="Overall grade">
+                <div id="grade-ring" class="relative flex items-center justify-center rounded-full w-[120px] h-[120px]">
+                  <svg width="120" height="120" class="absolute inset-0 -rotate-90" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" /><circle id="grade-progress" cx="60" cy="60" r="54" fill="none" stroke="var(--grade-mid)" stroke-width="6" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" class="grade-ring-progress" /></svg>
+                  <span id="grade-letter" class="relative font-bold text-4xl">C</span>
+                </div>
+                <span id="score-value" class="mt-2 text-sm font-mono text-[var(--text-secondary)]">50 / 100</span>
+              </div>
+              <div class="flex-1 text-center">
+                <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-1">Overall Evaluation Score</h3>
+                <p id="score-summary" class="text-[var(--text-secondary)] text-sm">This job description covers most key areas but has room for improvement.</p>
+                <div class="mt-3 flex flex-wrap gap-2 justify-center" id="score-tags"></div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-4">Detailed Breakdown</h3>
+            <div id="report-sections" class="space-y-3"></div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button type="button" id="re-evaluate-btn" class="card-interactive h-10 px-6 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] text-sm font-semibold rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40">Re-evaluate</button>
+            <a href="/output" class="h-10 px-6 inline-flex items-center justify-center border border-[var(--border-hover)] hover:border-[var(--border-hover)] text-[var(--text-primary)] text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/20">Generate Tailored Resume</a>
+          </div>
+        </div>
+
+        <div id="eval-error" class="hidden bg-[var(--bg-surface)] border border-red-900/40 rounded-lg p-6" role="alert">
+          <div class="flex items-start gap-4">
+            <svg class="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16c-.77.833.192 2.5 1.732 2.5z" /></svg>
+            <div class="flex-1">
+              <h4 class="text-red-400 font-semibold mb-1">Evaluation failed</h4>
+              <p class="text-[var(--text-secondary)] text-sm mb-3">Could not process the job description. Ensure the content is valid and try again.</p>
+              <button type="button" id="error-retry-btn" class="px-4 py-2 text-sm font-medium text-red-400 border border-red-900/40 rounded-md hover:bg-red-900/20 transition-colors focus:outline-none focus-ring-danger">Try Again</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
+
+  const CIRC = 2 * Math.PI * 54; // grade ring circumference (r=54)
+
+  // ===== Element refs =====
+  const tabPaste = document.getElementById('tab-paste') as HTMLButtonElement;
+  const tabUrl = document.getElementById('tab-url') as HTMLButtonElement;
+  const panelPaste = document.getElementById('panel-paste')!;
+  const panelUrl = document.getElementById('panel-url')!;
+  const textarea = document.getElementById('jd-textarea') as HTMLTextAreaElement;
+  const urlInput = document.getElementById('jd-url') as HTMLInputElement;
+  const fetchBtn = document.getElementById('fetch-btn') as HTMLButtonElement;
+  const fetchError = document.getElementById('fetch-error')!;
+  const charCount = document.getElementById('char-count')!;
+  const clearBtn = document.getElementById('clear-btn') as HTMLButtonElement;
+  const evaluateBtn = document.getElementById('evaluate-btn') as HTMLButtonElement;
+  const evaluateHint = document.getElementById('evaluate-hint')!;
+  const emptyState = document.getElementById('eval-empty')!;
+  const loadingSection = document.getElementById('eval-loading')!;
+  const loadingBar = document.getElementById('loading-bar')!;
+  const loadingStatus = document.getElementById('loading-status')!;
+  const resultsSection = document.getElementById('eval-results')!;
+  const errorSection = document.getElementById('eval-error')!;
+  const gradeRing = document.getElementById('grade-ring')!;
+  const gradeProgress = document.getElementById('grade-progress')!;
+  const gradeLetter = document.getElementById('grade-letter')!;
+  const scoreValue = document.getElementById('score-value')!;
+  const scoreSummary = document.getElementById('score-summary')!;
+  const scoreTags = document.getElementById('score-tags')!;
+  const reportSections = document.getElementById('report-sections')!;
+  const reEvaluateBtn = document.getElementById('re-evaluate-btn') as HTMLButtonElement;
+  const errorRetryBtn = document.getElementById('error-retry-btn') as HTMLButtonElement;
+
+  // ===== Tab switching =====
+  function switchTab(which: string): void {
+    const isPaste = which === 'paste';
+    tabPaste.setAttribute('aria-selected', String(isPaste));
+    tabUrl.setAttribute('aria-selected', String(!isPaste));
+    tabPaste.classList.toggle('text-[var(--text-primary)]', isPaste);
+    tabPaste.classList.toggle('border-[var(--accent-primary)]', isPaste);
+    tabPaste.classList.toggle('text-[var(--text-muted)]', !isPaste);
+    tabPaste.classList.toggle('border-transparent', !isPaste);
+    tabUrl.classList.toggle('text-[var(--text-primary)]', !isPaste);
+    tabUrl.classList.toggle('border-[var(--accent-primary)]', !isPaste);
+    tabUrl.classList.toggle('text-[var(--text-muted)]', isPaste);
+    tabUrl.classList.toggle('border-transparent', isPaste);
+    panelPaste.classList.toggle('hidden', !isPaste);
+    panelUrl.classList.toggle('hidden', isPaste);
+  }
+
+  tabPaste.addEventListener('click', () => switchTab('paste'));
+  tabUrl.addEventListener('click', () => switchTab('url'));
+
+  // ===== Textarea input handling =====
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCount.textContent = len + ' character' + (len !== 1 ? 's' : '');
+    clearBtn.classList.toggle('hidden', len === 0);
+    evaluateHint.classList.toggle('hidden', len >= 50);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    textarea.value = '';
+    charCount.textContent = '0 characters';
+    clearBtn.classList.add('hidden');
+    textarea.focus();
+  });
+
+  // ===== URL fetch (client-side simulation) =====
+  fetchBtn.addEventListener('click', () => {
+    const url = urlInput.value.trim();
+    if (!url) return;
+    fetchBtn.disabled = true;
+    fetchBtn.textContent = 'Fetching...';
+    fetchError.classList.add('hidden');
+    setTimeout(() => {
+      textarea.value = '[Fetched from ' + url + ']\n\nSenior Software Engineer\n\nWe are looking for an experienced software engineer to join our growing team.\n\nRequirements:\n- 5+ years TypeScript\n- React and Node.js\n- Strong problem-solving skills\n\nBenefits:\n- Competitive salary\n- Flexible hours\n- Remote-first';
+      charCount.textContent = textarea.value.length + ' characters';
+      clearBtn.classList.remove('hidden');
+      switchTab('paste');
+      fetchBtn.disabled = false;
+      fetchBtn.textContent = 'Fetch';
+    }, 800);
+  });
+
+  // ===== Section visibility =====
+  function showSection(id: string): void {
+    [emptyState, loadingSection, resultsSection, errorSection].forEach((el) => el.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // ===== Score coloring — uses shared utility =====
+  function scoreColors(score: number): { stroke: string; text: string; bg: string } {
+    return gradeColorVars(scoreToGrade(score));
+  }
+
+  // ===== Loading animation =====
+  let loadingInterval: ReturnType<typeof setInterval> | null = null;
+  let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
+  let abortController: AbortController | null = null;
+
+  // Progress phases mapped to elapsed time (seconds) — estimates for long evaluations
+  const PROGRESS_PHASES = [
+    { at: 0,    status: 'Parsing content...',         bar: 5  },
+    { at: 2,    status: 'Analyzing job description...', bar: 15 },
+    { at: 10,   status: 'Matching against CV...',       bar: 35 },
+    { at: 30,   status: 'Scoring A-G sections...',      bar: 60 },
+    { at: 90,   status: 'Generating report...',         bar: 80 },
+    { at: 180,  status: 'Almost done...',               bar: 90 },
+  ];
+  const STALL_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+  const FETCH_TIMEOUT_MS   = 8 * 60 * 1000; // hard browser kill at 8 min (before any proxy gives up)
+
+  function animateLoading(): void {
+    showSection('eval-loading');
+    const start = Date.now();
+    let lastPhaseIdx = -1;
+
+    loadingInterval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const elapsedSec = elapsed / 1000;
+
+      // Find current phase
+      let phaseIdx = 0;
+      for (let i = 0; i < PROGRESS_PHASES.length; i++) {
+        if (elapsedSec >= PROGRESS_PHASES[i].at) phaseIdx = i;
+      }
+      if (phaseIdx !== lastPhaseIdx) {
+        lastPhaseIdx = phaseIdx;
+        loadingStatus.textContent = PROGRESS_PHASES[phaseIdx].status;
+      }
+
+      // Smoothly animate bar toward phase target
+      const target = PROGRESS_PHASES[phaseIdx].bar;
+      const current = parseFloat(loadingBar.style.width) || 0;
+      if (current < target) {
+        loadingBar.style.width = Math.min(current + 3, target) + '%';
+      }
+    }, 300);
+
+    // 5-minute stall warning
+    loadingTimeout = setTimeout(() => {
+      if (loadingInterval) {
+        loadingStatus.textContent = 'Still evaluating — this can take several minutes. Check back later.';
+        loadingStatus.classList.add('text-yellow-400');
+        loadingStatus.classList.remove('text-[var(--text-muted)]');
+      }
+    }, STALL_THRESHOLD_MS);
+  }
+
+  function stopLoading(): void {
+    if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
+    if (loadingTimeout)   { clearTimeout(loadingTimeout);   loadingTimeout = null; }
+    abortController = null;
+    loadingBar.style.width = '100%';
+    loadingStatus.textContent = 'Done!';
+    loadingStatus.classList.remove('text-yellow-400');
+    loadingStatus.classList.add('text-[var(--text-muted)]');
+  }
+
+  // ===== Evaluation flow =====
+  async function runEvaluation(): Promise<void> {
+    const content = textarea.value.trim();
+    if (content.length < 50) { evaluateHint.classList.remove('hidden'); textarea.focus(); return; }
+
+    evaluateBtn.disabled = true;
+    evaluateBtn.textContent = 'Evaluating...';
+
+    animateLoading();
+
+    abortController = new AbortController();
+    const hardKill = setTimeout(() => abortController?.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const resp = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: content }),
+        signal: abortController.signal,
+      });
+
+      clearTimeout(hardKill);
+
+      if (resp.status === 504) {
+        stopLoading();
+        setTimeout(() => renderError('Evaluation timed out on the server. This can happen with complex job descriptions. Please try again.', true), 350);
+        return;
+      }
+
+      if (!resp.ok) {
+        let errMsg = `Server error (${resp.status})`;
+        try { const err = await resp.json(); if (err.detail) errMsg = err.detail; } catch {}
+        throw new Error(errMsg);
+      }
+
+      const data = await resp.json();
+      stopLoading();
+      setTimeout(() => renderResults(data), 350);
+    } catch (e: any) {
+      clearTimeout(hardKill);
+      stopLoading();
+      if (e.name === 'AbortError') {
+        setTimeout(() => renderError('Evaluation took too long and was cancelled. Please try again or with a shorter job description.', true), 350);
+      } else {
+        setTimeout(() => renderError(e.message || 'Evaluation failed'), 350);
+      }
+    }
+  }
+
+  // ===== Render results from backend response =====
+  function renderResults(data: any): void {
+    const scoreMatch = (data.report || '').match(/\*\*Score:\*\*\s*(\d+(?:\.\d+)?)\s*\/\s*5/);
+    const score = scoreMatch ? parseFloat(scoreMatch[1]) : 0;
+    const colors = scoreColors(score);
+
+    const grade = scoreToGrade(score);
+
+    // Apply colors via CSS custom properties on the ring container
+    gradeRing.style.background = colors.bg;
+    gradeProgress.setAttribute('stroke', colors.stroke);
+    gradeProgress.setAttribute('stroke-dashoffset', String(CIRC - (score / 5) * CIRC));
+    gradeLetter.textContent = grade;
+    gradeLetter.style.color = colors.text;
+    scoreValue.textContent = score.toFixed(1) + ' / 5';
+
+    scoreSummary.textContent = data.company
+      ? 'Evaluation for ' + data.company + (data.role ? ' — ' + data.role : '')
+      : 'Review the breakdown below.';
+
+    const tagLabels = ['A) Role Summary', 'B) Match with CV', 'C) Level & Strategy', 'D) Comp & Demand', 'E) Customization Plan', 'F) Interview Plan', 'G) Legitimacy'];
+    const tagRow: string[] = [];
+    for (const label of tagLabels) {
+      if ((data.report || '').includes('## ' + label.split(') ')[0] + ')')) {
+        tagRow.push('<span class="px-2 py-0.5 text-xs rounded-full border border-[var(--border-hover)] text-[var(--text-primary)] bg-[var(--bg-tertiary)]/40">' + label + '</span>');
+      }
+    }
+    scoreTags.innerHTML = tagRow.join('');
+
+    const sectionRe = /##\s+([A-H]\)\s+.+?)\s*\n([\s\S]*?)(?=\n##\s+[A-H]\)|\n---\s*$|$)/g;
+    const blocks: string[] = [];
+    let match;
+    while ((match = sectionRe.exec(data.report || '')) !== null) {
+      const name = match[1].trim();
+      const content = match[2].trim();
+      const preview = content.split('\n').filter(l => l.trim() && !l.startsWith('|') && !l.startsWith('---'))[0] || '';
+      blocks.push(
+        '<details class="group">' +
+          '<summary class="flex items-center justify-between cursor-pointer py-2 px-3 rounded-md hover:bg-[var(--bg-tertiary)]/50 transition-colors list-none">' +
+            '<span class="text-sm font-medium text-[var(--text-primary)]">' + name + '</span>' +
+            '<svg class="w-4 h-4 text-[var(--text-muted)] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>' +
+          '</summary>' +
+          '<div class="px-3 pb-3 pt-1 text-xs text-[var(--text-secondary)] whitespace-pre-wrap max-h-64 overflow-y-auto">' + (content || 'No content.') + '</div>' +
+        '</details>'
+      );
+    }
+    reportSections.innerHTML = blocks.length ? blocks.join('') : '<p class="text-sm text-[var(--text-muted)]">No section breakdown available.</p>';
+
+    showSection('eval-results');
+    evaluateBtn.disabled = false;
+    evaluateBtn.textContent = 'Evaluate Job Description';
+  }
+
+  // ===== Render error =====
+  function renderError(message: string, isTimeout: boolean = false): void {
+    const msgEl = errorSection.querySelector('p.text-[var(--text-secondary)]') as HTMLElement;
+    msgEl.textContent = message;
+
+    // Update heading based on error type
+    const headingEl = errorSection.querySelector('h4') as HTMLElement;
+    headingEl.textContent = isTimeout ? 'Evaluation timed out' : 'Evaluation failed';
+
+    // Show/hide retry button (only for timeout)
+    errorRetryBtn.classList.toggle('hidden', !isTimeout);
+    if (isTimeout) {
+      errorRetryBtn.textContent = 'Retry Evaluation';
+      errorRetryBtn.onclick = () => { errorSection.classList.add('hidden'); runEvaluation(); };
+    } else {
+      errorRetryBtn.textContent = 'Try Again';
+      errorRetryBtn.onclick = () => { errorSection.classList.add('hidden'); showSection('eval-empty'); };
+    }
+
+    showSection('eval-error');
+    evaluateBtn.disabled = false;
+    evaluateBtn.textContent = 'Evaluate Job Description';
+  }
+
+  // ===== Event wiring =====
+  evaluateBtn.addEventListener('click', () => runEvaluation());
+  reEvaluateBtn.addEventListener('click', () => showSection('eval-empty'));
+  errorRetryBtn.addEventListener('click', () => { errorSection.classList.add('hidden'); showSection('eval-empty'); });
+  textarea.addEventListener('keydown', (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runEvaluation();
+  });
+</script>

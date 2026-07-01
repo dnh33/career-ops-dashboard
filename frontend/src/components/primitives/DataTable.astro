@@ -1,0 +1,242 @@
+---
+import type { DataTableProps, RichCell } from './types';
+import StatusPill from './StatusPill.astro';
+import CodeBlock from './CodeBlock.astro';
+
+interface Props extends DataTableProps {}
+
+const {
+  columns,
+  rows,
+  sortKey,
+  sortDirection = 'asc',
+  emptyMessage = 'No data available',
+  class: className = '',
+} = Astro.props;
+
+const tableId = `data-table-${Math.random().toString(36).slice(2, 9)}`;
+
+function renderCell(cell: RichCell | undefined) {
+  if (cell == null) return '—';
+  if (typeof cell === 'string' || typeof cell === 'number') return cell;
+  if (cell.kind === 'pill') {
+    return { pill: cell };
+  }
+  if (cell.kind === 'link') {
+    return { link: cell };
+  }
+  if (cell.kind === 'code') {
+    return { code: cell };
+  }
+  return '—';
+}
+---
+
+<div class:list={['data-table-panel', className]}>
+  {rows.length === 0 ? (
+    <p class="data-table-panel__empty">{emptyMessage}</p>
+  ) : (
+    <div class="data-table-panel__scroll">
+      <table class="data-table" id={tableId} aria-label="Data table">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th
+                scope="col"
+                class:list={[
+                  column.mono && 'hermes-mono',
+                  column.sortable && 'data-table__th--sortable',
+                  sortKey === column.key && 'data-table__th--sorted',
+                  column.align === 'right' && 'data-table__th--right',
+                  column.align === 'center' && 'data-table__th--center',
+                ]}
+                data-mono={column.mono || undefined}
+                data-sort-key={column.sortable ? column.key : undefined}
+                aria-sort={sortKey === column.key ? (sortDirection === 'asc' ? 'ascending' : 'descending') : undefined}
+              >
+                {column.label}
+                {column.sortable && sortKey === column.key && (
+                  <i class:list={['codicon', sortDirection === 'asc' ? 'codicon-arrow-up' : 'codicon-arrow-down']} aria-hidden="true"></i>
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              {columns.map((column) => (
+                <td
+                  class:list={[
+                    column.mono && 'hermes-mono',
+                    column.align === 'right' && 'data-table__td--right',
+                    column.align === 'center' && 'data-table__td--center',
+                  ]}
+                  data-label={column.label}
+                  data-mono={column.mono || undefined}
+                  data-sort-value={
+                    typeof row.cells[column.key] === 'number'
+                      ? row.cells[column.key]
+                      : typeof row.cells[column.key] === 'string'
+                        ? row.cells[column.key]
+                        : undefined
+                  }
+                >
+                  {(() => {
+                    const rendered = renderCell(row.cells[column.key]);
+                    if (rendered && typeof rendered === 'object' && 'pill' in rendered) {
+                      const pill = rendered.pill;
+                      return (
+                        <StatusPill
+                          label={pill.label}
+                          variant={pill.variant}
+                          mono={pill.mono}
+                        />
+                      );
+                    }
+                    if (rendered && typeof rendered === 'object' && 'link' in rendered) {
+                      const link = rendered.link;
+                      return (
+                        <a href={link.href} class="data-table__link">{link.label}</a>
+                      );
+                    }
+                    if (rendered && typeof rendered === 'object' && 'code' in rendered) {
+                      const codeCell = rendered.code;
+                      return (
+                        <CodeBlock
+                          code={codeCell.code}
+                          language={codeCell.language ?? 'key'}
+                          showLineNumbers={false}
+                          copyable
+                          class="data-table__code"
+                        />
+                      );
+                    }
+                    return rendered ?? '—';
+                  })()}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+<script define:vars={{ tableId }}>
+  const table = document.getElementById(tableId);
+  if (!table) {
+    /* no-op */
+  } else {
+    const headers = table.querySelectorAll('[data-sort-key]');
+    headers.forEach((header) => {
+      header.addEventListener('click', () => {
+        const key = header.getAttribute('data-sort-key');
+        if (!key) return;
+        table.dispatchEvent(new CustomEvent('sort', { detail: { key }, bubbles: true }));
+      });
+      header.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          header.click();
+        }
+      });
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('role', 'button');
+    });
+  }
+</script>
+
+<style>
+  .data-table-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .data-table-panel__empty {
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .data-table-panel__scroll {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .data-table thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+    background: var(--bg-panel);
+    white-space: nowrap;
+    font-family: var(--font-ui);
+  }
+
+  .data-table__th--sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .data-table__th--sortable:hover {
+    color: var(--text-secondary);
+  }
+
+  .data-table__th--sorted {
+    color: var(--color-primary);
+  }
+
+  .data-table__th--right,
+  .data-table__td--right {
+    text-align: right;
+  }
+
+  .data-table__th--center,
+  .data-table__td--center {
+    text-align: center;
+  }
+
+  .data-table tbody td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+  }
+
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table tbody tr:hover td {
+    background: var(--bg-hover);
+  }
+
+  .data-table__link {
+    color: var(--color-primary);
+    text-decoration: none;
+    min-height: auto;
+    font-size: inherit;
+  }
+
+  .data-table__link:hover {
+    text-decoration: underline;
+  }
+
+  .data-table__code {
+    margin: 0;
+  }
+</style>

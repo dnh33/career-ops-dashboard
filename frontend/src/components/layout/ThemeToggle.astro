@@ -1,0 +1,100 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={['theme-toggle', className]}
+  id="theme-toggle"
+  aria-label="Toggle dark mode"
+  aria-pressed="false"
+>
+  <i class="codicon codicon-moon theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true"></i>
+  <i class="codicon codicon-lightbulb theme-toggle__icon theme-toggle__icon--light" aria-hidden="true"></i>
+</button>
+
+<script is:inline>
+  (function initTheme() {
+    const STORAGE_KEY = 'hermes-theme';
+    const root = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+
+    function applyTheme(mode) {
+      const isDark = mode === 'dark';
+      root.classList.toggle('dark', isDark);
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+    }
+
+    function resolveTheme() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === 'dark' || stored === 'light') return stored;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    applyTheme(resolveTheme());
+
+    toggle?.addEventListener('click', () => {
+      const next = root.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem(STORAGE_KEY, next);
+      applyTheme(next);
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+      if (localStorage.getItem(STORAGE_KEY)) return;
+      applyTheme(event.matches ? 'dark' : 'light');
+    });
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    min-height: auto;
+    padding: 0;
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-nous);
+    position: relative;
+  }
+
+  .theme-toggle:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .theme-toggle__icon {
+    position: absolute;
+    font-size: var(--text-base);
+    transition: opacity var(--transition-base);
+  }
+
+  :global(.dark) .theme-toggle__icon--dark {
+    opacity: 0;
+  }
+
+  :global(.dark) .theme-toggle__icon--light {
+    opacity: 1;
+  }
+
+  :global(html:not(.dark)) .theme-toggle__icon--dark {
+    opacity: 1;
+  }
+
+  :global(html:not(.dark)) .theme-toggle__icon--light {
+    opacity: 0;
+  }
+</style>

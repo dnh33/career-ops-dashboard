@@ -1,0 +1,5 @@
+<!-- Placeholder SVG logo for Zendesk -->
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="2" width="20" height="20" rx="4" stroke="#D4A853" stroke-width="2"/>
+  <path d="M6 8h12M6 12h12M6 16h12" stroke="#D4A853" stroke-width="2" stroke-linecap="square"/>
+</svg>

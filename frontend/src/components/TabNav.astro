@@ -1,0 +1,101 @@
+---
+// TabNav — Horizontal tab navigation with amber underline indicator
+// Props: tabs (array of { id, label, href? }), activeTab (string id of active tab)
+
+interface Tab {
+  id: string;
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  tabs: Tab[];
+  activeTab: string;
+}
+
+const { tabs = [], activeTab = '' } = Astro.props;
+---
+
+<nav class="tab-nav" role="tablist" aria-label="Section navigation">
+  {tabs.map((tab) => {
+    const isActive = tab.id === activeTab;
+    const baseClass = 'tab-nav-item';
+    const activeClass = isActive ? ' tab-nav-active' : '';
+    const element = tab.href ? 'a' : 'button';
+    const href = tab.href ? tab.href : undefined;
+
+    return (
+      <div>
+        {element === 'a' ? (
+          <a
+            href={href}
+            class={`${baseClass}${activeClass}`}
+            role="tab"
+            aria-selected={isActive}
+          >
+            {tab.label}
+          </a>
+        ) : (
+          <button
+            class={`${baseClass}${activeClass}`}
+            role="tab"
+            aria-selected={isActive}
+          >
+            {tab.label}
+          </button>
+        )}
+      </div>
+    );
+  })}
+</nav>
+
+<style>
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-default);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-nav-item {
+    flex-shrink: 0;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease;
+    white-space: nowrap;
+    min-height: 44px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-family: inherit;
+  }
+
+  .tab-nav-item:hover {
+    color: var(--text-primary);
+  }
+
+  .tab-nav-item:focus-visible {
+    outline: 2px solid rgba(212, 168, 83, 0.6);
+    outline-offset: 2px;
+  }
+
+  .tab-nav-active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+  }
+
+  .tab-nav-active:hover {
+    color: var(--accent-primary);
+  }
+</style>

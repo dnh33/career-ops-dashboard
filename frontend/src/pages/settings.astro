@@ -1,0 +1,570 @@
+---
+import HermesLayout from '../layouts/HermesLayout.astro';
+import SegmentedControl from '../components/primitives/SegmentedControl.astro';
+import SearchField from '../components/primitives/SearchField.astro';
+import DataTable from '../components/primitives/DataTable.astro';
+import MetricCard from '../components/primitives/MetricCard.astro';
+import CodeBlock from '../components/primitives/CodeBlock.astro';
+import Switch from '../components/primitives/Switch.astro';
+
+const settingsTabs = [
+  { id: 'general', label: 'General', icon: 'settings' },
+  { id: 'api-keys', label: 'API Keys', icon: 'key' },
+  { id: 'notifications', label: 'Notifications', icon: 'bell' },
+  { id: 'appearance', label: 'Appearance', icon: 'color-mode' },
+  { id: 'data', label: 'Data', icon: 'database' },
+  { id: 'advanced', label: 'Advanced', icon: 'tools' },
+];
+
+const currencyOptions = [
+  { id: 'DKK', label: 'DKK' },
+  { id: 'EUR', label: 'EUR' },
+  { id: 'USD', label: 'USD' },
+];
+
+const themeOptions = [
+  { id: 'light', label: 'Light' },
+  { id: 'dark', label: 'Dark' },
+  { id: 'system', label: 'System' },
+];
+
+const densityOptions = [
+  { id: 'compact', label: 'Compact' },
+  { id: 'comfortable', label: 'Comfortable' },
+];
+
+const apiKeyColumns = [
+  { key: 'service', label: 'Service' },
+  { key: 'status', label: 'Key Status' },
+  { key: 'lastUsed', label: 'Last Used', mono: true },
+  { key: 'action', label: 'Action' },
+];
+
+const apiKeyRows = [
+  {
+    id: 'openrouter',
+    cells: {
+      service: 'OpenRouter',
+      status: { kind: 'pill' as const, label: 'Active', variant: 'success' as const },
+      lastUsed: '2h ago',
+      action: { kind: 'code' as const, code: 'sk-••••••••••••••••••••••••', language: 'key' },
+    },
+  },
+  {
+    id: 'nvidia',
+    cells: {
+      service: 'NVIDIA NIM',
+      status: { kind: 'pill' as const, label: 'Fallback', variant: 'warning' as const },
+      lastUsed: '3d ago',
+      action: { kind: 'code' as const, code: 'nvapi-••••••••••••••••', language: 'key' },
+    },
+  },
+  {
+    id: 'telegram',
+    cells: {
+      service: 'Telegram Bot',
+      status: { kind: 'pill' as const, label: 'Missing', variant: 'error' as const },
+      lastUsed: '—',
+      action: { kind: 'code' as const, code: 'Not configured', language: 'key' },
+    },
+  },
+];
+
+const debugConfig = `{
+  "logLevel": "info",
+  "apiTimeout": 30000,
+  "cacheTtl": 3600,
+  "features": {
+    "marketSync": true,
+    "aiEvaluate": true
+  }
+}`;
+---
+
+<HermesLayout
+  title="Settings"
+  pageTitle="Settings"
+  description="Configure location, API keys, notifications, appearance, and data sync preferences."
+  currentPath="/settings"
+>
+  <div class="settings-page">
+    <aside class="settings-page__nav" aria-label="Settings sections">
+      <SegmentedControl
+        options={settingsTabs}
+        value="general"
+        name="settings-tab"
+        vertical
+        ariaLabel="Settings sections"
+        class="settings-page__tabs"
+      />
+    </aside>
+
+    <div class="settings-page__panels">
+      <!-- General -->
+      <section id="settings-panel-general" class="settings-panel" aria-labelledby="settings-general-heading">
+        <h2 id="settings-general-heading" class="settings-panel__title">General</h2>
+        <div class="settings-panel__field">
+          <label class="settings-panel__label" for="settings-location">Default location</label>
+          <SearchField
+            name="settings-location"
+            placeholder="Copenhagen, Denmark"
+            value="Copenhagen, Denmark"
+            ariaLabel="Default location"
+          />
+        </div>
+        <div class="settings-panel__field">
+          <span class="settings-panel__label">Salary currency</span>
+          <SegmentedControl
+            options={currencyOptions}
+            value="DKK"
+            name="salary-currency"
+            ariaLabel="Salary currency"
+          />
+        </div>
+      </section>
+
+      <!-- API Keys -->
+      <section id="settings-panel-api-keys" class="settings-panel" hidden aria-labelledby="settings-api-heading">
+        <h2 id="settings-api-heading" class="settings-panel__title">API Keys</h2>
+        <DataTable columns={apiKeyColumns} rows={apiKeyRows} emptyMessage="No API keys configured" />
+        <div class="settings-key-actions">
+          {apiKeyRows.map((row) => (
+            <button type="button" class="settings-key__reveal" data-reveal={row.id} aria-label={`Reveal ${row.cells.service} key`}>
+              <i class="codicon codicon-eye" aria-hidden="true"></i>
+              <span>Reveal {row.cells.service}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section id="settings-panel-notifications" class="settings-panel" hidden aria-labelledby="settings-notif-heading">
+        <h2 id="settings-notif-heading" class="settings-panel__title">Notifications</h2>
+        <div class="settings-panel__switches">
+          <Switch name="notify-email" label="Email" description="Evaluation summaries and weekly digest" checked />
+          <Switch name="notify-telegram" label="Telegram" description="Instant alerts for high-score matches" />
+          <Switch name="notify-inapp" label="In-app" description="Toast notifications in the dashboard" checked />
+        </div>
+      </section>
+
+      <!-- Appearance -->
+      <section id="settings-panel-appearance" class="settings-panel" hidden aria-labelledby="settings-appearance-heading">
+        <h2 id="settings-appearance-heading" class="settings-panel__title">Appearance</h2>
+        <div class="settings-panel__field">
+          <span class="settings-panel__label">Theme</span>
+          <SegmentedControl
+            options={themeOptions}
+            value="system"
+            name="theme-mode"
+            ariaLabel="Theme mode"
+            class="settings-theme-control"
+          />
+        </div>
+        <div class="settings-panel__field">
+          <span class="settings-panel__label">Density</span>
+          <SegmentedControl
+            options={densityOptions}
+            value="compact"
+            name="page-density"
+            ariaLabel="Page density"
+            class="settings-density-control"
+          />
+        </div>
+      </section>
+
+      <!-- Data -->
+      <section id="settings-panel-data" class="settings-panel" hidden aria-labelledby="settings-data-heading">
+        <h2 id="settings-data-heading" class="settings-panel__title">Data</h2>
+        <div class="settings-panel__metrics">
+          <div id="metric-last-sync"><MetricCard label="Last sync" value="—" /></div>
+          <div id="metric-postings"><MetricCard label="Postings" value="—" /></div>
+          <div id="metric-companies"><MetricCard label="Companies" value="—" /></div>
+          <div id="metric-rules"><MetricCard label="Rules" value="—" /></div>
+        </div>
+        <div class="settings-panel__actions">
+          <button type="button" class="settings-destructive-btn" id="clear-cache-btn" aria-label="Clear cache and re-sync">
+            Clear Cache & Re-sync
+          </button>
+        </div>
+      </section>
+
+      <!-- Advanced -->
+      <section id="settings-panel-advanced" class="settings-panel" hidden aria-labelledby="settings-advanced-heading">
+        <h2 id="settings-advanced-heading" class="settings-panel__title">Advanced</h2>
+        <div class="settings-panel__field">
+          <label class="settings-panel__label" for="settings-log-filter">Log level filter</label>
+          <SearchField
+            name="settings-log-filter"
+            placeholder="Filter by level: debug, info, warn, error…"
+            ariaLabel="Log level filter"
+          />
+        </div>
+        <div class="settings-panel__field">
+          <span class="settings-panel__label">Debug config</span>
+          <CodeBlock code={debugConfig} language="json" copyable />
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="clear-cache-overlay" hidden>
+    <div class="overlay-backdrop settings-overlay" role="presentation">
+      <div class="overlay settings-overlay__dialog" role="dialog" aria-modal="true" aria-labelledby="clear-cache-title">
+        <header class="overlay__header">
+          <h2 id="clear-cache-title" class="overlay__title">Clear cache & re-sync?</h2>
+          <button type="button" class="overlay__close" aria-label="Close" data-overlay-close>
+            <i class="codicon codicon-close" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="overlay__body">
+          <p class="settings-overlay__message">This clears local cache and triggers a full data re-sync from career-ops sources. Active sessions are not affected.</p>
+          <div class="settings-overlay__actions">
+            <button type="button" class="settings-overlay__cancel" id="clear-cache-cancel">Cancel</button>
+            <button type="button" class="settings-destructive-btn" id="clear-cache-confirm">Clear & Re-sync</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</HermesLayout>
+
+<script>
+  const TAB_PANELS: Record<string, string> = {
+    general: 'settings-panel-general',
+    'api-keys': 'settings-panel-api-keys',
+    notifications: 'settings-panel-notifications',
+    appearance: 'settings-panel-appearance',
+    data: 'settings-panel-data',
+    advanced: 'settings-panel-advanced',
+  };
+
+  const MOCK_KEYS: Record<string, string> = {
+    openrouter: 'sk-or-v1-demo-openrouter-key-placeholder',
+    nvidia: 'nvapi-demo-nim-key-placeholder',
+    telegram: '',
+  };
+
+  function showPanel(tabId: string) {
+    Object.entries(TAB_PANELS).forEach(([id, panelId]) => {
+      const panel = document.getElementById(panelId);
+      if (panel) panel.hidden = id !== tabId;
+    });
+  }
+
+  document.querySelector('.settings-page__tabs')?.addEventListener('change', (event) => {
+    const detail = (event as CustomEvent<{ value: string }>).detail;
+    if (detail?.value) showPanel(detail.value);
+  });
+
+  function applyTheme(mode: string) {
+    const root = document.documentElement;
+    if (mode === 'system') {
+      localStorage.removeItem('hermes-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', prefersDark);
+    } else {
+      localStorage.setItem('hermes-theme', mode);
+      root.classList.toggle('dark', mode === 'dark');
+    }
+    syncThemeControl();
+  }
+
+  function syncThemeControl() {
+    const stored = localStorage.getItem('hermes-theme');
+    const value = stored === 'dark' || stored === 'light' ? stored : 'system';
+    const control = document.querySelector('.settings-theme-control');
+    if (!control) return;
+    control.querySelectorAll('[role="tab"]').forEach((tab) => {
+      const isActive = tab.getAttribute('data-value') === value;
+      tab.classList.toggle('segmented-control__option--active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
+  function applyDensity(mode: string) {
+    document.body.classList.remove('page-density-compact', 'page-density-comfortable');
+    document.body.classList.add(`page-density-${mode}`);
+    localStorage.setItem('hermes-density', mode);
+  }
+
+  document.querySelector('.settings-theme-control')?.addEventListener('change', (event) => {
+    const detail = (event as CustomEvent<{ value: string }>).detail;
+    if (detail?.value) applyTheme(detail.value);
+  });
+
+  document.querySelector('.settings-density-control')?.addEventListener('change', (event) => {
+    const detail = (event as CustomEvent<{ value: string }>).detail;
+    if (detail?.value) applyDensity(detail.value);
+  });
+
+  syncThemeControl();
+  const storedDensity = localStorage.getItem('hermes-density') || 'compact';
+  applyDensity(storedDensity);
+  const densityControl = document.querySelector('.settings-density-control');
+  densityControl?.querySelectorAll('[role="tab"]').forEach((tab) => {
+    const isActive = tab.getAttribute('data-value') === storedDensity;
+    tab.classList.toggle('segmented-control__option--active', isActive);
+    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('[data-reveal]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const keyId = btn.getAttribute('data-reveal');
+      if (!keyId) return;
+      const keyIndex = ['openrouter', 'nvidia', 'telegram'].indexOf(keyId);
+      const keyBlocks = document.querySelectorAll('.data-table .code-block__code');
+      const keyBlock = keyBlocks[keyIndex];
+      const full = MOCK_KEYS[keyId] || 'Not configured';
+      if (keyBlock) keyBlock.textContent = full || 'Not configured';
+      const label = btn.querySelector('span');
+      if (label) label.textContent = 'Revealed';
+    });
+  });
+
+  async function loadDataMetrics() {
+    try {
+      const [stats, market] = await Promise.all([
+        fetch('/api/stats').then((r) => r.ok ? r.json() : null),
+        fetch('/api/market/overview').then((r) => r.ok ? r.json() : null),
+      ]);
+      const lastSync = document.getElementById('metric-last-sync')?.querySelector('.metric-card__value');
+      const postings = document.getElementById('metric-postings')?.querySelector('.metric-card__value');
+      const companies = document.getElementById('metric-companies')?.querySelector('.metric-card__value');
+      const rules = document.getElementById('metric-rules')?.querySelector('.metric-card__value');
+      if (lastSync) lastSync.textContent = 'Just now';
+      if (postings) postings.textContent = String(market?.total_postings ?? stats?.total_reports ?? '—');
+      if (companies) companies.textContent = String(market?.companies?.length ?? '—');
+      if (rules) rules.textContent = '12';
+    } catch {
+      /* API unavailable */
+    }
+  }
+
+  loadDataMetrics();
+
+  const overlayRoot = document.getElementById('clear-cache-overlay');
+  const openOverlay = () => { if (overlayRoot) overlayRoot.hidden = false; };
+  const closeOverlay = () => { if (overlayRoot) overlayRoot.hidden = true; };
+
+  document.getElementById('clear-cache-btn')?.addEventListener('click', openOverlay);
+  document.getElementById('clear-cache-cancel')?.addEventListener('click', closeOverlay);
+  overlayRoot?.querySelector('[data-overlay-close]')?.addEventListener('click', closeOverlay);
+  overlayRoot?.querySelector('.overlay-backdrop')?.addEventListener('click', (event) => {
+    if (event.target === event.currentTarget) closeOverlay();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && overlayRoot && !overlayRoot.hidden) closeOverlay();
+  });
+  document.getElementById('clear-cache-confirm')?.addEventListener('click', () => {
+    closeOverlay();
+    const lastSync = document.getElementById('metric-last-sync')?.querySelector('.metric-card__value');
+    if (lastSync) lastSync.textContent = 'Syncing…';
+    setTimeout(() => {
+      if (lastSync) lastSync.textContent = 'Just now';
+    }, 1200);
+  });
+</script>
+
+<style>
+  .settings-page {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .settings-page {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .settings-page__nav {
+    position: sticky;
+    top: calc(var(--topbar-height) + var(--space-4));
+  }
+
+  .settings-page__tabs {
+    width: 100%;
+  }
+
+  .settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .settings-panel__title {
+    margin: 0;
+    font-size: var(--text-xl);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .settings-panel__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .settings-panel__label {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .settings-panel__switches {
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+    padding: 0 var(--space-4);
+  }
+
+  .settings-panel__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .settings-panel__actions {
+    padding-top: var(--space-2);
+  }
+
+  .settings-destructive-btn,
+  .settings-overlay__cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-4);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    min-height: 36px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-base), background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .settings-destructive-btn {
+    border: 1px solid color-mix(in srgb, var(--ui-error) 40%, transparent);
+    background: color-mix(in srgb, var(--ui-error) 12%, transparent);
+    color: var(--ui-error);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .settings-destructive-btn:hover {
+    background: color-mix(in srgb, var(--ui-error) 20%, transparent);
+  }
+
+  .settings-overlay__cancel {
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+  }
+
+  .settings-overlay__cancel:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .settings-key-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .settings-key__reveal {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-nous);
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    min-height: auto;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transition-base), background-color var(--transition-base);
+  }
+
+  .settings-key__reveal:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--bg-chrome) 55%, transparent);
+  }
+
+  .settings-overlay__dialog {
+    width: 100%;
+    max-width: 28rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--stroke-nous);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .settings-overlay__message {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .settings-overlay__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  .overlay__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .overlay__title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .overlay__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    min-height: auto;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .overlay__close:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .overlay__body {
+    padding: var(--space-4);
+  }
+</style>

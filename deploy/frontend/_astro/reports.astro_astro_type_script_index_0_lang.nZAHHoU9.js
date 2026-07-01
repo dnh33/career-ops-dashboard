@@ -1,0 +1,16 @@
+import{r as e,t}from"./colors.D4fb9LWo.js";var n=``,r=document.getElementById(`search-input`),i=document.getElementById(`sort-select`),a=document.getElementById(`reports-grid`),o=document.getElementById(`no-results`),s=document.getElementById(`retry-btn`),c=document.getElementById(`reports-loading`),l=document.getElementById(`reports-error`),u=document.getElementById(`reports-empty`),d=[];function f(e){if(!e)return``;let t=new Date(e),n=Date.now()-t.getTime(),r=Math.floor(n/864e5);return r===0?`Today`:r===1?`Yesterday`:r<7?`${r} days ago`:t.toLocaleDateString(`en-US`,{month:`short`,day:`numeric`})}async function p(){c&&c.classList.remove(`hidden`),l&&l.classList.add(`hidden`),u&&u.classList.add(`hidden`),a&&a.classList.add(`hidden`);try{let e=await fetch(`${n}/api/reports`);if(!e.ok)throw Error(`HTTP ${e.status}`);if(d=(await e.json()).reports||[],c&&c.classList.add(`hidden`),d.length===0){u&&u.classList.remove(`hidden`);return}m(d),a&&a.classList.remove(`hidden`)}catch(e){console.error(`Failed to load reports:`,e),c&&c.classList.add(`hidden`),l&&l.classList.remove(`hidden`)}}function m(n){a&&(a.innerHTML=``,n.forEach(n=>{let r=e(n.score),i=f(n.date),o=document.createElement(`div`);o.className=`report-card-wrapper`,o.dataset.id=n.id,o.dataset.company=(n.company||``).toLowerCase(),o.dataset.role=(n.role||``).toLowerCase(),o.dataset.score=String(n.score||0),o.dataset.date=n.date||``,o.innerHTML=`
+        <a href="/report?id=${n.id}" class="report-card block bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-5 hover:border-[var(--border-hover)] transition-colors">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] truncate">${n.company||`Unknown`}</h3>
+              <p class="text-xs text-[var(--text-secondary)] mt-0.5 truncate">${n.role||`Unknown Role`}</p>
+              <p class="text-xs text-[var(--text-muted)] mt-1 font-mono">${i}</p>
+            </div>
+            <div class="text-center shrink-0">
+              <span class="${t(r)} inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold">${r}</span>
+              <p class="text-xs text-[var(--text-muted)] mt-1">${n.score?n.score.toFixed(1):`—`}/5</p>
+            </div>
+          </div>
+          ${n.archetype?`<span class="inline-block mt-3 px-2 py-0.5 text-xs rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">${n.archetype}</span>`:``}
+        </a>
+      `,a.appendChild(o)}))}function h(){if(!r||!i||!a)return;let e=r.value.toLowerCase().trim(),t=i.value,n=Array.from(a.querySelectorAll(`.report-card-wrapper`)),s=n.filter(function(t){let n=t.dataset.company||``,r=t.dataset.role||``;return!e||n.includes(e)||r.includes(e)});s.sort(function(e,n){let r=parseFloat(e.dataset.score||`0`),i=parseFloat(n.dataset.score||`0`),a=e.dataset.date||``,o=n.dataset.date||``;return t===`date_desc`?o.localeCompare(a):t===`date_asc`?a.localeCompare(o):t===`score_desc`?i-r:t===`score_asc`?r-i:0}),s.forEach(function(e){a.appendChild(e)}),o&&o.classList.toggle(`hidden`,s.length>0),n.forEach(function(e){e.style.display=s.includes(e)?``:`none`})}r&&r.addEventListener(`input`,h),i&&i.addEventListener(`change`,h),s&&s.addEventListener(`click`,p),p();

@@ -1,0 +1,198 @@
+---
+import HermesLayout from '../layouts/HermesLayout.astro';
+---
+
+<HermesLayout title="Report" currentPath="/report" pageTitle="Report" description="View detailed evaluation report.">
+  <div class="content-container max-w-4xl mx-auto space-y-6">
+    <a href="/reports" class="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Reports
+    </a>
+
+    <!-- Loading -->
+    <div id="report-loading" class="text-center py-16">
+      <div class="skeleton skeleton-card h-32 rounded-lg mb-4"></div>
+      <p class="text-[var(--text-muted)] text-sm">Loading report...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="report-error" class="hidden text-center py-16">
+      <svg class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <p class="text-[var(--text-secondary)] text-lg" id="error-msg">Unable to connect to backend</p>
+      <a href="/reports" class="inline-block mt-4 px-5 py-2 bg-[var(--accent-primary)] text-[var(--text-inverse)] rounded-lg font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">
+        Back to Reports
+      </a>
+    </div>
+
+    <!-- Report content (populated client-side) -->
+    <div id="report-content" class="hidden space-y-6">
+      <!-- Score Hero -->
+      <div class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <h1 class="text-2xl font-bold text-[var(--text-primary)] truncate" id="report-title">—</h1>
+            <p class="text-[var(--text-secondary)] mt-1" id="report-role">—</p>
+            <p class="text-xs text-[var(--text-muted)] mt-1 font-mono" id="report-date"></p>
+            <span class="inline-block mt-2 px-2 py-0.5 text-xs rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hidden" id="report-legitimacy"></span>
+          </div>
+          <div class="text-center shrink-0" id="report-score-section">
+            <div class="text-5xl font-bold text-[var(--accent-primary)]" id="report-score">—</div>
+            <span class="inline-block mt-2 px-3 py-0.5 text-xs border border-[var(--accent-primary)] text-[var(--accent-primary)] rounded-full" id="report-grade"></span>
+            <p class="text-xs text-[var(--text-secondary)] mt-2 max-w-[160px] mx-auto" id="report-archetype"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="flex flex-wrap gap-3">
+        <button id="pdf-btn" class="px-4 py-2 bg-[var(--accent-primary)] text-[var(--text-inverse)] rounded-lg font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
+          Generate PDF
+        </button>
+        <a href="/tracker" class="px-4 py-2 border border-[var(--border-hover)] text-[var(--text-primary)] rounded-lg font-medium text-sm hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] transition-colors">
+          Track this
+        </a>
+        <a href="/reports" class="px-4 py-2 border border-[var(--border-hover)] text-[var(--text-primary)] rounded-lg font-medium text-sm hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] transition-colors">
+          Compare reports
+        </a>
+      </div>
+
+      <!-- Report Content Blocks -->
+      <div id="report-blocks" class="space-y-4"></div>
+    </div>
+  </div>
+</HermesLayout>
+
+<script>
+  import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
+
+  function escapeHtml(s: string) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderMd(md: string) {
+    return md
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 bg-[var(--bg-tertiary)] rounded text-xs font-mono text-[var(--text-primary)]">$1</code>')
+      .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+      .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold text-[var(--text-primary)] mt-3 mb-1">$1</h4>')
+      .replace(/\n\n/g, '</p><p class="mt-2">');
+  }
+
+  const API_BASE = '';
+
+  // Extract report ID from query param: /report?id=X
+  const urlParams = new URLSearchParams(window.location.search);
+  const reportId = urlParams.get('id') || '';
+
+  const loadingEl = document.getElementById('report-loading');
+  const errorEl = document.getElementById('report-error');
+  const contentEl = document.getElementById('report-content');
+  const errorMsg = document.getElementById('error-msg') as HTMLElement | null;
+  const pdfBtn = document.getElementById('pdf-btn');
+
+  if (pdfBtn) {
+    pdfBtn.addEventListener('click', function() {
+      fetch(`${API_BASE}/api/output/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_id: reportId }),
+      }).then(async function(res) {
+        if (res.ok) alert('PDF generation started');
+        else { const d = await res.json(); alert(d.detail || 'Failed to generate PDF'); }
+      }).catch(function() { alert('Backend unavailable'); });
+    });
+  }
+
+  function renderBlocks(content: string) {
+    const blocksEl = document.getElementById('report-blocks');
+    if (!blocksEl) return;
+
+    const sections: Array<{ letter: string; title: string; body: string }> = [];
+    const pattern = /^## (?:Block\s+)?([A-G])(?:\)\s*|:\s*|\s+—\s+|\s+)(.+)?$/gm;
+    const matches: Array<{ idx: number; letter: string; title: string; headerLen: number }> = [];
+    let m: RegExpExecArray | null;
+    while ((m = pattern.exec(content)) !== null) {
+      matches.push({ idx: m.index, letter: m[1], title: (m[2] || `Block ${m[1]}`).trim(), headerLen: m[0].length });
+    }
+    matches.forEach(function(match, i) {
+      const start = match.idx + match.headerLen + 2;
+      const end = i + 1 < matches.length ? matches[i+1].idx : content.length;
+      sections.push({ letter: match.letter, title: match.title, body: content.slice(start, end).trim() });
+    });
+
+    if (sections.length === 0) {
+      blocksEl.innerHTML = '<pre class="whitespace-pre-wrap text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] rounded-lg p-6 overflow-x-auto">' + escapeHtml(content) + '</pre>';
+      return;
+    }
+
+    blocksEl.innerHTML = sections.map(function(s) {
+      const cv = gradeColorVars(s.letter);
+      return `<details class="group bg-[var(--bg-secondary)] border-l-4 border-[var(--accent-primary)] rounded-lg overflow-hidden" open>` +
+        `<summary class="flex items-center justify-between p-4 cursor-pointer select-none hover:bg-[var(--bg-tertiary)]/50 list-none">` +
+        `<div class="flex items-center gap-3">` +
+        `<span class="${gradeClass(s.letter)} w-8 h-8 flex items-center justify-center text-sm font-bold">${s.letter}</span>` +
+        `<span class="font-medium text-[var(--text-primary)]">${escapeHtml(s.title)}</span></div>` +
+        `<svg class="w-4 h-4 text-[var(--text-muted)] group-open:rotate-90 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">` +
+        `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></summary>` +
+        `<div class="px-4 pb-4 pt-2 text-sm text-[var(--text-primary)] leading-relaxed">${renderMd(s.body)}</div></details>`;
+    }).join('');
+  }
+
+  async function loadReport() {
+    if (!reportId) {
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (errorEl) errorEl.classList.remove('hidden');
+      if (errorMsg) errorMsg.textContent = 'Invalid report ID';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/reports/${reportId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const report = await res.json();
+
+      if (loadingEl) loadingEl.classList.add('hidden');
+
+      const titleEl = document.getElementById('report-title');
+      const roleEl = document.getElementById('report-role');
+      const dateEl = document.getElementById('report-date');
+      if (titleEl) titleEl.textContent = report.company || report.id;
+      if (roleEl) roleEl.textContent = report.role || 'No role specified';
+      if (dateEl) dateEl.textContent = report.date || '';
+
+      const legitimacyEl = document.getElementById('report-legitimacy');
+      if (report.legitimacy && legitimacyEl) {
+        legitimacyEl.textContent = report.legitimacy;
+        legitimacyEl.classList.remove('hidden');
+      }
+
+      if (report.score != null && report.score > 0) {
+        const scoreEl = document.getElementById('report-score');
+        const gradeEl = document.getElementById('report-grade');
+        const archetypeEl = document.getElementById('report-archetype');
+        if (scoreEl) scoreEl.textContent = report.score + '/5';
+        if (gradeEl) gradeEl.textContent = 'Grade ' + scoreToGrade(report.score);
+        if (report.archetype && archetypeEl) archetypeEl.textContent = report.archetype;
+      }
+
+      if (report.content) {
+        renderBlocks(report.content);
+      }
+
+      if (contentEl) contentEl.classList.remove('hidden');
+    } catch (e) {
+      console.error('Failed to load report:', e);
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (errorEl) errorEl.classList.remove('hidden');
+      if (errorMsg) errorMsg.textContent = 'Unable to connect to backend';
+    }
+  }
+
+  loadReport();
+</script>

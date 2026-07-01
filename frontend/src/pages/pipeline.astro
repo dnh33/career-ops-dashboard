@@ -1,0 +1,177 @@
+---
+import HermesLayout from '../layouts/HermesLayout.astro';
+---
+
+<HermesLayout title="Pipeline" currentPath="/pipeline" pageTitle="Pipeline" description="Manage and monitor the evaluation pipeline.">
+  <main class="content-container">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <div>
+        <h1 style="font-size: 1.25rem; font-weight: 700; font-family: var(--font-display); margin: 0;">Pipeline</h1>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0.25rem 0 0;">URLs queued for evaluation</p>
+      </div>
+      <span id="pipeline-count" class="tag tag-gray">Loading...</span>
+    </div>
+
+    <!-- Add URLs -->
+    <section class="panel" style="margin-bottom: 1rem;">
+      <div style="padding: 0.75rem 0.875rem;">
+        <label for="bulk-input" class="section-title" style="display: block; margin-bottom: 0.5rem;">Add URLs</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <textarea id="bulk-input" rows="2" placeholder="Paste URLs here, one per line..." class="toolbar-input" style="flex: 1; background: var(--bg-input); border: 1px solid var(--border-default); border-radius: 6px; padding: 0.5rem 0.625rem; font-family: var(--font-mono); resize: vertical; min-height: 56px;"></textarea>
+          <button id="add-btn" type="button" class="toolbar-btn toolbar-btn-primary" style="align-self: flex-end; height: 36px;">Add <span id="add-count">0</span></button>
+        </div>
+        <p id="bulk-error" class="text-xs text-red-400 mt-1 hidden"></p>
+      </div>
+    </section>
+
+    <!-- Pipeline Items -->
+    <section class="panel">
+      <div class="section-header" style="padding: 0.625rem 0.875rem;">
+        <span class="section-title">Queue</span>
+        <div class="filter-bar" style="padding: 0;">
+          <div class="filter-chip active" data-filter="all">All</div>
+          <div class="filter-chip" data-filter="pending">Pending</div>
+          <div class="filter-chip" data-filter="evaluated">Done</div>
+          <div class="filter-chip" data-filter="error">Error</div>
+        </div>
+      </div>
+      <div class="panel-scroll" style="max-height: calc(100dvh - 340px);">
+        <div id="pipeline-list" style="padding: 0.375rem 0;">
+          <div class="empty-row">Loading...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</HermesLayout>
+
+<script>
+  let allItems = [];
+  let currentFilter = 'all';
+
+  function host(url) {
+    if (!url) return '—';
+    try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
+  }
+
+  function relDate(d) {
+    if (!d) return '—';
+    const diff = (Date.now() - new Date(d).getTime()) / 86400000;
+    if (diff < 1) return 'Today';
+    if (diff < 2) return 'Yesterday';
+    if (diff < 7) return `${Math.floor(diff)}d ago`;
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function statusTag(s) {
+    if (!s) return 'tag-gray';
+    const lc = s.toLowerCase();
+    if (lc === 'done' || lc === 'evaluated') return 'tag-green';
+    if (lc === 'running' || lc === 'processing') return 'tag-blue';
+    if (lc === 'error' || lc === 'failed') return 'tag-red';
+    return 'tag-amber';
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('/api/pipeline');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      allItems = data.entries || data.items || data || [];
+      document.getElementById('pipeline-count').textContent = `${allItems.length} items`;
+      render();
+    } catch (e) {
+      document.getElementById('pipeline-list').innerHTML = `<div class="empty-row">Failed to load <button class="toolbar-btn" onclick="location.reload()" style="margin-left: 0.5rem;">Retry</button></div>`;
+    }
+  }
+
+  function render() {
+    const list = document.getElementById('pipeline-list');
+    let items = allItems;
+    if (currentFilter !== 'all') {
+      items = items.filter(i => (i.status || 'pending').toLowerCase() === currentFilter);
+    }
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="empty-row">Nothing in queue</div>';
+      return;
+    }
+
+    list.innerHTML = items.map(p => `
+      <div class="data-row" style="gap: 0.75rem;">
+        <span class="tag ${statusTag(p.status)}" style="min-width: 60px; justify-content: center; font-size: 0.625rem;">${p.status || 'pending'}</span>
+        <div style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          <span style="color: var(--text-primary); font-size: 0.8125rem;">${host(p.url)}</span>
+          <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">${relDate(p.date_added)}</span>
+        </div>
+        <div style="display: flex; gap: 0.25rem; flex-shrink: 0;">
+          ${p.status !== 'evaluated' && p.status !== 'done' ? `<a href="/evaluate?url=${encodeURIComponent(p.url)}" class="toolbar-btn" style="font-size: 0.625rem; padding: 0.25rem 0.5rem;">Eval</a>` : ''}
+          <button class="toolbar-btn" style="font-size: 0.625rem; padding: 0.25rem 0.5rem;" onclick="removeItem('${p.url}')">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function removeItem(url) {
+    try {
+      await fetch('/api/pipeline', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      allItems = allItems.filter(i => i.url !== url);
+      render();
+      document.getElementById('pipeline-count').textContent = `${allItems.length} items`;
+    } catch (e) {
+      console.error('Remove failed:', e);
+    }
+  }
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.filter;
+      render();
+    });
+  });
+
+  // Add URLs
+  const bulkInput = document.getElementById('bulk-input');
+  const addBtn = document.getElementById('add-btn');
+  const addCount = document.getElementById('add-count');
+  const bulkError = document.getElementById('bulk-error');
+
+  bulkInput.addEventListener('input', () => {
+    const urls = bulkInput.value.split('\n').map(u => u.trim()).filter(u => u.length > 0);
+    addCount.textContent = urls.length;
+  });
+
+  addBtn.addEventListener('click', async () => {
+    const urls = bulkInput.value.split('\n').map(u => u.trim()).filter(u => u.length > 0);
+    if (urls.length === 0) return;
+
+    addBtn.disabled = true;
+    bulkError.classList.add('hidden');
+
+    try {
+      for (const url of urls) {
+        await fetch('/api/pipeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+      }
+      bulkInput.value = '';
+      addCount.textContent = '0';
+      await load();
+    } catch (e) {
+      bulkError.textContent = `Failed: ${e.message}`;
+      bulkError.classList.remove('hidden');
+    } finally {
+      addBtn.disabled = false;
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', load);
+</script>

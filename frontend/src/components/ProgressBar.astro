@@ -1,0 +1,79 @@
+---
+// ProgressBar — Animated horizontal progress bar
+// Props:
+//   value (number) — 0-100
+//   max (number) — default 100
+//   color (string) — CSS color or CSS custom property name (default: accent color)
+//   label (string) — accessible label text
+//   showPercent (boolean) — show percentage text after bar
+
+interface Props {
+  value: number;
+  max?: number;
+  color?: string;
+  label?: string;
+  showPercent?: boolean;
+}
+
+const {
+  value = 0,
+  max = 100,
+  color = 'var(--accent-primary)',
+  label = 'Progress',
+  showPercent = false,
+} = Astro.props;
+
+const clampedValue = Math.max(0, Math.min(max, value));
+const percent = Math.round((clampedValue / max) * 100);
+---
+
+<div class="progress-bar-wrapper" role="progressbar" aria-valuenow={clampedValue} aria-valuemin={0} aria-valuemax={max} aria-label={label}>
+  {showPercent && (
+    <span class="progress-bar-label">{percent}%</span>
+  )}
+  <div class="progress-bar-track">
+    <div
+      class="progress-bar-fill"
+      style={`width: ${percent}%; background-color: ${color};`}
+    ></div>
+  </div>
+</div>
+
+<style>
+  .progress-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .progress-bar-label {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  .progress-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 9999px;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 600ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-bar-fill {
+      transition: none;
+    }
+  }
+</style>

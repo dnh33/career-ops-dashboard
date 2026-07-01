@@ -1,0 +1,98 @@
+---
+// GapAlert — Skill gap alert panel
+// Receives data from MarketOverview class via global reference
+// Renders gaps dynamically based on API data
+---
+<div class="gap-alert-container" id="gapListContainer">
+  <!-- Gaps will be populated by MarketOverview.renderGapAlert() -->
+  <div class="gap-item-placeholder">
+    <div class="empty-row">Loading gap data...</div>
+  </div>
+</div>
+
+<style>
+  .gap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .gap-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    transition: background-color 200ms ease;
+  }
+
+  .gap-item:hover {
+    background: var(--bg-elevated);
+  }
+
+  .gap-item-severity {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .gap-item-severity.high {
+    background: var(--error);
+    color: var(--text-primary);
+  }
+
+  .gap-item-severity.medium {
+    background: var(--warning);
+    color: var(--text-primary);
+  }
+
+  .gap-item-severity.low {
+    background: var(--success);
+    color: var(--text-primary);
+  }
+
+  .gap-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gap-item-skill {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .gap-item-market {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .gap-item-action {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    font-weight: 500;
+    margin-top: 0.25rem;
+  }
+
+  .gap-item-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+  }
+
+  .empty-row {
+    font-style: italic;
+  }
+</style>

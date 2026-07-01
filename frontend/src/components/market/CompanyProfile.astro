@@ -1,0 +1,205 @@
+---
+// CompanyProfile — Company header with badges, description, tech stack
+interface Props {
+  company: {
+    name: string;
+    logo: string;
+    size: string;
+    fundingStage: string;
+    locations: string[];
+    description: string;
+    website: string;
+    techStack: string[];
+  };
+}
+
+const { company } = Astro.props;
+---
+
+<div class="company-profile">
+  <div class="company-header">
+    <img src={company.logo} alt={company.name} class="company-logo" onerror="this.style.display='none'" />
+    <div class="company-header-info">
+      <h1 class="company-name">{company.name}</h1>
+      <div class="company-badges">
+        <span class="badge badge-size">{company.size} employees</span>
+        <span class="badge badge-funding">{company.fundingStage}</span>
+        {company.locations.map(loc => (
+          <span class="badge badge-location">{loc}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="company-description">
+    <p>{company.description}</p>
+  </div>
+
+  <div class="company-tech-stack">
+    <h3 class="section-title">Tech Stack</h3>
+    <div class="tech-tags">
+      {company.techStack.map(tech => (
+        <span class="tech-tag">{tech}</span>
+      ))}
+    </div>
+  </div>
+
+  <div class="company-links">
+    <a href={company.website} target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+      Website
+    </a>
+  </div>
+</div>
+
+<style>
+  .company-profile {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .company-header {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+  }
+
+  .company-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: var(--bg-tertiary);
+    padding: 8px;
+    flex-shrink: 0;
+  }
+
+  .company-header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .company-name {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .company-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge-size {
+    background: color-mix(in srgb, var(--info) 15%, var(--bg-tertiary));
+    color: var(--info);
+    border: 1px solid color-mix(in srgb, var(--info) 30%, var(--border-default));
+  }
+
+  .badge-funding {
+    background: color-mix(in srgb, var(--warning) 15%, var(--bg-tertiary));
+    color: var(--warning);
+    border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--border-default));
+  }
+
+  .badge-location {
+    background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-tertiary));
+    color: var(--accent-primary);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, var(--border-default));
+  }
+
+  .company-description {
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: 1rem;
+  }
+
+  .company-description p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .section-title {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tech-tag {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-hover);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    transition: all 150ms ease;
+  }
+
+  .tech-tag:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  .company-links {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-default);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 150ms ease;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+</style>

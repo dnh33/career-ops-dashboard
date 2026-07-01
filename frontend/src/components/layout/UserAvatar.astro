@@ -1,0 +1,39 @@
+---
+interface Props {
+  name?: string;
+  initials?: string;
+  class?: string;
+}
+
+const {
+  name = 'Daniel',
+  initials = 'D',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['user-avatar', className]} title={name} aria-label={name}>
+  <span class="user-avatar__initials">{initials}</span>
+</div>
+
+<style>
+  .user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    border: 1px solid var(--stroke-hairline);
+    flex-shrink: 0;
+  }
+
+  .user-avatar__initials {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    font-family: var(--font-ui);
+    color: var(--color-primary);
+    line-height: 1;
+  }
+</style>

@@ -1,0 +1,170 @@
+---
+import HermesLayout from '../layouts/HermesLayout.astro';
+---
+
+<HermesLayout title="Tools" currentPath="/tools" pageTitle="Tools" description="Utilities and helper tools.">
+  <main class="content-container">
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-2">Maintenance Tools</h2>
+      <p class="text-[var(--text-secondary)] text-sm max-w-2xl">Run career-ops CLI utilities for health checks, data cleanup, and analysis.</p>
+    </div>
+
+    <!-- Tools grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="tools-grid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Running indicator -->
+    <div id="tool-running" class="hidden bg-[var(--bg-secondary)] border border-[var(--accent-primary)]/30 rounded-lg p-6 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></div>
+        <span class="text-sm font-medium text-[var(--text-primary)]">Running <span id="running-tool-name"></span>…</span>
+      </div>
+    </div>
+
+    <!-- Output panel -->
+    <div id="tool-output" class="hidden bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg overflow-hidden mb-6">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border-default)] bg-[var(--text-inverse)]/50">
+        <div class="flex items-center gap-2">
+          <span id="output-tool-name" class="text-sm font-semibold text-[var(--text-primary)]"></span>
+          <span id="output-exit-code" class="text-xs font-mono px-2 py-0.5 rounded-full"></span>
+        </div>
+        <button type="button" id="output-close" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" aria-label="Close output">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <pre id="output-stdout" class="px-4 py-3 text-sm text-[var(--text-primary)] font-mono whitespace-pre-wrap overflow-x-auto max-h-[400px] overflow-y-auto"></pre>
+      <div id="output-stderr-wrap" class="hidden border-t border-red-900/30">
+        <div class="px-4 py-2 text-xs font-semibold text-red-400 border-b border-red-900/20">stderr</div>
+        <pre id="output-stderr" class="px-4 py-3 text-sm text-red-300/80 font-mono whitespace-pre-wrap overflow-x-auto max-h-[200px] overflow-y-auto"></pre>
+      </div>
+    </div>
+  </main>
+</HermesLayout>
+
+<script>
+  interface Tool {
+    id: string;
+    description: string;
+  }
+
+  const TOOLS: Tool[] = [
+    { id: 'doctor',     description: 'Health check and diagnostics — verify Node, deps, Playwright' },
+    { id: 'verify',     description: 'Verify data integrity — check reports, tracker, pipeline' },
+    { id: 'dedup',      description: 'Remove duplicate tracker entries' },
+    { id: 'merge',      description: 'Merge tracker entries (interactive — needs CLI)' },
+    { id: 'normalize',  description: 'Normalize status values in tracker to canonical set' },
+    { id: 'reconcile',  description: 'Reconcile pipeline state with tracker' },
+    { id: 'liveness',   description: 'Check if tracked postings are still live' },
+    { id: 'patterns',   description: 'Analyze job market patterns across reports' },
+  ];
+
+  const toolIcons: Record<string, string> = {
+    doctor:    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+    verify:    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    dedup:     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>',
+    merge:     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>',
+    normalize: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>',
+    reconcile: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>',
+    liveness:  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
+    patterns:  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a9 9 0 0118 0v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4a1 1 0 011-1h2M5 19a1 1 0 01-1-1v-4a1 1 0 011-1h2"/>',
+  };
+
+  const grid = document.getElementById('tools-grid') as HTMLDivElement;
+  const runningEl = document.getElementById('tool-running') as HTMLDivElement;
+  const runningName = document.getElementById('running-tool-name') as HTMLSpanElement;
+  const outputEl = document.getElementById('tool-output') as HTMLDivElement;
+  const outputName = document.getElementById('output-tool-name') as HTMLSpanElement;
+  const outputCode = document.getElementById('output-exit-code') as HTMLSpanElement;
+  const outputStdout = document.getElementById('output-stdout') as HTMLPreElement;
+  const outputStderr = document.getElementById('output-stderr') as HTMLPreElement;
+  const outputStderrWrap = document.getElementById('output-stderr-wrap') as HTMLDivElement;
+  const outputClose = document.getElementById('output-close') as HTMLButtonElement;
+
+  function renderTools() {
+    grid.innerHTML = TOOLS.map(t => {
+      const icon = toolIcons[t.id] || '<circle cx="12" cy="12" r="10"/>';
+      const isDestructive = ['dedup', 'merge', 'normalize'].includes(t.id);
+      const color = isDestructive ? 'amber' : 'blue';
+      return `
+        <button
+          type="button"
+          class="tool-card bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-5 hover:border-${color}-500/40 transition-colors text-left group card-interactive cursor-pointer"
+          data-tool="${t.id}"
+        >
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-${color}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icon}</svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] group-hover:text-${color}-400 transition-colors capitalize">${t.id}</h3>
+              <p class="text-xs text-[var(--text-secondary)] mt-1">${t.description}</p>
+            </div>
+            <svg class="w-4 h-4 text-[var(--text-muted)] group-hover:text-${color}-400 transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </button>
+      `;
+    }).join('');
+  }
+
+  const API_KEY = import.meta.env.PUBLIC_API_KEY || '';
+
+  async function runTool(toolId: string) {
+    runningName.textContent = toolId;
+    runningEl.classList.remove('hidden');
+    outputEl.classList.add('hidden');
+
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (API_KEY) headers['X-API-Key'] = API_KEY;
+      const resp = await fetch('/api/tools/run', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ tool: toolId }),
+      });
+
+      const data = await resp.json();
+      runningEl.classList.add('hidden');
+
+      // Show output
+      outputName.textContent = toolId;
+      outputStdout.textContent = data.stdout || '(no output)';
+      if (data.stderr) {
+        outputStderr.textContent = data.stderr;
+        outputStderrWrap.classList.remove('hidden');
+      } else {
+        outputStderrWrap.classList.add('hidden');
+      }
+
+      // Exit code badge
+      const code = data.exit_code ?? -1;
+      outputCode.textContent = `exit ${code}`;
+      outputCode.className = code === 0
+        ? 'text-xs font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+        : 'text-xs font-mono px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20';
+
+      outputEl.classList.remove('hidden');
+    } catch (err) {
+      runningEl.classList.add('hidden');
+      outputName.textContent = toolId;
+      outputStdout.textContent = 'Error: ' + (err as Error).message;
+      outputStderrWrap.classList.add('hidden');
+      outputCode.textContent = 'error';
+      outputCode.className = 'text-xs font-mono px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20';
+      outputEl.classList.remove('hidden');
+    }
+  }
+
+  grid.addEventListener('click', (e: Event) => {
+    const card = (e.target as HTMLElement).closest('[data-tool]');
+    if (!card) return;
+    const tool = card.getAttribute('data-tool');
+    if (tool) runTool(tool);
+  });
+
+  outputClose.addEventListener('click', () => {
+    outputEl.classList.add('hidden');
+  });
+
+  renderTools();
+</script>

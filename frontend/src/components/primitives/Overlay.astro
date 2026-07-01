@@ -1,0 +1,129 @@
+---
+import type { OverlayProps } from './types';
+
+interface Props extends OverlayProps {
+  class?: string;
+}
+
+const {
+  open = true,
+  title,
+  dismissible = true,
+  class: className = '',
+} = Astro.props;
+
+const overlayId = `overlay-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+{open && (
+  <div class="overlay-backdrop" data-overlay-id={overlayId} role="presentation">
+    <div
+      class:list={['overlay', className]}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      {title && (
+        <header class="overlay__header">
+          <h2 class="overlay__title">{title}</h2>
+          {dismissible && (
+            <button type="button" class="overlay__close" aria-label="Close" data-overlay-close>
+              <i class="codicon codicon-close" aria-hidden="true"></i>
+            </button>
+          )}
+        </header>
+      )}
+      <div class="overlay__body">
+        <slot />
+      </div>
+    </div>
+  </div>
+)}
+
+<script define:vars={{ overlayId, dismissible }}>
+  const backdrop = document.querySelector(`[data-overlay-id="${overlayId}"]`);
+  if (backdrop) {
+    const close = () => backdrop.dispatchEvent(new CustomEvent('close', { bubbles: true }));
+    backdrop.querySelector('[data-overlay-close]')?.addEventListener('click', close);
+    if (dismissible) {
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) close();
+      });
+    }
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
+  }
+</script>
+
+<style>
+  .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background: color-mix(in srgb, var(--bg-chrome) 55%, transparent);
+  }
+
+  .overlay {
+    width: 100%;
+    max-width: 32rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--stroke-nous);
+    box-shadow: var(--shadow-nous);
+    animation: overlay-in var(--transition-base);
+  }
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-2));
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .overlay__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--stroke-hairline);
+  }
+
+  .overlay__title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .overlay__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    min-height: auto;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .overlay__close:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .overlay__body {
+    padding: var(--space-4);
+  }
+</style>

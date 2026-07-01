@@ -1,0 +1,117 @@
+---
+// SalaryCards — Salary range comparison tiles
+// Receives data from MarketOverview class via global reference
+// Renders cards dynamically based on API data
+---
+<div class="salary-cards-container" id="salaryCardsContainer">
+  <!-- Cards will be populated by MarketOverview.renderSalaryCards() -->
+  <div class="salary-card-placeholder">
+    <div class="empty-row">Loading salary data...</div>
+  </div>
+</div>
+
+<style>
+  .salary-cards-grid {
+    display: grid;
+    gap: 1rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .salary-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    padding: 0.75rem 0.875rem;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .salary-card:hover {
+    border-color: color-mix(in srgb, var(--accent-primary) 25%, var(--border-default));
+    box-shadow: 0 0 16px rgba(212, 168, 83, 0.06);
+  }
+
+  .salary-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .salary-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .salary-card-location {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-hover);
+    border-radius: 4px;
+  }
+
+  .salary-card-ranges {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .salary-range {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+
+  .salary-range-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .salary-range-value {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .salary-card-footer {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .salary-card-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+  }
+
+  .empty-row {
+    font-style: italic;
+  }
+
+  /* Responsive grid */
+  @media (min-width: 640px) {
+    .salary-cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .salary-cards-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

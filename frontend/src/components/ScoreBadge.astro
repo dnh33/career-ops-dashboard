@@ -1,0 +1,36 @@
+---
+import { scoreToGrade, gradeClass } from '../utils/colors';
+
+interface Props {
+  score: number;
+  size?: 'sm' | 'md' | 'lg';
+  showValue?: boolean;
+}
+
+const { score = 0, size = 'md', showValue = true } = Astro.props;
+
+const letterGrade = scoreToGrade(score);
+
+const sizeClasses: Record<string, string> = {
+  sm: 'w-8 h-8 text-xs',
+  md: 'w-10 h-10 text-sm',
+  lg: 'w-14 h-14 text-xl',
+};
+---
+
+<div
+  class="inline-flex flex-col items-center gap-0.5"
+  role="img"
+  aria-label={`Score: ${score.toFixed(1)} out of 5. Grade ${letterGrade}`}
+>
+  <div
+    class={`${gradeClass(letterGrade)} ${sizeClasses[size]}`}
+  >
+    {letterGrade}
+  </div>
+  {showValue && (
+    <span class="text-[10px] text-[var(--text-secondary)] font-mono">
+      {score.toFixed(1)}
+    </span>
+  )}
+</div>

@@ -1,0 +1,54 @@
+---
+// SkillChart — Horizontal bar chart showing skill demand percentages
+// Receives data from MarketOverview class via global reference
+// Renders bars dynamically based on API data
+---
+<div class="skill-chart-container" id="skillChartContainer">
+  <!-- Bars will be populated by MarketOverview.renderSkillChart() -->
+  <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+    Loading skill data...
+  </div>
+</div>
+
+<style>
+  .skill-bar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bar-container {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    height: 28px;
+  }
+
+  .bar-fill {
+    transition: width 0.3s ease;
+  }
+
+  /* Tag styles (reuse existing) */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .tag-red { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+  .tag-amber { background: rgba(234, 179, 8, 0.2); color: var(--warning); }
+  .tag-green { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+  .tag-gray { background: rgba(100, 116, 139, 0.2); color: var(--text-muted); }
+
+  .skill-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+</style>

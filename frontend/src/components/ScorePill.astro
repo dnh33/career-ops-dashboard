@@ -1,0 +1,35 @@
+---
+// ScorePill — Compact score indicator for tracker table rows
+// Props: score (0-5 number)
+// Shows letter grade + numeric value in a small rounded pill
+import { scoreToGrade } from '../utils/colors';
+
+interface Props {
+  score: number;
+}
+
+const { score = 0 } = Astro.props;
+
+const clamped = Math.max(0, Math.min(5, score));
+const letterGrade = scoreToGrade(score);
+
+const gradeTier = (grade: string): 'high' | 'mid' | 'low' => {
+  const g = grade.toUpperCase();
+  if (g === 'A' || g === 'B') return 'high';
+  if (g === 'C') return 'mid';
+  return 'low'; // D, E, F, G
+};
+
+const tier = gradeTier(letterGrade);
+const tierBg = `var(--grade-${tier}-bg)`;
+const tierText = `var(--grade-${tier}-text)`;
+---
+
+<span
+  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-md"
+  style={`background-color: ${tierBg}; color: ${tierText};`}
+  aria-label={`Score: ${clamped.toFixed(1)}, Grade ${letterGrade}`}
+>
+  {letterGrade}
+  <span class="text-[10px] font-normal opacity-70">{clamped.toFixed(1)}</span>
+</span>

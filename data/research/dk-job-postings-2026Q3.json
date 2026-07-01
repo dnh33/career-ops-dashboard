@@ -1,0 +1,1549 @@
+[
+  {
+    "company": "Danske Bank",
+    "role": "Senior Front-End Engineer (React/TypeScript)",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/senior-front-end-engineer-react-typescript-at-danske-bank-4328810110",
+    "skills_required": [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      ".NET",
+      "CSS",
+      "HTML"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-01-13",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Danske Bank",
+    "role": "Senior Frontend Engineer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/senior-frontend-engineer-at-danske-bank-4368670897",
+    "skills_required": [
+      "React",
+      "JavaScript",
+      "Architecture",
+      "Component Libraries"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1000000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Danske Bank",
+    "role": "Frontend Developer - Core Financing Platform",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobannonce/r12193149/frontend-developer-for-core-financing-platform",
+    "skills_required": [
+      "React",
+      "TypeScript",
+      "Banking",
+      "Frontend"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Zendesk",
+    "role": "Frontend Software Engineer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/frontend-software-engineer-at-zendesk-4347479143",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "AI Integration",
+      "ML Pipelines",
+      "Frontend Architecture"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Lunar",
+    "role": "Frontend Engineer - Customer Experience",
+    "location": "Copenhagen",
+    "url": "https://relocate.me/denmark/copenhagen/lunar/frontend-engineer-customer-experience-8001",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Fintech",
+      "Mobile-First",
+      "User Experience"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Relocate.me"
+  },
+  {
+    "company": "Netcompany",
+    "role": "Senior Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://netcompany.com/careers/vacancies/",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Angular",
+      "Vue",
+      "Architecture",
+      "UI/UX"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 800000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-10",
+    "remote/hybrid/onsite": "onsite",
+    "source": "Netcompany Careers"
+  },
+  {
+    "company": "GN Audio (Sitecore)",
+    "role": "Sitecore Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://relocate.me/denmark/copenhagen/gn/sitecore-frontend-developer-7971",
+    "skills_required": [
+      "Sitecore",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Headless CMS",
+      "React"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 800000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Relocate.me"
+  },
+  {
+    "company": "Wunderman Thompson",
+    "role": "Student Assistant - AI Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://www.glassdoor.com/Job/denmark-web-developer-jobs-SRCH_IL.0,7_IN63_KO8,21.htm",
+    "skills_required": [
+      "JavaScript",
+      "AI Tools",
+      "Prototyping",
+      "UI Design",
+      "React"
+    ],
+    "salary_range": {
+      "min": 150000,
+      "max": 200000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Glassdoor"
+  },
+  {
+    "company": "VML MAP",
+    "role": "Student Assistant - AI Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/frontend-developer-jobs?countryRedirected=1",
+    "skills_required": [
+      "JavaScript",
+      "AI Tools",
+      "React",
+      "Frontend Design"
+    ],
+    "salary_range": {
+      "min": 150000,
+      "max": 200000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Boozt",
+    "role": "Frontend Software Engineer (React.js)",
+    "location": "Copenhagen",
+    "url": "https://www.devjobsscanner.com/frontend-developer-jobs-in-denmark/",
+    "skills_required": [
+      "React.js",
+      "TypeScript",
+      "JavaScript",
+      "E-commerce",
+      "CSS"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 800000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "DevJobScanner"
+  },
+  {
+    "company": "Synthesia",
+    "role": "Webflow Developer / Front-End Engineer",
+    "location": "Copenhagen",
+    "url": "https://www.glassdoor.com/Job/denmark-html-css-jobs-SRCH_IL.0,7_IN63_KO8,16.htm",
+    "skills_required": [
+      "Webflow",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Marketing Technology"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Glassdoor"
+  },
+  {
+    "company": "Too Good To Go",
+    "role": "Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/location/denmark/copenhagen",
+    "skills_required": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Mobile Development"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-05",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Newcode.ai",
+    "role": "Frontend Engineer",
+    "location": "Copenhagen",
+    "url": "https://www.linkedin.com/jobs/search/?location=Copenhagen+Area,+Denmark&locationId=dk:5038",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "AI",
+      "Developer Tools"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-18",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "AdPlenty",
+    "role": "Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://www.devjobsscanner.com/frontend-developer-jobs-in-denmark/",
+    "skills_required": [
+      "JavaScript",
+      "Marketing Technology",
+      "Local Marketing",
+      "React"
+    ],
+    "salary_range": {
+      "min": 550000,
+      "max": 750000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "DevJobScanner"
+  },
+  {
+    "company": "JazzWorld / Teknosys",
+    "role": "Frontend Development Engineer - Teknosys",
+    "location": "Copenhagen",
+    "url": "https://jobr.pro/jobs/frontend-developer",
+    "skills_required": [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "Engineering"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-05",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobr"
+  },
+  {
+    "company": "BEES",
+    "role": "Senior Frontend Developer (React/Typescript)",
+    "location": "Copenhagen",
+    "url": "https://jobr.pro/jobs/frontend-developer",
+    "skills_required": [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "Architecture"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-08",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobr"
+  },
+  {
+    "company": "Netic",
+    "role": "Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/frontend-developer-jobs?countryRedirected=1",
+    "skills_required": [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "Next.js"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Vertic",
+    "role": "Senior Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://www.glassdoor.com/Job/denmark-frontend-developer-jobs-SRCH_IL.0,7_IN63_KO8,26.htm",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "Agency"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Glassdoor"
+  },
+  {
+    "company": "Trustpilot",
+    "role": "Frontend Engineer",
+    "location": "Copenhagen",
+    "url": "https://jobrise.io/en/blog/tech-jobs-copenhagen-salary-guide-2026/",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "HTML/CSS"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "JobRise"
+  },
+  {
+    "company": "Sticks'n'Sushi",
+    "role": "Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/frontend-developer-jobs",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript"
+    ],
+    "salary_range": {
+      "min": 550000,
+      "max": 750000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-19",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "LEGO Group",
+    "role": "Senior Software Engineer, GenAI Foundation Execution",
+    "location": "Copenhagen",
+    "url": "https://dk.jobrapido.com/jobpreview/6021580095720783872",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "Generative AI",
+      "Machine Learning",
+      "Cloud",
+      "Kubernetes"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1050000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "JobRapido"
+  },
+  {
+    "company": "KIME",
+    "role": "Junior AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://dk.jooble.org/jdp/8117203113476287614",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "NLP",
+      "Agentic AI",
+      "Prompt Engineering"
+    ],
+    "salary_range": {
+      "min": 500000,
+      "max": 700000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jooble"
+  },
+  {
+    "company": "GetWhy",
+    "role": "Principal AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/principal-ai-engineer-at-getwhy-4403177162",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "Machine Learning",
+      "AI Architecture",
+      "Research"
+    ],
+    "salary_range": {
+      "min": 900000,
+      "max": 1300000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-17",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Thirdroom",
+    "role": "AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/610d500170881f7b53eeefb1",
+    "skills_required": [
+      "AI Development",
+      "LLMs",
+      "Platform Engineering",
+      "Python",
+      "ML"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-05",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "syv.ai",
+    "role": "AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/68a45c37eb85fd4d23d6803f",
+    "skills_required": [
+      "AI Consulting",
+      "Generative AI",
+      "LLMs",
+      "GDPR",
+      "Data Sovereignty",
+      "Python"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Heyra",
+    "role": "AI Engineer - Onsite Copenhagen",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/6707973398bf16eef4d521e6",
+    "skills_required": [
+      "AI Engineering",
+      "Software Architecture",
+      "LLMs",
+      "Python",
+      "Cloud"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-25",
+    "remote/hybrid/onsite": "onsite",
+    "source": "The Hub"
+  },
+  {
+    "company": "Nordic Valley",
+    "role": "AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/6883a3fcec17e7bc68d9ab01",
+    "skills_required": [
+      "LLMs",
+      "Prompt Engineering",
+      "Vector Search/RAG",
+      "AI Scoring",
+      "Python"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-30",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Go Nordic Cruiseline",
+    "role": "AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/vis-job/r13876389?lang=en",
+    "skills_required": [
+      "AI Systems",
+      "LLMs",
+      "Cloud",
+      "Azure",
+      "Python"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Forsvarets AI Center",
+    "role": "Senior AI Research & Innovation Lead",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/vis-job/r13876389?lang=en",
+    "skills_required": [
+      "AI Research",
+      "Machine Learning",
+      "Leadership",
+      "Python",
+      "Defense"
+    ],
+    "salary_range": {
+      "min": 800000,
+      "max": 1100000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-16",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Lunar",
+    "role": "Senior AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://jobs.lunar.app/jobs/7916823-senior-ai-engineer",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "Machine Learning",
+      "Banking/Fintech",
+      "AI Agents"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1100000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Lunar Careers"
+  },
+  {
+    "company": "Halfspace (Accenture)",
+    "role": "Generative AI Solutions Engineer",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/join-halfspace%E2%80%99s-engineering-team-generative-ai-solutions-at-accenture-nordics-4389809659",
+    "skills_required": [
+      "Generative AI",
+      "LLMs",
+      "Python",
+      "Azure",
+      "Agentic AI",
+      "Architecture"
+    ],
+    "salary_range": {
+      "min": 800000,
+      "max": 1200000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-21",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Collectia A/S",
+    "role": "Data Scientist – Applied AI & Machine Learning",
+    "location": "Brøndby",
+    "url": "https://www.jobindex.dk/vis-job/r13876389?lang=en",
+    "skills_required": [
+      "Machine Learning",
+      "Python",
+      "Data Science",
+      "Statistics",
+      "Deep Learning"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-25",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "NordicTech Solutions",
+    "role": "AI Engineer - Build & Deploy AI Solutions for Production",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobannonce/r13681098/ai-engineer-build-deploy-ai-solutions-for-production",
+    "skills_required": [
+      "LLMs",
+      "Agentic Frameworks",
+      "RAG",
+      "Vector Databases",
+      "Azure DevOps",
+      "Python"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 1000000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-12",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Werktøj.dk",
+    "role": "AI DevOps Engineer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/68d3cda13078d831538a1c43",
+    "skills_required": [
+      "Linux",
+      "RedHat",
+      "Docker",
+      "Kubernetes",
+      "CI/CD",
+      "AI Model Deployment"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "DLG",
+    "role": "AI Developer",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobsoegning?q=ai",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "AI Solutions",
+      "Cloud",
+      "Agile"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "AdaptiqAI",
+    "role": "Full-Stack AI Developer",
+    "location": "Copenhagen (Remote)",
+    "url": "https://www.jobindex.dk/jobannonce/r13418880/full-stack-ai-developer",
+    "skills_required": [
+      "Python",
+      "JavaScript",
+      "Agentic AI",
+      "LLMs",
+      "React",
+      "Cloud"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-02-20",
+    "remote/hybrid/onsite": "remote",
+    "source": "Jobindex"
+  },
+  {
+    "company": "StaffHost Digital",
+    "role": "Senior Generative AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://www.staffhostdigital.com/jobs/dataai/europe-denmark",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "Generative AI",
+      "PyTorch",
+      "TensorFlow",
+      "RAG"
+    ],
+    "salary_range": {
+      "min": 800000,
+      "max": 1200000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "StaffHost Digital"
+  },
+  {
+    "company": "Pleo",
+    "role": "AI/Generative AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://businessdanmark.dk/nyheder/artikler/pleo-nar-produktet-gor-halvdelen-af-salgsarbejdet",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "Generative AI",
+      "Finance",
+      "Machine Learning"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1000000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Business Danmark"
+  },
+  {
+    "company": "Hello Monday ApS",
+    "role": "AI Specialist",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobsoegning?q=openai",
+    "skills_required": [
+      "Python",
+      "LLMs",
+      "AI Tools",
+      "Generative AI",
+      "Cloud"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-18",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Mercive",
+    "role": "Full-stack Developer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/location/denmark/copenhagen",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Full-stack"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "DFDS",
+    "role": "AI/ML Engineer",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobsoegning?q=ai+engineer",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "MLOps",
+      "Cloud",
+      "Docker"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Unity Technologies",
+    "role": "AI Tools Developer",
+    "location": "Copenhagen",
+    "url": "https://unity.com/",
+    "skills_required": [
+      "Unity",
+      "C#",
+      "AI Gateway",
+      "MCP",
+      "Game Dev",
+      "Machine Learning"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Unity Careers"
+  },
+  {
+    "company": "Maersk Technology",
+    "role": "AI Engineer",
+    "location": "Copenhagen",
+    "url": "https://proxytechsupport.com/proxy-interview-denmark/",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "Cloud",
+      "Logistics",
+      "AWS/Azure"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1000000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Maersk Careers"
+  },
+  {
+    "company": "Novo Nordisk IT",
+    "role": "AI/Machine Learning Developer",
+    "location": "Copenhagen",
+    "url": "https://proxytechsupport.com/proxy-interview-denmark/",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "R",
+      "Healthcare",
+      "Deep Learning"
+    ],
+    "salary_range": {
+      "min": 750000,
+      "max": 1000000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Novo Nordisk Careers"
+  },
+  {
+    "company": "Sitecore",
+    "role": "Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://jobs.jobvite.com/sitecore",
+    "skills_required": [
+      "React",
+      "JavaScript",
+      "TypeScript",
+      "Sitecore XM Cloud",
+      ".NET"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Sitecore Careers"
+  },
+  {
+    "company": "Dansk Erhverv",
+    "role": "Data Scientist - Generative AI",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/view/principal-ai-engineer-at-getwhy-4403177162",
+    "skills_required": [
+      "Python",
+      "Generative AI",
+      "LLMs",
+      "RAG",
+      "Statistics",
+      "NLP"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-05",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Milestone Systems",
+    "role": "Software developer with AI development focus",
+    "location": "Brøndby",
+    "url": "https://fa-ewto-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/requisitions",
+    "skills_required": [
+      "C#",
+      "AI",
+      "Video Analytics",
+      "Machine Learning",
+      ".NET",
+      "Cloud"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-12",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Milestone Careers"
+  },
+  {
+    "company": "Tata Consultancy Services",
+    "role": "AI Software Developer",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobsoegning?q=ai+software+developer",
+    "skills_required": [
+      "Python",
+      "Java",
+      "Machine Learning",
+      "Cloud",
+      "DevOps"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Netcompany",
+    "role": "Frontend Udvikler",
+    "location": "Aarhus",
+    "url": "https://dk.linkedin.com/jobs/view/frontend-udvikler-at-netcompany-4267456698",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "UI",
+      "Design Systems"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 800000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-12",
+    "remote/hybrid/onsite": "onsite",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Era",
+    "role": "Frontend Developer - Webshops",
+    "location": "Aarhus",
+    "url": "https://www.glassdoor.com/Job/denmark-html-css-jobs-SRCH_IL.0,7_IN63_KO8,16.htm",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "E-commerce",
+      "Webshops"
+    ],
+    "salary_range": {
+      "min": 550000,
+      "max": 750000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Glassdoor"
+  },
+  {
+    "company": "Novicell",
+    "role": "Senior Frontend Developer - Commerce",
+    "location": "Aarhus",
+    "url": "https://www.jobindex.dk/jobsoegning/danmark?q=frontend",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "eCommerce",
+      "Architecture"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Whiteaway Group",
+    "role": "Commercial Excellence Developer",
+    "location": "Aarhus N",
+    "url": "https://www.jobindex.dk/jobsoegning/it/database/region-midtjylland",
+    "skills_required": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Commerce",
+      "Data"
+    ],
+    "salary_range": {
+      "min": 550000,
+      "max": 750000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-10",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Lunar",
+    "role": "Senior Backend Engineer (AI)",
+    "location": "Aarhus",
+    "url": "https://dk.jooble.org/jdp/4997829961199254550",
+    "skills_required": [
+      "Go",
+      "AI",
+      "Cloud",
+      "Banking",
+      "LLMs"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jooble"
+  },
+  {
+    "company": "Sigma Connectivity",
+    "role": "Edge AI Engineer",
+    "location": "Aarhus",
+    "url": "https://www.jobindex.dk/vis-job/r13250725",
+    "skills_required": [
+      "Edge AI",
+      "Embedded",
+      "Python",
+      "Computer Vision",
+      "ML",
+      "C/C++"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-26",
+    "remote/hybrid/onsite": "onsite",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Lunar",
+    "role": "Backend Engineer",
+    "location": "Aarhus",
+    "url": "https://dk.linkedin.com/jobs/view/backend-engineer-at-lunar-4291793083",
+    "skills_required": [
+      "Go",
+      "Cloud",
+      "Banking",
+      "Backend",
+      "Microservices"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Netcompany",
+    "role": "Senior Frontend Developer",
+    "location": "Aalborg",
+    "url": "https://jobr.pro/company/797236835/netcompany",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Architecture",
+      "UI",
+      "TypeScript"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-22",
+    "remote/hybrid/onsite": "onsite",
+    "source": "Jobr"
+  },
+  {
+    "company": "BESTSELLER",
+    "role": "Senior Frontend Developer - AI Applications",
+    "location": "Odense",
+    "url": "https://jobsinenglish.dk/ads/bestseller-senior-frontend-developer-ai-applications-20241111/",
+    "skills_required": [
+      "React",
+      "JavaScript",
+      "TypeScript",
+      "AI Applications",
+      "Retail",
+      "APPRETIO"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "JobsInEnglish.dk"
+  },
+  {
+    "company": "Østergade Kapital A/S",
+    "role": "AI-udvikler (AI Developer)",
+    "location": "Odense SØ",
+    "url": "https://www.jobindex.dk/jobannonce/r12985623/ai-udvikler-ai-developer",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "Health-tech",
+      "Deep Learning",
+      "TensorFlow"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2025-01-29",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "JobsInEnglish",
+    "role": "Frontend Engineer (AI, Remote)",
+    "location": "Denmark (Remote)",
+    "url": "https://jobsinenglish.dk/ads/frontend-engineer-ai-remote-20260505/",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "AI",
+      "Remote Work",
+      "TypeScript"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-05",
+    "remote/hybrid/onsite": "remote",
+    "source": "JobsInEnglish.dk"
+  },
+  {
+    "company": "SearchApi",
+    "role": "Frontend Engineer & UI Designer (Developer Tooling)",
+    "location": "Denmark (Remote)",
+    "url": "https://dk.linkedin.com/jobs/front-end-developer-jobs",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Developer Tools",
+      "TypeScript"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-25",
+    "remote/hybrid/onsite": "remote",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Globhe",
+    "role": "Junior AI/Dev/PM",
+    "location": "Berlin (Remote)",
+    "url": "https://thehub.io/jobs/location/sweden/stockholm",
+    "skills_required": [
+      "Python",
+      "JavaScript",
+      "AI",
+      "Project Management",
+      "ML"
+    ],
+    "salary_range": {
+      "min": 500000,
+      "max": 700000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-04-15",
+    "remote/hybrid/onsite": "remote",
+    "source": "The Hub"
+  },
+  {
+    "company": "Danish Crown A/S",
+    "role": "AI-forandringsagent til IT & Digitalisering",
+    "location": "Randers",
+    "url": "https://www.jobindex.dk/vis-job/r13685225?lang=en",
+    "skills_required": [
+      "AI",
+      "Change Management",
+      "IT",
+      "Digitalization",
+      "Strategy"
+    ],
+    "salary_range": {
+      "min": 550000,
+      "max": 750000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-11",
+    "remote/hybrid/onsite": "onsite",
+    "source": "Jobindex"
+  },
+  {
+    "company": "ISS World",
+    "role": "Site Manager - IT Development",
+    "location": "Aarhus",
+    "url": "https://jobs.issworld.com/job/Aarhus-C-Vi-s%C3%B8ger-en-engageret-Site-Manager-til-drift-og-udvikling-hos-vores-kunde-i-Aarhus-og-Aalborg/1364701057",
+    "skills_required": [
+      "IT Development",
+      "Management",
+      "Operations",
+      "Supervision"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 800000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-28",
+    "remote/hybrid/onsite": "onsite",
+    "source": "ISS World Careers"
+  },
+  {
+    "company": "Corti",
+    "role": "Senior Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://www.aistartupjobs.com/p/new-ai-startup-jobs-week-ending-march-e30",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "AI/MedTech",
+      "Healthcare"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-03-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "AI Startup Jobs"
+  },
+  {
+    "company": "AAK Denmark",
+    "role": "SAP Deployment Manager",
+    "location": "Aarhus",
+    "url": "https://www.jobindex.dk/vis-job/r13250725",
+    "skills_required": [
+      "SAP",
+      "Deployment",
+      "Project Management",
+      "Supply Chain"
+    ],
+    "salary_range": {
+      "min": 700000,
+      "max": 950000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-25",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Partyamtiet (Hirify)",
+    "role": "Frontend Developer (AI)",
+    "location": "Copenhagen",
+    "url": "https://hirify.me/jobs/690739-frontend-developer-ai",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "AI",
+      "LLM Integration",
+      "Public Sector"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Hirify"
+  },
+  {
+    "company": "Conscia",
+    "role": "Senior Frontend Developer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/location/denmark/copenhagen",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "Infrastructure"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-25",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Frank Founders",
+    "role": "Web Assistant",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs?countryCode=NO&page=3",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Frontend",
+      "Web Development"
+    ],
+    "salary_range": {
+      "min": 500000,
+      "max": 700000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Dobby",
+    "role": "Backend Developer (AI)",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/location/denmark/copenhagen",
+    "skills_required": [
+      "Python",
+      "AI",
+      "Machine Learning",
+      "Backend",
+      "LLMs"
+    ],
+    "salary_range": {
+      "min": 650000,
+      "max": 900000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-18",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Millennial Consulting",
+    "role": "Student Consultant - AI",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs/location/denmark/copenhagen?page=2",
+    "skills_required": [
+      "AI",
+      "Consulting",
+      "Python",
+      "Data Analysis"
+    ],
+    "salary_range": {
+      "min": 150000,
+      "max": 250000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "Swap Language Denmark",
+    "role": "Web Developer",
+    "location": "Copenhagen",
+    "url": "https://thehub.io/jobs?countryCode=NO&page=3",
+    "skills_required": [
+      "JavaScript",
+      "React",
+      "Web Development",
+      "Education"
+    ],
+    "salary_range": {
+      "min": 500000,
+      "max": 700000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-20",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "The Hub"
+  },
+  {
+    "company": "FrontEnd Labs",
+    "role": "Frontend Developer with Vue.js",
+    "location": "Copenhagen",
+    "url": "https://www.jobindex.dk/jobsoegning?lang=en&q=%23frontend",
+    "skills_required": [
+      "Vue.js",
+      "JavaScript",
+      "CSS",
+      "TypeScript",
+      "Public Sector"
+    ],
+    "salary_range": {
+      "min": 600000,
+      "max": 850000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-15",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Jobindex"
+  },
+  {
+    "company": "Microsoft Denmark",
+    "role": "AI Technical Specialist",
+    "location": "Copenhagen",
+    "url": "https://dk.linkedin.com/jobs/search/?keyword=ai&location=denmark",
+    "skills_required": [
+      "Azure",
+      "AI",
+      "Cloud",
+      "Machine Learning",
+      "Enterprise"
+    ],
+    "salary_range": {
+      "min": 800000,
+      "max": 1100000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-05-30",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "LinkedIn"
+  },
+  {
+    "company": "Amazon Denmark",
+    "role": "Applied Scientist - AI/ML",
+    "location": "Copenhagen",
+    "url": "https://www.amazon.jobs/en/search",
+    "skills_required": [
+      "Python",
+      "Machine Learning",
+      "Deep Learning",
+      "AWS",
+      "NLP"
+    ],
+    "salary_range": {
+      "min": 800000,
+      "max": 1100000,
+      "period": "yearly"
+    },
+    "posted_date": "2026-06-01",
+    "remote/hybrid/onsite": "hybrid",
+    "source": "Amazon Jobs"
+  }
+]

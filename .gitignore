@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Python virtual environments
+backend/venv/
+deploy/backend/venv/
+
+# Build outputs
+dist/
+build/
+*.local
+
+# Astro
+.astro/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache/
+.eslintcache
+
+# Test coverage
+coverage/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Python bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd

@@ -1,0 +1,118 @@
+---
+import type { SegmentedControlProps } from './types';
+
+interface Props extends SegmentedControlProps {}
+
+const {
+  options,
+  value,
+  name = 'segmented-control',
+  compact = false,
+  vertical = false,
+  ariaLabel = 'Segmented control',
+  class: className = '',
+} = Astro.props;
+
+const groupId = `segmented-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div
+  class:list={['segmented-control', compact && 'segmented-control--compact', vertical && 'segmented-control--vertical', className]}
+  role="tablist"
+  aria-label={ariaLabel}
+  id={groupId}
+>
+  {options.map((option) => (
+    <button
+      type="button"
+      role="tab"
+      class:list={['segmented-control__option', value === option.id && 'segmented-control__option--active']}
+      aria-selected={value === option.id}
+      data-value={option.id}
+      name={name}
+    >
+      {option.icon && <i class:list={['codicon', `codicon-${option.icon}`]} aria-hidden="true"></i>}
+      <span>{option.label}</span>
+    </button>
+  ))}
+</div>
+
+<script define:vars={{ groupId }}>
+  const group = document.getElementById(groupId);
+  if (group) {
+    group.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-value]');
+      if (!target) return;
+      const nextValue = target.getAttribute('data-value');
+      group.querySelectorAll('[role="tab"]').forEach((tab) => {
+        const isActive = tab.getAttribute('data-value') === nextValue;
+        tab.classList.toggle('segmented-control__option--active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      group.dispatchEvent(new CustomEvent('change', { detail: { value: nextValue }, bubbles: true }));
+    });
+  }
+</script>
+
+<style>
+  .segmented-control {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--stroke-hairline);
+    background: var(--bg-panel);
+    gap: 0;
+  }
+
+  .segmented-control--compact .segmented-control__option {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    min-height: 32px;
+  }
+
+  .segmented-control__option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-right: 1px solid var(--stroke-hairline);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    min-height: 36px;
+    cursor: pointer;
+    transition: color var(--transition-base), background-color var(--transition-base);
+  }
+
+  .segmented-control__option:last-child {
+    border-right: none;
+  }
+
+  .segmented-control--vertical {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .segmented-control--vertical .segmented-control__option {
+    border-right: none;
+    border-bottom: 1px solid var(--stroke-hairline);
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .segmented-control--vertical .segmented-control__option:last-child {
+    border-bottom: none;
+  }
+
+  .segmented-control__option:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  .segmented-control__option--active {
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+</style>

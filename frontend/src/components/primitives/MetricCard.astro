@@ -1,0 +1,121 @@
+---
+import Sparkline from './Sparkline.astro';
+import type { MetricCardProps } from './types';
+
+interface Props extends MetricCardProps {}
+
+const {
+  label,
+  value,
+  unit,
+  variant = 'default',
+  trend,
+  trendDirection = 'neutral',
+  sparklineData,
+  class: className = '',
+} = Astro.props;
+---
+
+<article class:list={['metric-card', `metric-card--${variant}`, className]}>
+  <header class="metric-card__header">
+    <span class="metric-card__label">{label}</span>
+  </header>
+  <div class="metric-card__body">
+    <span class="metric-card__value hermes-mono" data-mono="true">{value}</span>
+    {unit && <span class="metric-card__unit hermes-mono" data-mono="true">{unit}</span>}
+    {trend && (
+      <span class:list={['metric-card__trend', `metric-card__trend--${trendDirection}`, 'hermes-mono']} data-mono="true">
+        {trend}
+      </span>
+    )}
+  </div>
+  {sparklineData && sparklineData.length > 1 && (
+    <footer class="metric-card__sparkline">
+      <Sparkline data={sparklineData} width={120} height={28} />
+    </footer>
+  )}
+</article>
+
+<style>
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .metric-card--primary {
+    border-left: 3px solid var(--color-primary);
+  }
+
+  .metric-card--warm {
+    border-left: 3px solid var(--color-warm);
+  }
+
+  .metric-card--success {
+    border-left: 3px solid var(--ui-success);
+  }
+
+  .metric-card--warning {
+    border-left: 3px solid var(--ui-warning);
+  }
+
+  .metric-card--error {
+    border-left: 3px solid var(--ui-error);
+  }
+
+  .metric-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .metric-card__label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-ui);
+  }
+
+  .metric-card__body {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .metric-card__value {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  .metric-card__unit {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .metric-card__trend {
+    font-size: var(--text-xs);
+    margin-left: auto;
+  }
+
+  .metric-card__trend--up {
+    color: var(--ui-success);
+  }
+
+  .metric-card__trend--down {
+    color: var(--ui-error);
+  }
+
+  .metric-card__trend--neutral {
+    color: var(--text-tertiary);
+  }
+
+  .metric-card__sparkline {
+    margin-top: var(--space-1);
+  }
+</style>

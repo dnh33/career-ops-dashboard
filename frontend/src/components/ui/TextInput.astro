@@ -1,0 +1,206 @@
+---
+// TextInput.astro - Career Ops Dashboard Text Input Component
+// Follows component-library specifications: TypeScript props, design tokens, variants, sizes, accessibility
+
+type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+
+interface Props {
+  /** Input type: text, email, password, number, etc. */
+  type?: InputType;
+  /** Label text */
+  label?: string;
+  /** Placeholder text */
+  placeholder?: string;
+  /** Current value */
+  value: string;
+  /** Input change handler */
+  onChange?: (e: Event) => void;
+  /** Whether the input is disabled */
+  disabled?: boolean;
+  /** Whether the input is in error state */
+  error?: boolean;
+  /** Helper text (shown below input) */
+  helperText?: string;
+  /** Size: sm, md, lg */
+  size?: 'sm' | 'md' | 'lg';
+  /** Whether to show clear button when value is not empty */
+  clearable?: boolean;
+  /** Icon to show as prefix (optional) */
+  prefixIcon?: any;
+  /** Icon to show as suffix (optional) */
+  suffixIcon?: any;
+}
+
+/* Defaults */
+const {
+  type = 'text',
+  label,
+  placeholder = '',
+  value,
+  onChange,
+  disabled = false,
+  error = false,
+  helperText = '',
+  size = 'md',
+  clearable = false,
+  prefixIcon,
+  suffixIcon,
+} = Astro.props;
+
+/* Size mapping */
+const sizeMap: Record<'sm' | 'md' | 'lg', { px: string; py: string; text: string; gap: string }> = {
+  sm: { px: 'px-3', py: 'py-1.5', text: 'text-text-sm', gap: 'gap-2' },
+  md: { px: 'px-4', py: 'py-2', text: 'text-text-base', gap: 'gap-2' },
+  lg: { px: 'px-5', py: 'py-2.5', text: 'text-text-lg', gap: 'gap-2' },
+};
+
+const { px, py, text: textSize } = sizeMap[size];
+
+/* Generate unique IDs for accessibility */
+const inputId = `input-${Math.random().toString(36).substring(2, 9)}`;
+const helperId = `helper-${Math.random().toString(36).substring(2, 9)}`;
+
+/* Border color based on state */
+const getBorderColor = () => {
+  if (disabled) return 'var(--border-default)';
+  if (error) return 'var(--error)';
+  return 'var(--border-hover)';
+};
+
+/* Background color */
+const getBgColor = () => {
+  if (disabled) return 'var(--bg-input)';
+  return 'var(--bg-tertiary)';
+};
+
+/* Text color */
+const getTextColor = () => {
+  if (disabled) return 'var(--text-muted)';
+  return 'var(--text-primary)';
+};
+---
+
+<div class:list={['relative', 'mb-4']}>
+  {label && (
+    <label
+      class:list={[
+        'mb-1',
+        'block',
+        'text-sm',
+        'font-medium',
+        `text-[${getTextColor()}]`,
+        'cursor-default',
+        disabled && 'cursor-not-allowed',
+      ]}
+      for={inputId}
+    >
+      {label}
+    </label>
+  )}
+  <div class:list={['relative', 'flex', 'items-center', 'space-x-2']}>
+    {prefixIcon && (
+      <span class:list={['flex-shrink-0', 'text-[var(--text-muted)]', disabled && 'opacity-50']}>
+        {prefixIcon}
+      </span>
+    )}
+    <input
+      class:list={[
+        'flex-1',
+        'min-w-0',
+        px,
+        py,
+        textSize,
+        'rounded-md',
+        'border',
+        `border-[${getBorderColor()}]`,
+        `bg-[${getBgColor()}]`,
+        `text-[${getTextColor()}]`,
+        'placeholder:text-[var(--text-muted)]',
+        'focus:outline-none',
+        'focus:ring-2',
+        'focus:ring-[var(--accent-primary)]',
+        'focus:border-[var(--accent-primary)]',
+        'transition-colors',
+        'duration-200',
+        'disabled:cursor-not-allowed',
+        'disabled:opacity-50',
+      ]}
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      oninput={(e: Event) => onChange?.(e)}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : 'false'}
+      aria-describedby={helperText ? helperId : undefined}
+      id={inputId}
+    />
+    {suffixIcon && (
+      <span class:list={['flex-shrink-0', 'text-[var(--text-muted)]', disabled && 'opacity-50']}>
+        {suffixIcon}
+      </span>
+    )}
+    {clearable && value && (
+      <button
+        class:list={[
+          'absolute',
+          'right-2',
+          'top-1/2',
+          '-translate-y-1/2',
+          'flex',
+          'items-center',
+          'justify-center',
+          'w-8',
+          'h-8',
+          'rounded-full',
+          'text-[var(--text-muted)]',
+          'hover:bg-[var(--bg-elevated)]',
+          'hover:text-[var(--text-primary)]',
+          'disabled:opacity-50',
+          'disabled:cursor-not-allowed',
+        ]}
+        data-clear-input={inputId}
+        aria-label="Clear input"
+        disabled={disabled}
+      >
+        <span class="text-xs">✕</span>
+      </button>
+    )}
+  </div>
+  {helperText && (
+    <p
+      class:list={[
+        'mt-1',
+        'text-xs',
+        `text-[${error ? 'var(--error)' : 'var(--text-muted)'}]`,
+      ]}
+      id={helperId}
+    >
+      {helperText}
+    </p>
+  )}
+</div>
+
+<style>
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+
+<script>
+  // Client-side handler for clear buttons
+  document.addEventListener('click', (e: MouseEvent) => {
+    const btn = (e.target as HTMLElement)?.closest('[data-clear-input]') as HTMLButtonElement | null;
+    if (btn && !btn.disabled) {
+      const inputId = btn.getAttribute('data-clear-input');
+      const input = document.getElementById(inputId);
+      if (input && 'value' in input) {
+        (input as HTMLInputElement).value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  });
+</script>

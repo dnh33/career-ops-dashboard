@@ -1,0 +1,36 @@
+---
+// StatusBadge — Color-coded status indicator
+// Props: status (string) — Applied | Pending | Rejected | Interview | Follow-up | etc.
+
+interface Props {
+  status: string;
+}
+
+const { status = '' } = Astro.props;
+
+// Map statuses to color schemes
+const statusStyles: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  Applied:    { bg: 'var(--bg-tertiary)', text: 'var(--success)', border: 'var(--success)', dot: 'var(--success)' },
+  Pending:    { bg: 'var(--bg-tertiary)', text: 'var(--warning)', border: 'var(--warning)', dot: 'var(--warning)' },
+  Rejected:   { bg: 'var(--bg-tertiary)', text: 'var(--error)', border: 'var(--error)', dot: 'var(--error)' },
+  Interview:  { bg: 'var(--bg-tertiary)', text: 'var(--info)', border: 'var(--info)', dot: 'var(--info)' },
+  'Follow-up':{ bg: 'var(--bg-tertiary)', text: 'var(--accent-primary)', border: 'var(--accent-primary)', dot: 'var(--accent-primary)' },
+  Accepted:   { bg: 'var(--bg-tertiary)', text: 'var(--success)', border: 'var(--success)', dot: 'var(--success)' },
+  Withdrawn:  { bg: 'var(--bg-tertiary)', text: 'var(--text-muted)', border: 'var(--border-hover)', dot: 'var(--text-muted)' },
+};
+
+const style = statusStyles[status] || {
+  bg: 'var(--bg-tertiary)',
+  text: 'var(--text-primary)',
+  border: 'var(--border-hover)',
+  dot: 'var(--text-muted)',
+};
+---
+
+<span
+  class={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border`}
+  style={`background-color: ${style.bg}; color: ${style.text}; border-color: ${style.border};`}
+>
+  <span class="w-1.5 h-1.5 rounded-full" style={`background-color: ${style.dot};`}></span>
+  {status}
+</span>

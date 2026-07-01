@@ -1,0 +1,38 @@
+---
+import ScoreBadge from './ScoreBadge.astro';
+
+interface Props {
+  id: string;
+  company: string;
+  role: string;
+  score: number;
+  grade: string;
+  archetype: string;
+  date: string;
+}
+
+const { id, company, role, score, grade, archetype, date } = Astro.props;
+
+const formattedDate = new Date(date).toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<a href={`/report?id=${id}`} class="card-interactive block group">
+  <div class="bg-[var(--bg-secondary)] border border-slate-800 rounded-lg p-5 transition-all duration-200 hover:border-[var(--accent-primary)]">
+    <div class="flex items-start justify-between">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-base font-bold text-[var(--text-primary)] truncate">{company}</h3>
+        <p class="text-sm text-[var(--text-secondary)] mt-0.5 truncate">{role}</p>
+        <p class="text-xs text-[var(--text-muted)] mt-2">{archetype}</p>
+      </div>
+      <ScoreBadge grade={grade} size="md" />
+    </div>
+    <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-default)]">
+      <span class="text-xs font-mono text-[var(--text-muted)]">{score.toFixed(1)}/5</span>
+      <span class="text-xs text-[var(--text-muted)]">{formattedDate}</span>
+    </div>
+  </div>
+</a>

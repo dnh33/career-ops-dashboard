@@ -1,0 +1,163 @@
+---
+// Button.astro - Career Ops Dashboard Button Component
+// Follows component-library specifications: TypeScript props, design tokens, variants, sizes, loading/disabled states, accessibility
+
+interface Props {
+  /** Button variant: primary, secondary, ghost, danger */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  /** Button size: sm, md, lg */
+  size?: 'sm' | 'md' | 'lg';
+  /** Button type: submit, button, reset */
+  type?: 'submit' | 'button' | 'reset';
+  /** Whether button is in loading state */
+  isLoading?: boolean;
+  /** Whether button is disabled */
+  disabled?: boolean;
+  /** Accessible label for screen readers (overrides children if provided) */
+  ariaLabel?: string;
+  /** Icon to show before text (optional) */
+  iconBefore?: any;
+  /** Icon to show after text (optional) */
+  iconAfter?: any;
+  /** Children content */
+  children: any;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  isLoading = false,
+  disabled = false,
+  ariaLabel,
+  iconBefore,
+  iconAfter,
+  children,
+} = Astro.props;
+
+/* Variant styles */
+const variantStyles: Record<string, string> = {
+  primary: 'bg-[var(--accent-primary)] text-[var(--bg-primary)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-muted)] focus-visible:ring-[var(--accent-primary)]',
+  secondary: 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-elevated)] focus-visible:ring-[var(--accent-primary)]',
+  ghost: 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-elevated)] focus-visible:ring-[var(--accent-primary)]',
+  danger: 'bg-[var(--error)] text-[var(--text-primary)] hover:bg-[var(--error)]/90 active:bg-[var(--error)]/80 focus-visible:ring-[var(--error)]',
+};
+
+/* Size styles */
+const sizeStyles: Record<string, string> = {
+  sm: 'px-3 py-1.5 text-text-sm gap-2',
+  md: 'px-4 py-2 text-text-base gap-2',
+  lg: 'px-5 py-2.5 text-text-lg gap-2',
+};
+
+const variantClass = variantStyles[variant] ?? variantStyles.primary;
+const sizeClass = sizeStyles[size] ?? sizeStyles.md;
+const loadingClass = isLoading ? 'pointer-events-none opacity-75' : '';
+const disabledClass = disabled ? 'cursor-not-allowed opacity-50' : '';
+---
+
+<button 
+  class:list={[
+    // Base styles
+    'inline-flex',
+    'items-center',
+    'justify-center',
+    'cursor-pointer',
+    'transition-colors',
+    'transition-opacity',
+    'transition-transform',
+    'duration-150',
+    'focus-visible:outline-none',
+    'focus-visible:ring-2',
+    'focus-visible:ring-offset-2',
+    'focus-visible:ring-offset-[var(--bg-primary)]',
+    disabledClass,
+    // Variant
+    variantClass,
+    // Size
+    sizeClass,
+    // Loading
+    loadingClass,
+  ]}
+  type={type}
+  aria-label={ariaLabel}
+  disabled={isLoading || disabled}
+>
+  {/* Loading spinner */}
+  {isLoading && (
+    <span class="inline-block animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full">
+    </span>
+  )}
+
+  {/* Button content */}
+  {!isLoading && (
+    <>
+      {iconBefore && <span>{iconBefore}</span>}
+      <span>{children}</span>
+      {iconAfter && <span>{iconAfter}</span>}
+    </>
+  )}
+</button>
+
+<!-- 
+  Styles - using CSS custom properties (design tokens) exclusively
+  We define the styles in a <style> block to ensure they use the tokens
+-->
+<style>
+  /* Base transitions for smooth states (respects prefers-reduced-motion) */
+  button {
+    transition-property: color, background-color, border-color, opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    button {
+      transition-duration: 0.01ms;
+      transition-delay: 0s;
+    }
+    .animate-spin {
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  /* Focus ring colors based on variant */
+  button:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  button.primary:focus-visible {
+    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5);
+  }
+
+  button.secondary:focus-visible,
+  button.ghost:focus-visible {
+    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5);
+  }
+
+  button.danger:focus-visible {
+    box-shadow: 0 0 0 2px rgba(var(--error-rgb), 0.5);
+  }
+
+  /* Active state transform (scale down slightly) */
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* Hover states are handled via variant classes above */
+
+  /* Ensure cursor pointer on interactive elements */
+  button:not(:disabled),
+  button[role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  /* Disable button styling */
+  button:disabled,
+  button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+</style>

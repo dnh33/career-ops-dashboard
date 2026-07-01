@@ -1,0 +1,75 @@
+---
+// ScoreBadge.astro - Career Ops Dashboard Score Badge Component
+// Follows component-library specifications: TypeScript props, design tokens, variants, sizes, accessibility
+
+interface Props {
+  /** Grade: A, B+, B, C+, C, D, F */
+  grade: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D' | 'F';
+  /** Size: sm, md, lg */
+  size?: 'sm' | 'md' | 'lg';
+  /** Whether to show the letter grade label */
+  showLabel?: boolean;
+}
+
+/* Defaults */
+const { grade, size = 'md', showLabel = true } = Astro.props;
+
+/* Map grade to token */
+const gradeToToken: Record<string, { bg: string; text: string }> = {
+  A: { bg: 'var(--grade-high-bg)', text: 'var(--grade-high-text)' },
+  'B+': { bg: 'var(--grade-high-bg)', text: 'var(--grade-high-text)' },
+  B: { bg: 'var(--grade-mid-bg)', text: 'var(--grade-mid-text)' },
+  'C+': { bg: 'var(--grade-mid-bg)', text: 'var(--grade-mid-text)' },
+  C: { bg: 'var(--grade-low-bg)', text: 'var(--grade-low-text)' },
+  D: { bg: 'var(--grade-low-bg)', text: 'var(--grade-low-text)' },
+  F: { bg: 'var(--grade-low-bg)', text: 'var(--grade-low-text)' },
+};
+
+const { bg, text } = gradeToToken[grade];
+
+/* Size mapping */
+const sizeMap: Record<string, { px: string; py: string; text: string; gap: string }> = {
+  sm: { px: 'px-3', py: 'py-1.5', text: 'text-text-sm', gap: 'gap-2' },
+  md: { px: 'px-4', py: 'py-2', text: 'text-text-base', gap: 'gap-2' },
+  lg: { px: 'px-5', py: 'py-2.5', text: 'text-text-lg', gap: 'gap-2' },
+};
+
+const { px, py, text: textSize, gap } = sizeMap[size];
+---
+
+<span
+  class:list={[
+    'inline-flex',
+    'items-center',
+    'justify-center',
+    px,
+    py,
+    textSize,
+    gap,
+    'rounded-full',
+    'cursor-pointer',
+    'transition-colors',
+    'duration-200',
+    'focus-visible:outline-none',
+    'focus-visible:ring-2',
+    'focus-visible:ring-offset-2',
+    `bg-[${bg}]`,
+    `text-[${text}]`,
+    'hover:opacity-90',
+    'active:scale-95',
+  ]}
+  role="img"
+  aria-label={`Grade: ${grade}`}
+>
+  {showLabel && <span class="mr-1">{grade}</span>}
+</span>
+
+<style>
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

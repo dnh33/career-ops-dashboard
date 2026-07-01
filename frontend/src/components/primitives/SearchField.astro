@@ -1,0 +1,63 @@
+---
+import type { SearchFieldProps } from './types';
+
+interface Props extends SearchFieldProps {}
+
+const {
+  name = 'search',
+  placeholder = 'Search…',
+  value = '',
+  ariaLabel = 'Search',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['search-field', className]}>
+  <i class="codicon codicon-search search-field__icon" aria-hidden="true"></i>
+  <input
+    type="search"
+    name={name}
+    class="search-field__input"
+    placeholder={placeholder}
+    value={value}
+    aria-label={ariaLabel}
+  />
+</div>
+
+<style>
+  .search-field {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--stroke-hairline);
+    padding: var(--space-2) 0;
+    min-height: 44px;
+    transition: border-color var(--transition-base);
+  }
+
+  .search-field:focus-within {
+    border-bottom-color: var(--color-primary);
+  }
+
+  .search-field__icon {
+    color: var(--text-tertiary);
+    font-size: var(--text-base);
+    flex-shrink: 0;
+  }
+
+  .search-field__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    min-height: auto;
+    padding: 0;
+    outline: none;
+  }
+
+  .search-field__input::placeholder {
+    color: var(--text-quaternary);
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+import type { ErrorStateProps } from './types';
+
+interface Props extends ErrorStateProps {}
+
+const {
+  title = 'Something went wrong',
+  message,
+  retryLabel = 'Try again',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['error-state', className]} role="alert">
+  <i class="codicon codicon-error error-state__icon" aria-hidden="true"></i>
+  <h3 class="error-state__title">{title}</h3>
+  <p class="error-state__message">{message}</p>
+  <button type="button" class="error-state__retry" data-retry>
+    <i class="codicon codicon-refresh" aria-hidden="true"></i>
+    {retryLabel}
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll('[data-retry]').forEach((button) => {
+    button.addEventListener('click', () => {
+      button.dispatchEvent(new CustomEvent('retry', { bubbles: true }));
+    });
+  });
+</script>
+
+<style>
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-10) var(--space-6);
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-hairline);
+    box-shadow: var(--shadow-nous);
+  }
+
+  .error-state__icon {
+    font-size: 2rem;
+    color: var(--ui-error);
+    margin-bottom: var(--space-3);
+  }
+
+  .error-state__title {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-lg);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .error-state__message {
+    margin: 0 0 var(--space-4);
+    max-width: 28rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .error-state__retry {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--stroke-nous);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow-nous);
+    border-radius: var(--radius-sm);
+  }
+
+  .error-state__retry:hover {
+    background: var(--bg-hover);
+  }
+</style>
