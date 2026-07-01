@@ -122,6 +122,7 @@ const steps = [
           <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-json"><i class="codicon codicon-json" aria-hidden="true"></i> Export JSON</button>
           <button type="button" class="cv-builder__btn cv-builder__btn--strong" id="cv-export-md"><i class="codicon codicon-markdown" aria-hidden="true"></i> Export MD</button>
           <button type="button" class="cv-builder__btn" id="cv-export-pdf"><i class="codicon codicon-file-pdf" aria-hidden="true"></i> Export PDF</button>
+          <button type="button" class="cv-builder__btn" id="cv-export-cover-letter"><i class="codicon codicon-mail" aria-hidden="true"></i> Export Cover Letter</button>
         </div>
       </div>
     </div>
@@ -529,6 +530,49 @@ const steps = [
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="codicon codicon-file-pdf" aria-hidden="true"></i> Export PDF';
+    }
+  });
+
+  document.getElementById('cv-export-cover-letter')?.addEventListener('click', async () => {
+    const btn = document.getElementById('cv-export-cover-letter');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="codicon codicon-loading codicon-modifier-spin" aria-hidden="true"></i> Generating...';
+
+    try {
+      const response = await fetch('/api/cv/cover-letter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'Ojy29OB8AJwvBAXZuF-244Su_L9RswRzpKSM5u8I2xE'
+        },
+        body: JSON.stringify({
+          profile: state.profile,
+          target_company: prompt('Target company:') || '',
+          target_role: state.profile.roleTarget || 'AI Engineer',
+          job_description: prompt('Job description (optional):') || '',
+          cv_summary: state.profile.summary || ''
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.detail || 'Cover letter generation failed');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cover-letter.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Cover letter generation failed:', err);
+      alert('Failed to generate cover letter: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="codicon codicon-mail" aria-hidden="true"></i> Export Cover Letter';
     }
   });
 

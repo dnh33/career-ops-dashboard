@@ -8,7 +8,7 @@ from typing import Optional
 
 from app.config import CONFIG_DIR
 from app.services import cv_optimize
-from app.services.pdf.cv_pdf import generate_cv_pdf
+from app.services.pdf.cv_pdf import generate_cv_pdf, generate_cover_letter_pdf
 
 router = APIRouter(tags=["cv"])
 CV_FILE = CONFIG_DIR / "cv.md"
@@ -43,6 +43,14 @@ class CvGenerateRequest(BaseModel):
     skills: list[dict]
     education: list[dict]
     role_target: str = "AI Engineer"
+
+
+class CoverLetterRequest(BaseModel):
+    profile: dict
+    target_company: str
+    target_role: str
+    job_description: str = ""
+    cv_summary: str = ""
 
 
 @router.get("/cv")
@@ -91,3 +99,23 @@ async def generate_cv(request: CvGenerateRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
+
+
+@router.post("/cv/cover-letter")
+async def generate_cover_letter(request: CoverLetterRequest):
+    """Generate PDF cover letter from builder JSON."""
+    try:
+        pdf_bytes = generate_cover_letter_pdf(
+            profile=request.profile,
+            target_company=request.target_company,
+            target_role=request.target_role,
+            job_description=request.job_description,
+            cv_summary=request.cv_summary,
+        )
+        return StreamingResponse(
+            iter([pdf_bytes]),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=cover-letter.pdf"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cover letter generation failed: {str(e)}")
