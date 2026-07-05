@@ -1,0 +1,167 @@
+---
+// DensitySwitcher.astro — Density switching (compact/comfortable/spacious)
+// Design System Foundation §3.2 & §4.3
+// Astro + module script, semantic tokens only, data-* attributes
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const densities = [
+  { id: 'compact', label: 'Compact', icon: 'remove' },
+  { id: 'comfortable', label: 'Comfortable', icon: 'dash' },
+  { id: 'spacious', label: 'Spacious', icon: 'add' },
+] as const;
+
+const densityId = `density-switcher-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+  class:list={['density-switcher', className]}
+  data-component="density-switcher"
+  data-density-id={densityId}
+  role="group"
+  aria-label="Density selector"
+>
+  {densities.map((density) => (
+    <button
+      type="button"
+      class:list={[
+        'density-switcher__btn',
+        density.id === 'comfortable' && 'density-switcher__btn--active',
+      ]}
+      data-density={density.id}
+      aria-pressed={density.id === 'comfortable'}
+      aria-label={density.label}
+    >
+      <i class={`codicon codicon-${density.icon}`} aria-hidden="true" />
+      <span class="density-switcher__label">{density.label}</span>
+    </button>
+  ))}
+</div>
+
+<style>
+  .density-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-1);
+  }
+
+  .density-switcher__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+    white-space: nowrap;
+    min-height: var(--size-9);
+  }
+
+  .density-switcher__btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .density-switcher__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .density-switcher__btn--active {
+    background: var(--accent-subtle);
+    color: var(--accent-primary);
+  }
+
+  .density-switcher__label {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .density-switcher__label {
+      display: inline;
+    }
+  }
+</style>
+
+<script>
+  export function initDensitySwitcher(root: HTMLElement): () => void {
+    const container = root.querySelector('[data-component="density-switcher"]') as HTMLElement;
+    if (!container) return () => {};
+
+    const buttons = container.querySelectorAll('.density-switcher__btn');
+    const densityId = container.getAttribute('data-density-id');
+
+    const getCurrentDensity = (): string => {
+      return document.documentElement.getAttribute('data-density') || 'comfortable';
+    };
+
+    const setActiveButton = (density: string) => {
+      buttons.forEach((btn) => {
+        const isActive = btn.getAttribute('data-density') === density;
+        btn.classList.toggle('density-switcher__btn--active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+    };
+
+    const applyDensity = (density: string) => {
+      document.documentElement.setAttribute('data-density', density);
+      localStorage.setItem('career-ops-density', density);
+      setActiveButton(density);
+
+      window.dispatchEvent(new CustomEvent('density:change', { detail: { density } }));
+    };
+
+    const handleClick = (event: MouseEvent) => {
+      const btn = (event.target as HTMLElement).closest('.density-switcher__btn') as HTMLButtonElement;
+      if (!btn) return;
+      const density = btn.getAttribute('data-density');
+      if (density) applyDensity(density);
+    };
+
+    container.addEventListener('click', handleClick);
+
+    setActiveButton(getCurrentDensity());
+
+    const handleDensityChange = (event: CustomEvent) => {
+      if (event.detail?.density) {
+        setActiveButton(event.detail.density);
+      }
+    };
+    window.addEventListener('density:change', handleDensityChange as EventListener);
+
+    return () => {
+      container.removeEventListener('click', handleClick);
+      window.removeEventListener('density:change', handleDensityChange as EventListener);
+    };
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-component="density-switcher"]').forEach((el) => {
+        initDensitySwitcher(el as HTMLElement);
+      });
+    });
+
+    window.addEventListener('pagelayout:ready', () => {
+      document.querySelectorAll('[data-component="density-switcher"]').forEach((el) => {
+        initDensitySwitcher(el as HTMLElement);
+      });
+    });
+  }
+</script>

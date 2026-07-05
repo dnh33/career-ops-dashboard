@@ -48,15 +48,47 @@ async def _call(system_prompt: str, user_content: str, max_tokens: int = 500) ->
         ],
         "temperature": 0.1,
         "max_tokens": max_tokens,
+        "reasoning": {"effort": "none"},
     }
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(OPENROUTER_URL, json=payload, headers=_HEADERS)
         resp.raise_for_status()
         data = resp.json()
     try:
-        return data["choices"][0]["message"]["content"]
+        content = data["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as e:
         raise OwlAlphaError(f"Unexpected OpenRouter response shape: {type(data).__name__}") from e
+    return content
+
+
+async def _call_with_examples(system_prompt: str, examples: list, user_content: str, max_tokens: int = 500) -> str:
+    """Call with few-shot examples for better instruction following."""
+    if not OPENROUTER_API_KEY:
+        raise OwlAlphaError(
+            "OPENROUTER_API_KEY not found. Ensure /root/.hermes/.env contains OPENROUTER_API_KEY=<key>"
+        )
+    messages = [{"role": "system", "content": system_prompt}]
+    for ex_user, ex_assistant in examples:
+        messages.append({"role": "user", "content": ex_user})
+        messages.append({"role": "assistant", "content": ex_assistant})
+    messages.append({"role": "user", "content": user_content})
+    
+    payload = {
+        "model": MODEL,
+        "messages": messages,
+        "temperature": 0.1,
+        "max_tokens": max_tokens,
+        "reasoning": {"effort": "none"},
+    }
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(OPENROUTER_URL, json=payload, headers=_HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+    try:
+        content = data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as e:
+        raise OwlAlphaError(f"Unexpected OpenRouter response shape: {type(data).__name__}") from e
+    return content
 
 
 def _clean(raw: str) -> str:
@@ -77,10 +109,10 @@ async def extract_company(jd_text: str) -> str:
     """
     system = (
         "You extract company names from job descriptions. "
-        "Return ONLY the company name, nothing else. "
-        "If no company name is found, return 'unknown'."
+        "Return ONLY the company name. No sentences. No explanations. "
+        "If no company name is found, return exactly: unknown"
     )
-    raw = await _call(system, jd_text, max_tokens=50)
+    raw = await _call(system, jd_text, max_tokens=20)
     cleaned = _clean(raw)
     return cleaned if cleaned else "unknown"
 

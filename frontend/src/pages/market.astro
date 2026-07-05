@@ -1,9 +1,10 @@
 ---
-import HermesLayout from '../layouts/HermesLayout.astro';
+import PageLayout from '../components/layout/PageLayout.astro';
 import SearchField from '../components/primitives/SearchField.astro';
 import SegmentedControl from '../components/primitives/SegmentedControl.astro';
 import Loader from '../components/primitives/Loader.astro';
 import ErrorState from '../components/primitives/ErrorState.astro';
+import MetricCard from '../components/primitives/MetricCard.astro';
 
 const timeRanges = [
   { id: '30d', label: '30d' },
@@ -13,69 +14,68 @@ const timeRanges = [
 ];
 ---
 
-<HermesLayout
+<PageLayout
   title="Market Overview"
   pageTitle="Market Intelligence"
   description="69 active postings across Danish tech — salary bands, skill demand, and gap signals."
   currentPath="/market"
 >
-  <section class="market-page">
-    <div class="market-page__toolbar">
-      <SearchField
-        name="market-search"
-        placeholder="Filter companies, roles, locations, skills…"
-        ariaLabel="Filter market postings"
-        class="market-page__search"
-      />
-      <SegmentedControl
-        options={timeRanges}
-        value="90d"
-        name="market-range"
-        compact
-        ariaLabel="Time range"
-        class="market-page__range"
-      />
-    </div>
+  <div slot="hero" class="market-page__hero">
+    <h1 class="market-page__title">Market Intelligence</h1>
+    <p class="market-page__subtitle">69 active postings across Danish tech — salary bands, skill demand, and gap signals.</p>
+  </div>
 
-    <div id="market-loading" class="market-page__loader-wrap">
-      <Loader label="Loading market overview" size="lg" />
-    </div>
+  <div slot="actions" class="market-page__toolbar">
+    <SearchField
+      name="market-search"
+      placeholder="Filter companies, roles, locations, skills…"
+      ariaLabel="Filter market postings"
+      class="market-page__search"
+    />
+    <SegmentedControl
+      options={timeRanges}
+      value="90d"
+      name="market-range"
+      compact
+      ariaLabel="Filter by time range"
+      class="market-page__range"
+    />
+  </div>
 
-    <div id="market-error" class="market-page__error" hidden>
-      <ErrorState title="Market data unavailable" message="Could not fetch market overview." />
-    </div>
+  <div id="market-loading" class="market-page__state">
+    <Loader label="Loading market overview" size="lg" />
+  </div>
 
-    <div id="market-content" hidden>
-      <div class="market-page__metrics" id="market-metrics"></div>
+  <div id="market-error" class="market-page__state" hidden>
+    <ErrorState title="Market data unavailable" message="Could not fetch market overview." />
+  </div>
 
-      <section class="market-page__table-section" aria-label="Market postings">
-        <header class="market-page__section-header">
-          <h2 class="market-page__section-title">Active Postings</h2>
-          <span class="market-page__count hermes-mono" data-mono="true" id="market-row-count">0</span>
-        </header>
-        <div class="data-table-panel" id="market-table-panel">
-          <div class="data-table-panel__scroll">
-            <table class="data-table" id="market-table" aria-label="Market postings">
-              <thead>
-                <tr>
-                  <th scope="col" data-sort-key="company" tabindex="0" role="button">Company</th>
-                  <th scope="col" data-sort-key="role" tabindex="0" role="button">Role</th>
-                  <th scope="col" data-sort-key="seniority" tabindex="0" role="button">Seniority</th>
-                  <th scope="col" data-sort-key="location" tabindex="0" role="button">Location</th>
-                  <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="salary" tabindex="0" role="button" data-mono="true">Salary</th>
-                  <th scope="col" data-sort-key="skills" tabindex="0" role="button">Skills</th>
-                  <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="posted" tabindex="0" role="button" data-mono="true">Posted</th>
-                  <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="gap" tabindex="0" role="button" data-mono="true">Gap</th>
-                </tr>
-              </thead>
-              <tbody id="market-table-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+  <section id="market-content" class="market-page__table-section" aria-label="Market postings" hidden>
+    <header class="market-page__section-header">
+      <h2 class="market-page__section-title">Active Postings</h2>
+      <span class="market-page__count hermes-mono" data-mono="true" id="market-row-count">0</span>
+    </header>
+    <div class="data-table-panel">
+      <div class="data-table-panel__scroll">
+        <table class="data-table" id="market-table" aria-label="Market postings">
+          <thead>
+            <tr>
+              <th scope="col" data-sort-key="company" tabindex="0" role="button">Company</th>
+              <th scope="col" data-sort-key="role" tabindex="0" role="button">Role</th>
+              <th scope="col" data-sort-key="seniority" tabindex="0" role="button">Seniority</th>
+              <th scope="col" data-sort-key="location" tabindex="0" role="button">Location</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="salary" tabindex="0" role="button" data-mono="true">Salary</th>
+              <th scope="col" data-sort-key="skills" tabindex="0" role="button">Skills</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="posted" tabindex="0" role="button" data-mono="true">Posted</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="gap" tabindex="0" role="button" data-mono="true">Gap</th>
+            </tr>
+          </thead>
+          <tbody id="market-table-body"></tbody>
+        </table>
+      </div>
     </div>
   </section>
-</HermesLayout>
+</PageLayout>
 
 <script>
   const RANGE_DAYS = { '30d': 30, '90d': 90, '6m': 180, '1y': 365 };
@@ -105,43 +105,6 @@ const timeRanges = [
     return Number(value).toLocaleString('en-DK');
   }
 
-  function renderMetrics(metrics) {
-    if (!metricsEl) return;
-    metricsEl.innerHTML = `
-      <article class="metric-card metric-card--primary">
-        <header class="metric-card__header"><span class="metric-card__label">Avg Salary</span></header>
-        <div class="metric-card__body">
-          <span class="metric-card__value hermes-mono" data-mono="true">${formatSalary(metrics.avgSalary)}</span>
-          <span class="metric-card__unit hermes-mono" data-mono="true">DKK/mo</span>
-        </div>
-        <footer class="metric-card__sparkline">${sparklineSvg(metrics.avgSalarySparkline)}</footer>
-      </article>
-      <article class="metric-card">
-        <header class="metric-card__header"><span class="metric-card__label">Top Skill</span></header>
-        <div class="metric-card__body">
-          <span class="metric-card__value hermes-mono" data-mono="true">${metrics.topSkill}</span>
-        </div>
-        <footer class="metric-card__sparkline">${sparklineSvg(metrics.topSkillSparkline)}</footer>
-      </article>
-      <article class="metric-card">
-        <header class="metric-card__header"><span class="metric-card__label">Top City</span></header>
-        <div class="metric-card__body">
-          <span class="metric-card__value hermes-mono" data-mono="true">${metrics.topCity}</span>
-        </div>
-        <footer class="metric-card__sparkline">${sparklineSvg(metrics.topCitySparkline)}</footer>
-      </article>
-      <article class="metric-card metric-card--primary">
-        <header class="metric-card__header"><span class="metric-card__label">Velocity</span></header>
-        <div class="metric-card__body">
-          <span class="metric-card__value hermes-mono" data-mono="true">${metrics.velocity}</span>
-          <span class="metric-card__unit hermes-mono" data-mono="true">postings</span>
-          <span class="metric-card__trend metric-card__trend--up hermes-mono" data-mono="true">${metrics.postingCount} total</span>
-        </div>
-        <footer class="metric-card__sparkline">${sparklineSvg(metrics.velocitySparkline)}</footer>
-      </article>
-    `;
-  }
-
   function sparklineSvg(data) {
     if (!data?.length) return '';
     const width = 120;
@@ -154,7 +117,17 @@ const timeRanges = [
       const y = height - ((value - min) / range) * height;
       return `${x},${y}`;
     }).join(' ');
-    return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-hidden="true"><polyline fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${points}"></polyline></svg>`;
+    return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-hidden="true"><polyline fill="none" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${points}"></polyline></svg>`;
+  }
+
+  function renderMetrics(metrics) {
+    if (!metricsEl || !metrics) return;
+    metricsEl.innerHTML = `
+      <MetricCard label="Avg Salary" value="${formatSalary(metrics.avgSalary)}" unit="DKK/mo" sparklineData=${JSON.stringify(metrics.avgSalarySparkline || [])} />
+      <MetricCard label="Top Skill" value="${metrics.topSkill}" sparklineData=${JSON.stringify(metrics.topSkillSparkline || [])} />
+      <MetricCard label="Top City" value="${metrics.topCity}" sparklineData=${JSON.stringify(metrics.topCitySparkline || [])} />
+      <MetricCard label="Velocity" value="${metrics.velocity}" unit="postings" variant="primary" sparklineData=${JSON.stringify(metrics.velocitySparkline || [])} />
+    `;
   }
 
   function getFilteredPostings() {
@@ -186,9 +159,7 @@ const timeRanges = [
       if (typeof av === 'number' && typeof bv === 'number') {
         return sortDir === 'asc' ? av - bv : bv - av;
       }
-      return sortDir === 'asc'
-        ? String(av).localeCompare(String(bv))
-        : String(bv).localeCompare(String(av));
+      return sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
   }
 
@@ -237,9 +208,8 @@ const timeRanges = [
     header.addEventListener('click', () => {
       const key = header.getAttribute('data-sort-key');
       if (!key) return;
-      if (sortKey === key) {
-        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-      } else {
+      if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      else {
         sortKey = key;
         sortDir = key === 'posted' || key === 'gap' || key === 'salary' ? 'desc' : 'asc';
       }
@@ -253,9 +223,7 @@ const timeRanges = [
     });
   });
 
-  errorEl?.addEventListener('retry', loadMarket);
   document.querySelector('#market-error [data-retry]')?.addEventListener('click', loadMarket);
-
   loadMarket();
 </script>
 
@@ -266,6 +234,25 @@ const timeRanges = [
     gap: var(--space-5);
   }
 
+  .market-page__hero {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .market-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .market-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .market-page__toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -273,66 +260,18 @@ const timeRanges = [
     justify-content: space-between;
     gap: var(--space-4);
     padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .market-page__search {
     flex: 1;
-    min-width: min(100%, 20rem);
+    min-width: min(100%, var(--size-80));
   }
 
-  .market-page__metrics {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-3);
-  }
-
-  .market-page__metrics :global(.metric-card) {
-    background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
-    padding: var(--space-4);
+  .market-page__state {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .market-page__metrics :global(.metric-card--primary) {
-    border-left: 3px solid var(--color-primary);
-  }
-
-  .market-page__metrics :global(.metric-card__label) {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
-  .market-page__metrics :global(.metric-card__value) {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .market-page__metrics :global(.metric-card__unit),
-  .market-page__metrics :global(.metric-card__trend) {
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-  }
-
-  .market-page__metrics :global(.metric-card__trend--up) {
-    color: var(--ui-success);
-    margin-left: auto;
-  }
-
-  @media (max-width: 1024px) {
-    .market-page__metrics {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 640px) {
-    .market-page__metrics {
-      grid-template-columns: 1fr;
-    }
+    justify-content: center;
+    padding: var(--space-10);
   }
 
   .market-page__table-section {
@@ -355,20 +294,13 @@ const timeRanges = [
 
   .market-page__count {
     font-size: var(--text-sm);
-    color: var(--text-tertiary);
-  }
-
-  .market-page__loader-wrap,
-  .market-page__error {
-    padding: var(--space-10);
-    display: flex;
-    justify-content: center;
+    color: var(--text-muted);
   }
 
   .data-table-panel {
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
   }
 
   .data-table-panel__scroll {
@@ -386,11 +318,11 @@ const timeRanges = [
     font-weight: 600;
     font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-tertiary);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-muted);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
-    background: var(--bg-panel);
+    border-bottom: var(--border-width) solid var(--border-default);
+    background: var(--bg-card);
     white-space: nowrap;
     cursor: pointer;
   }
@@ -402,16 +334,16 @@ const timeRanges = [
 
   .data-table tbody td {
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     color: var(--text-primary);
   }
 
   .data-table tbody tr:hover td {
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .data-table__link {
-    color: var(--color-primary);
+    color: var(--accent-primary);
     text-decoration: none;
     min-height: auto;
   }
@@ -426,27 +358,39 @@ const timeRanges = [
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
     font-weight: 500;
-    border: 1px solid var(--stroke-hairline);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-sm);
-    background: var(--bg-panel);
+    background: var(--bg-card);
     white-space: nowrap;
   }
 
   .status-pill--success {
-    color: var(--ui-success);
-    border-color: color-mix(in srgb, var(--ui-success) 30%, transparent);
-    background: var(--tag-success-bg);
+    color: var(--grade-high);
+    border-color: var(--grade-high-border);
+    background: var(--grade-high-bg);
   }
 
   .status-pill--warning {
-    color: var(--ui-warning);
-    border-color: color-mix(in srgb, var(--ui-warning) 30%, transparent);
-    background: var(--tag-warning-bg);
+    color: var(--grade-mid);
+    border-color: var(--grade-mid-border);
+    background: var(--grade-mid-bg);
   }
 
   .status-pill--warm {
-    color: var(--color-warm);
-    border-color: color-mix(in srgb, var(--color-warm) 30%, transparent);
-    background: color-mix(in srgb, var(--color-warm) 10%, transparent);
+    color: var(--grade-mid);
+    border-color: var(--grade-mid-border);
+    background: var(--grade-mid-bg);
+  }
+
+  @media (max-width: 1024px) {
+    .market-page__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .market-page__metrics {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

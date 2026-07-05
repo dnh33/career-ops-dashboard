@@ -11,6 +11,7 @@
     "audit:perf": "node scripts/perf-budget.mjs"
   },
   "dependencies": {
+    "@astrojs/node": "^11.0.2",
     "@tailwindcss/vite": "^4.3.1",
     "@vscode/codicons": "^0.0.45",
     "astro": "^7.0.3",

@@ -1,104 +1,104 @@
 ---
-import HermesLayout from '../layouts/HermesLayout.astro';
+import PageLayout from '../components/layout/PageLayout.astro';
+import SearchField from '../components/primitives/SearchField.astro';
+import SegmentedControl from '../components/primitives/SegmentedControl.astro';
+import MetricCard from '../components/primitives/MetricCard.astro';
+import DataTable from '../components/primitives/DataTable.astro';
+import EmptyState from '../components/primitives/EmptyState.astro';
+import StatusPill from '../components/primitives/StatusPill.astro';
+import Loader from '../components/primitives/Loader.astro';
+import ErrorState from '../components/primitives/ErrorState.astro';
+import Switch from '../components/primitives/Switch.astro';
 ---
 
-<HermesLayout title="Profile & CV" currentPath="/profile" pageTitle="Profile & CV" description="Manage your professional profile and CV.">
-  <main class="content-container">
-    <h2 class="text-xl sm:text-2xl font-bold mb-6">Profile & CV Manager</h2>
+<PageLayout
+  title="Profile & CV"
+  pageTitle="Profile & CV"
+  description="Manage your professional profile and CV."
+  currentPath="/profile"
+>
+  <div slot="hero" class="profile-page__hero">
+    <h1 class="profile-page__title">Profile & CV</h1>
+    <p class="profile-page__subtitle">Manage your professional profile and CV.</p>
+  </div>
 
-    <!-- Toast container -->
-    <div id="toast-container" class="toast-container"></div>
+  <div class="profile-page__panels">
+    <!-- Profile Form -->
+    <section class="profile-panel" aria-labelledby="profile-heading">
+      <h2 id="profile-heading" class="profile-panel__title">Profile</h2>
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-name">Full Name</label>
+        <input id="profile-name" type="text" class="profile-input" placeholder="Your name" />
+      </div>
 
-    <!-- ═══ SECTION A: Profile Form ═══ -->
-    <section class="mb-8">
-      <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4">Profile</h3>
-      <div class="bg-[var(--bg-secondary)] rounded-lg p-4 sm:p-6 border border-[var(--border-default)] space-y-5">
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-email">Email</label>
+        <input id="profile-email" type="email" class="profile-input" placeholder="you@example.com" />
+      </div>
 
-        <!-- Name + Email row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="profile-name" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Full Name</label>
-            <input id="profile-name" type="text" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="Your name" />
-          </div>
-          <div>
-            <label for="profile-email" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Email</label>
-            <input id="profile-email" type="email" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="you@example.com" />
-          </div>
+      <div class="profile-panel__row">
+        <div class="profile-panel__field">
+          <label class="profile-panel__label" for="profile-location">Location</label>
+          <input id="profile-location" type="text" class="profile-input" placeholder="City, Country" />
         </div>
-
-        <!-- Location + Salary row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="profile-location" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Location</label>
-            <input id="profile-location" type="text" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="City, Country" />
-          </div>
-          <div>
-            <label for="profile-salary" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Salary Minimum</label>
-            <input id="profile-salary" type="number" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="80000" />
-          </div>
+        <div class="profile-panel__field">
+          <label class="profile-panel__label" for="profile-salary">Salary Minimum</label>
+          <input id="profile-salary" type="number" class="profile-input" placeholder="80000" />
         </div>
+      </div>
 
-        <!-- Remote Preference -->
-        <div>
-          <label for="profile-remote" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Remote Preference</label>
-          <select id="profile-remote" class="cursor-pointer w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent">
-            <option value="">Select...</option>
-            <option value="remote">Fully Remote</option>
-            <option value="hybrid">Hybrid</option>
-            <option value="onsite">On-site</option>
-            <option value="flexible">Flexible</option>
-          </select>
-        </div>
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-remote">Remote Preference</label>
+        <select id="profile-remote" class="profile-select">
+          <option value="">Select...</option>
+          <option value="remote">Fully Remote</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="onsite">On-site</option>
+          <option value="flexible">Flexible</option>
+        </select>
+      </div>
 
-        <!-- Target Roles (tags) -->
-        <div>
-          <label for="profile-target-roles" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Target Roles</label>
-          <div id="target-roles-tags" class="flex flex-wrap gap-2 mb-2"></div>
-          <input id="profile-target-roles" type="text" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="Type a role and press Enter" />
-        </div>
+      <!-- Target Roles (tags) -->
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-target-roles">Target Roles</label>
+        <div id="target-roles-tags" class="tag-container"></div>
+        <input id="profile-target-roles" type="text" class="profile-input tag-input" placeholder="Type a role and press Enter" />
+      </div>
 
-        <!-- Skills (tags) -->
-        <div>
-          <label for="profile-skills" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Skills</label>
-          <div id="skills-tags" class="flex flex-wrap gap-2 mb-2"></div>
-          <input id="profile-skills" type="text" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="Type a skill and press Enter" />
-        </div>
+      <!-- Skills (tags) -->
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-skills">Skills</label>
+        <div id="skills-tags" class="tag-container"></div>
+        <input id="profile-skills" type="text" class="profile-input tag-input" placeholder="Type a skill and press Enter" />
+      </div>
 
-        <!-- Languages (tags) -->
-        <div>
-          <label for="profile-languages" class="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Languages</label>
-          <div id="languages-tags" class="flex flex-wrap gap-2 mb-2"></div>
-          <input id="profile-languages" type="text" class="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md px-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent" placeholder="Type a language and press Enter" />
-        </div>
+      <!-- Languages (tags) -->
+      <div class="profile-panel__field">
+        <label class="profile-panel__label" for="profile-languages">Languages</label>
+        <div id="languages-tags" class="tag-container"></div>
+        <input id="profile-languages" type="text" class="profile-input tag-input" placeholder="Type a language and press Enter" />
+      </div>
 
-        <!-- Save Profile button -->
-        <div class="pt-2">
-          <button id="save-profile-btn" class="px-6 py-2.5 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] font-semibold rounded-md text-sm transition-colors focus-ring-visible">
-            Save Profile
-          </button>
-        </div>
+      <div class="profile-panel__actions">
+        <button id="save-profile-btn" class="toolbar-btn toolbar-btn-primary">Save Profile</button>
       </div>
     </section>
 
-    <!-- ═══ SECTION B: CV Editor ═══ -->
-    <section>
-      <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4">CV (Markdown)</h3>
-      <div class="bg-[var(--bg-secondary)] rounded-lg p-4 sm:p-6 border border-[var(--border-default)]">
-        <textarea
-          id="cv-editor"
-          class="w-full h-72 sm:h-96 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md p-4 text-[var(--text-primary)] font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent"
-          placeholder="Write your CV in Markdown format..."
-        ></textarea>
-        <div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <span class="text-xs text-[var(--text-muted)]">Supports Markdown formatting</span>
-          <button id="save-cv-btn" class="px-6 py-2.5 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] font-semibold rounded-md text-sm transition-colors">
-            Save CV
-          </button>
-        </div>
+    <!-- CV Editor -->
+    <section class="profile-panel" aria-labelledby="cv-heading">
+      <h2 id="cv-heading" class="profile-panel__title">CV (Markdown)</h2>
+      <textarea
+        id="cv-editor"
+        class="cv-editor"
+        placeholder="Write your CV in Markdown format..."
+      ></textarea>
+      <div class="profile-panel__actions">
+        <span class="cv-hint">Supports Markdown formatting</span>
+        <button id="save-cv-btn" class="toolbar-btn toolbar-btn-primary">Save CV</button>
       </div>
     </section>
-  </main>
-</HermesLayout>
+  </div>
+</PageLayout>
 
 <script>
   // ═══ YAML parse/stringify (simple flat structure) ═══
@@ -122,11 +122,9 @@ import HermesLayout from '../layouts/HermesLayout.astro';
         currentKey = line.slice(0, colonIdx).trim();
         const val = line.slice(colonIdx + 1).trim();
         if (val) {
-          // Scalar value
           result[currentKey] = isNaN(Number(val)) ? val : Number(val);
           currentList = null;
         } else {
-          // Could be list or object lookahead
           result[currentKey] = [];
           currentList = [];
         }
@@ -186,7 +184,7 @@ import HermesLayout from '../layouts/HermesLayout.astro';
         chip.textContent = tag;
         const remove = document.createElement('button');
         remove.type = 'button';
-        remove.className = 'hover:text-white transition-colors ml-0.5 text-[10px] leading-none';
+        remove.className = 'hover:text-[var(--text-primary)] transition-colors ml-0.5 text-xs leading-none';
         remove.innerHTML = '&times;';
         remove.addEventListener('click', () => {
           tags.splice(i, 1);
@@ -271,11 +269,11 @@ import HermesLayout from '../layouts/HermesLayout.astro';
     languagesContainer.innerHTML = '';
     for (const [lang, level] of Object.entries(languages)) {
       const chip = document.createElement('span');
-      chip.className = 'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      chip.className = 'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--grade-mid-bg)] text-[var(--grade-mid-text)] border border-[var(--grade-mid-border)]';
       chip.textContent = lang + ' (' + level + ')';
       const remove = document.createElement('button');
       remove.type = 'button';
-      remove.className = 'hover:text-white transition-colors ml-0.5 text-[10px] leading-none';
+      remove.className = 'hover:text-[var(--text-primary)] transition-colors ml-0.5 text-xs leading-none';
       remove.innerHTML = '&times;';
       remove.addEventListener('click', () => {
         delete languages[lang];
@@ -400,3 +398,150 @@ import HermesLayout from '../layouts/HermesLayout.astro';
   loadProfile();
   loadCV();
 </script>
+
+<style>
+  .profile-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .profile-page__hero {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .profile-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .profile-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .profile-page__panels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .profile-panel {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-5);
+  }
+
+  .profile-panel__title {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .profile-panel__field {
+    margin-bottom: var(--space-4);
+  }
+
+  .profile-panel__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .profile-panel__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .profile-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-2-5) var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .profile-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: var(--focus-ring);
+  }
+
+  .profile-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-2-5) var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    background-size: var(--size-4);
+    padding-right: var(--space-10);
+  }
+
+  .tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .tag-input {
+    margin-top: var(--space-2);
+  }
+
+  .cv-editor {
+    width: 100%;
+    min-height: var(--size-96);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    resize: vertical;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .cv-editor:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: var(--focus-ring);
+  }
+
+  .cv-hint {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .profile-panel__actions {
+    margin-top: var(--space-4);
+  }
+
+  @media (max-width: 1024px) {
+    .profile-panel__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

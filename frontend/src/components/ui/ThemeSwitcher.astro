@@ -1,0 +1,208 @@
+---
+// ThemeSwitcher.astro — Theme switching (dark/light/high-contrast/sepia)
+// Design System Foundation §3.1 & §4.3
+// Astro + module script, semantic tokens only, data-* attributes
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const themes = [
+  { id: 'dark', label: 'Dark', icon: 'moon' },
+  { id: 'light', label: 'Light', icon: 'sun' },
+  { id: 'high-contrast', label: 'High Contrast', icon: 'circle-outline' },
+  { id: 'sepia', label: 'Sepia', icon: 'book' },
+] as const;
+
+const themeId = `theme-switcher-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+  class:list={['theme-switcher', className]}
+  data-component="theme-switcher"
+  data-theme-id={themeId}
+  role="group"
+  aria-label="Theme selector"
+>
+  {themes.map((theme) => (
+    <button
+      type="button"
+      class:list={[
+        'theme-switcher__btn',
+        theme.id === 'dark' && 'theme-switcher__btn--active',
+      ]}
+      data-theme={theme.id}
+      aria-pressed={theme.id === 'dark'}
+      aria-label={theme.label}
+    >
+      <i class={`codicon codicon-${theme.icon}`} aria-hidden="true" />
+      <span class="theme-switcher__label">{theme.label}</span>
+    </button>
+  ))}
+</div>
+
+<style>
+  .theme-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-1);
+  }
+
+  .theme-switcher__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+    white-space: nowrap;
+    min-height: var(--size-9);
+  }
+
+  .theme-switcher__btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .theme-switcher__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .theme-switcher__btn--active {
+    background: var(--accent-subtle);
+    color: var(--accent-primary);
+  }
+
+  .theme-switcher__label {
+    display: none;
+    color: inherit; /* inherit from button for proper contrast in all themes */
+  }
+
+  @media (min-width: 640px) {
+    .theme-switcher__label {
+      display: inline;
+    }
+  }
+
+  /* Light theme: ensure label has sufficient contrast */
+  [data-theme="light"] .theme-switcher__btn {
+    color: var(--text-secondary);
+  }
+
+  [data-theme="light"] .theme-switcher__btn:hover {
+    color: var(--text-primary);
+  }
+
+  [data-theme="light"] .theme-switcher__btn--active {
+    color: var(--accent-primary);
+  }
+
+  [data-theme="light"] .theme-switcher__label {
+    color: var(--text-primary); /* Ensure WCAG AA contrast on light bg */
+  }
+
+  /* Sepia theme: ensure label has sufficient contrast */
+  [data-theme="sepia"] .theme-switcher__btn {
+    color: var(--text-secondary);
+  }
+
+  [data-theme="sepia"] .theme-switcher__btn:hover {
+    color: var(--text-primary);
+  }
+
+  [data-theme="sepia"] .theme-switcher__btn--active {
+    color: var(--accent-primary);
+  }
+
+  [data-theme="sepia"] .theme-switcher__label {
+    color: var(--text-primary); /* Ensure WCAG AA contrast on sepia bg */
+  }
+</style>
+
+<script>
+  export function initThemeSwitcher(root: HTMLElement): () => void {
+    const container = root.querySelector('[data-component="theme-switcher"]') as HTMLElement;
+    if (!container) return () => {};
+
+    const buttons = container.querySelectorAll('.theme-switcher__btn');
+    const themeId = container.getAttribute('data-theme-id');
+
+    // Read current theme from document.documentElement
+    const getCurrentTheme = (): string => {
+      return document.documentElement.getAttribute('data-theme') || 'dark';
+    };
+
+    const setActiveButton = (theme: string) => {
+      buttons.forEach((btn) => {
+        const isActive = btn.getAttribute('data-theme') === theme;
+        btn.classList.toggle('theme-switcher__btn--active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+    };
+
+    const applyTheme = (theme: string) => {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('career-ops-theme', theme);
+      setActiveButton(theme);
+
+      // Dispatch event for other components
+      window.dispatchEvent(new CustomEvent('theme:change', { detail: { theme } }));
+    };
+
+    const handleClick = (event: MouseEvent) => {
+      const btn = (event.target as HTMLElement).closest('.theme-switcher__btn') as HTMLButtonElement;
+      if (!btn) return;
+      const theme = btn.getAttribute('data-theme');
+      if (theme) applyTheme(theme);
+    };
+
+    container.addEventListener('click', handleClick);
+
+    // Initialize active button
+    setActiveButton(getCurrentTheme());
+
+    // Listen for external theme changes
+    const handleThemeChange = (event: CustomEvent) => {
+      if (event.detail?.theme) {
+        setActiveButton(event.detail.theme);
+      }
+    };
+    window.addEventListener('theme:change', handleThemeChange as EventListener);
+
+    return () => {
+      container.removeEventListener('click', handleClick);
+      window.removeEventListener('theme:change', handleThemeChange as EventListener);
+    };
+  }
+
+  // Auto-init
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-component="theme-switcher"]').forEach((el) => {
+        initThemeSwitcher(el as HTMLElement);
+      });
+    });
+
+    window.addEventListener('pagelayout:ready', () => {
+      document.querySelectorAll('[data-component="theme-switcher"]').forEach((el) => {
+        initThemeSwitcher(el as HTMLElement);
+      });
+    });
+  }
+</script>

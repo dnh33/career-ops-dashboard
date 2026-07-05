@@ -1,6 +1,6 @@
 ---
-import Sparkline from './Sparkline.astro';
-import type { MetricCardProps } from './types';
+import Sparkline from './Sparkline.astro'
+import type { MetricCardProps } from './types'
 
 interface Props extends MetricCardProps {}
 
@@ -39,8 +39,8 @@ const {
 <style>
   .metric-card {
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
@@ -48,23 +48,23 @@ const {
   }
 
   .metric-card--primary {
-    border-left: 3px solid var(--color-primary);
+    border-left: var(--border-width-thick) solid var(--accent-primary);
   }
 
   .metric-card--warm {
-    border-left: 3px solid var(--color-warm);
+    border-left: var(--border-width-thick) solid var(--grade-low);
   }
 
   .metric-card--success {
-    border-left: 3px solid var(--ui-success);
+    border-left: var(--border-width-thick) solid var(--grade-high);
   }
 
   .metric-card--warning {
-    border-left: 3px solid var(--ui-warning);
+    border-left: var(--border-width-thick) solid var(--grade-mid);
   }
 
   .metric-card--error {
-    border-left: 3px solid var(--ui-error);
+    border-left: var(--border-width-thick) solid var(--grade-low);
   }
 
   .metric-card__header {
@@ -76,7 +76,7 @@ const {
   .metric-card__label {
     font-size: var(--text-sm);
     color: var(--text-secondary);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
   }
 
   .metric-card__body {
@@ -104,15 +104,15 @@ const {
   }
 
   .metric-card__trend--up {
-    color: var(--ui-success);
+    color: var(--grade-high);
   }
 
   .metric-card__trend--down {
-    color: var(--ui-error);
+    color: var(--grade-low);
   }
 
   .metric-card__trend--neutral {
-    color: var(--text-tertiary);
+    color: var(--text-muted);
   }
 
   .metric-card__sparkline {

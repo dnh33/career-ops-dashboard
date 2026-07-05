@@ -5,8 +5,6 @@
 //   filterOptions (array of { value, label }) — dropdown options
 //   activeFilter (string) — currently selected filter value
 //   placeholder (string) — search placeholder text
-//   onSearch (string) — event handler for search input (passed as inline JS expression)
-//   onFilterChange (string) — event handler for filter dropdown change
 
 interface FilterOption {
   value: string;
@@ -85,7 +83,7 @@ const {
 <style>
   .filter-bar {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--space-3);
     align-items: center;
     flex-wrap: wrap;
   }
@@ -93,12 +91,12 @@ const {
   .filter-search-wrap {
     position: relative;
     flex: 1;
-    min-width: 200px;
+    min-width: var(--size-44);
   }
 
   .filter-search-icon {
     position: absolute;
-    left: 0.75rem;
+    left: var(--space-3);
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
@@ -107,15 +105,15 @@ const {
 
   .filter-search-input {
     width: 100%;
-    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-    font-size: 0.875rem;
-    font-family: inherit;
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--size-8);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
     color: var(--text-primary);
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-hover);
-    border-radius: 0.375rem;
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-sm);
     outline: none;
-    transition: border-color 150ms ease;
+    transition: border-color var(--transition-fast);
   }
 
   .filter-search-input::placeholder {
@@ -132,17 +130,17 @@ const {
 
   .filter-select {
     appearance: none;
-    padding: 0.5rem 2rem 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    font-family: inherit;
+    padding: var(--space-2) var(--size-8) var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
     color: var(--text-primary);
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-hover);
-    border-radius: 0.375rem;
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     outline: none;
-    transition: border-color 150ms ease;
-    min-height: 44px;
+    transition: border-color var(--transition-fast);
+    min-height: var(--size-11);
   }
 
   .filter-select:focus {
@@ -151,7 +149,7 @@ const {
 
   .filter-select-chevron {
     position: absolute;
-    right: 0.625rem;
+    right: var(--space-2-5);
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);

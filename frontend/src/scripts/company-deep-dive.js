@@ -108,7 +108,7 @@ class CompanyDeepDive {
     const { matchedRoles } = this.data;
 
     container.innerHTML = matchedRoles.map(role => {
-      const matchClass = role.matchScore >= 85 ? 'green' : role.matchScore >= 70 ? 'amber' : 'red';
+      const matchClass = role.matchScore >= 85 ? 'high' : role.matchScore >= 70 ? 'mid' : 'low';
       const workModeLabel = role.workMode === 'hybrid' ? '🏢 Hybrid' : role.workMode === 'remote' ? '🏠 Remote' : '🏢 Onsite';
 
       return `
@@ -127,36 +127,27 @@ class CompanyDeepDive {
             </div>
           </td>
           <td>
-            <div style="font-family: var(--font-mono); font-size: 0.875rem; font-weight: 600;">
+            <div style="font-family: var(--font-mono); font-size: var(--text-base); font-weight: 600;">
               ${this.formatDKK(role.salary.min)} - ${this.formatDKK(role.salary.max)} / mo
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Median: ${this.formatDKK(role.salary.median)}</div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">Median: ${this.formatDKK(role.salary.median)}</div>
           </td>
           <td>
             <div>${role.location}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">${workModeLabel}</div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">${workModeLabel}</div>
           </td>
           <td>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">
+            <div style="font-size: var(--text-xs); color: var(--text-secondary);">
               ${role.postedDaysAgo === 1 ? '1 day ago' : `${role.postedDaysAgo} days ago`}
             </div>
           </td>
           <td>
-            <button class="toolbar-btn" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;" onclick="alert('Role detail modal - to be implemented')">View Details</button>
+            <button class="toolbar-btn" style="padding: var(--space-1-5) var(--space-3); font-size: var(--text-xs);" data-component="role-detail-btn" data-role-index="${matchedRoles.indexOf(role)}">View Details</button>
           </td>
         </tr>
       `;
     }).join('');
 
-    // Add click handler for role rows
-    container.querySelectorAll('tr').forEach((row, index) => {
-      row.addEventListener('click', (e) => {
-        if (!e.target.closest('button')) {
-          const role = matchedRoles[index];
-          alert(`Role detail modal for: ${role.title}\nRequirements: ${role.requirements.join(', ')}\nWork mode: ${role.workMode}`);
-        }
-      });
-    });
   }
 
   renderSalaryComparison() {
@@ -179,7 +170,7 @@ class CompanyDeepDive {
 
     container.innerHTML = `
       <div>
-        <h4 style="margin: 0 0 1rem; font-size: 0.875rem; font-weight: 600; color: var(--text-primary);">${this.data.profile.name} ${this.data.matchedRoles[0]?.title || 'AI Engineer'}</h4>
+        <h4 style="margin: 0 0 var(--space-4); font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);">${this.data.profile.name} ${this.data.matchedRoles[0]?.title || 'AI Engineer'}</h4>
         <div class="salary-bar-container">
           <div class="salary-bar-row">
             <span class="salary-bar-label">p25</span>
@@ -205,7 +196,7 @@ class CompanyDeepDive {
         </div>
       </div>
       <div>
-        <h4 style="margin: 0 0 1rem; font-size: 0.875rem; font-weight: 600; color: var(--text-primary);">Market Median (${this.data.matchedRoles[0]?.title || 'AI Engineer'})</h4>
+        <h4 style="margin: 0 0 var(--space-4); font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);">Market Median (${this.data.matchedRoles[0]?.title || 'AI Engineer'})</h4>
         <div class="salary-bar-container">
           <div class="salary-bar-row">
             <span class="salary-bar-label">p25</span>
@@ -229,7 +220,7 @@ class CompanyDeepDive {
             <span class="salary-bar-value">${this.formatDKK(salaryComparison.market.p75)}/mo</span>
           </div>
         </div>
-        <div style="margin-top: 1rem; text-align: center;">
+        <div style="margin-top: var(--space-4); text-align: center;">
           <div class="salary-delta ${deltaClass}">
             ${deltaSign}${delta}% ${delta > 0 ? 'above market' : delta < 0 ? 'below market' : 'at market'}
           </div>
@@ -373,7 +364,7 @@ class CompanyDeepDive {
   }
 
   showErrorState() {
-    const errorMsg = '<div class="empty-row" style="padding: 2rem; text-align: center; color: var(--error);">Failed to load company data</div>';
+    const errorMsg = '<div class="empty-row" style="padding: var(--space-8); text-align: center; color: var(--grade-low);">Failed to load company data</div>';
     const containers = [
       document.getElementById('rolesTableBody'),
       document.getElementById('salaryComparison'),

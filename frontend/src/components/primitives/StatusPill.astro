@@ -1,5 +1,5 @@
 ---
-import type { StatusPillProps } from './types';
+import type { StatusPillProps } from './types'
 
 interface Props extends StatusPillProps {}
 
@@ -22,53 +22,53 @@ const {
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
     font-weight: 500;
-    font-family: var(--font-ui);
-    border: 1px solid var(--stroke-hairline);
+    font-family: var(--font-sans);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    background: var(--bg-panel);
+    background: var(--bg-card);
     white-space: nowrap;
   }
 
   .status-pill--primary {
-    color: var(--color-primary);
-    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle);
   }
 
   .status-pill--success {
-    color: var(--ui-success);
-    border-color: color-mix(in srgb, var(--ui-success) 30%, transparent);
-    background: var(--tag-success-bg);
+    color: var(--grade-high);
+    border-color: var(--grade-high-border);
+    background: var(--grade-high-bg);
   }
 
   .status-pill--warning {
-    color: var(--ui-warning);
-    border-color: color-mix(in srgb, var(--ui-warning) 30%, transparent);
-    background: var(--tag-warning-bg);
+    color: var(--grade-mid);
+    border-color: var(--grade-mid-border);
+    background: var(--grade-mid-bg);
   }
 
   .status-pill--error {
-    color: var(--ui-error);
-    border-color: color-mix(in srgb, var(--ui-error) 30%, transparent);
-    background: var(--tag-error-bg);
+    color: var(--grade-low);
+    border-color: var(--grade-low-border);
+    background: var(--grade-low-bg);
   }
 
   .status-pill--warm {
-    color: var(--color-warm);
-    border-color: color-mix(in srgb, var(--color-warm) 30%, transparent);
-    background: color-mix(in srgb, var(--color-warm) 10%, transparent);
+    color: var(--grade-mid);
+    border-color: var(--grade-mid-border);
+    background: var(--grade-mid-bg);
   }
 
   .status-pill--info {
-    color: var(--tag-info-fg);
-    border-color: color-mix(in srgb, var(--ui-info) 30%, transparent);
-    background: var(--tag-info-bg);
+    color: var(--text-muted);
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
   }
 
   .status-pill--neutral {
-    color: var(--tag-muted-fg);
-    border-color: color-mix(in srgb, var(--text-tertiary) 30%, transparent);
-    background: var(--tag-muted-bg);
+    color: var(--text-muted);
+    border-color: var(--border-hover);
+    background: var(--bg-surface);
   }
 </style>

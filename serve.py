@@ -3,6 +3,9 @@
 
 Fixes: CLOSE-WAIT deadlock from urllib leaving connections half-closed.
 Uses ThreadingMixin for concurrent requests and proper connection cleanup.
+
+SSE Support: Special handling for /api/evaluate/*/stream endpoints
+to forward Server-Sent Events without buffering.
 """
 
 import http.server
@@ -12,20 +15,31 @@ import urllib.error
 import os
 import sys
 import socket
+import threading
+import time
 
 BACKEND = "http://localhost:18000"
-DIST_DIR = "/opt/career-ops-dashboard/frontend/dist"
+DIST_DIR = "/opt/career-ops-dashboard/frontend/dist/client"
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8083
 API_KEY = os.environ.get("CAREER_OPS_API_KEY", "")
 
+# SSE endpoints that need streaming proxy (no buffering)
+SSE_PATHS = ("/api/evaluate/", "/stream")
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIST_DIR, **kwargs)
 
+    def is_sse_endpoint(self, path: str) -> bool:
+        """Check if path is an SSE stream endpoint."""
+        return any(sse_path in path for sse_path in SSE_PATHS) and path.endswith("/stream")
+
     def do_GET(self):
         if self.path.startswith("/api/"):
-            self.proxy_request("GET")
+            if self.is_sse_endpoint(self.path):
+                self.proxy_sse_stream("GET")
+            else:
+                self.proxy_request("GET")
         else:
             super().do_GET()
 
@@ -56,6 +70,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def proxy_request(self, method):
+        """Proxy a regular (non-streaming) request to backend."""
         target = BACKEND + self.path
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length > 0 else None
@@ -101,6 +116,65 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(f'{{"error": "{str(e)}"}}'.encode())
             self.wfile.flush()
+
+    def proxy_sse_stream(self, method):
+        """Proxy SSE stream from backend WITHOUT buffering.
+        Streams chunk-by-chunk to maintain real-time delivery.
+        """
+        target = BACKEND + self.path
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length) if content_length > 0 else None
+
+        req = urllib.request.Request(target, data=body, method=method)
+        if body:
+            req.add_header("Content-Type", self.headers.get("Content-Type", "application/json"))
+        if API_KEY:
+            req.add_header("X-API-Key", API_KEY)
+
+        try:
+            # Open connection to backend
+            resp = urllib.request.urlopen(req, timeout=300)  # Long timeout for SSE
+            try:
+                # Send response headers immediately - no buffering!
+                self.send_response(resp.status)
+                for key, val in resp.getheaders():
+                    if key.lower() not in ("transfer-encoding", "connection"):
+                        self.send_header(key, val)
+                # Critical SSE headers - must not be buffered by nginx/proxy
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Connection", "keep-alive")
+                self.send_header("X-Accel-Buffering", "no")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.flush()
+
+                # Stream response body chunk by chunk
+                # Read in small chunks to maintain streaming
+                while True:
+                    chunk = resp.read(4096)  # Read 4KB at a time
+                    if not chunk:
+                        break
+                    try:
+                        self.wfile.write(chunk)
+                        self.wfile.flush()
+                    except (BrokenPipeError, ConnectionResetError):
+                        # Client disconnected - stop streaming
+                        break
+            finally:
+                resp.close()
+        except urllib.error.HTTPError as e:
+            try:
+                self.send_response(e.code)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(e.read())
+                self.wfile.flush()
+            finally:
+                e.close()
+        except Exception as e:
+            # Client may have disconnected
+            pass
 
     def log_message(self, format, *args):
         pass

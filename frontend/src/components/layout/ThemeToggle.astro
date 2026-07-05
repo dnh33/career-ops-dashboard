@@ -58,22 +58,22 @@ const { class: className = '' } = Astro.props;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: var(--size-9);
+    height: var(--size-9);
     min-height: auto;
     padding: 0;
-    border: 1px solid var(--stroke-hairline);
+    border: var(--border-width) solid var(--border-default);
     background: var(--bg-elevated);
     color: var(--text-secondary);
     cursor: pointer;
     border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-nous);
+    box-shadow: var(--shadow-md);
     position: relative;
   }
 
   .theme-toggle:hover {
     color: var(--text-primary);
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .theme-toggle__icon {
@@ -82,19 +82,19 @@ const { class: className = '' } = Astro.props;
     transition: opacity var(--transition-base);
   }
 
-  :global(.dark) .theme-toggle__icon--dark {
+  :global([data-theme="dark"]) .theme-toggle__icon--dark {
     opacity: 0;
   }
 
-  :global(.dark) .theme-toggle__icon--light {
+  :global([data-theme="dark"]) .theme-toggle__icon--light {
     opacity: 1;
   }
 
-  :global(html:not(.dark)) .theme-toggle__icon--dark {
+  :global(html:not([data-theme="dark"])) .theme-toggle__icon--dark {
     opacity: 1;
   }
 
-  :global(html:not(.dark)) .theme-toggle__icon--light {
+  :global(html:not([data-theme="dark"])) .theme-toggle__icon--light {
     opacity: 0;
   }
 </style>

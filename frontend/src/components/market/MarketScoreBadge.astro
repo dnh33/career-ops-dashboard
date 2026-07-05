@@ -15,7 +15,7 @@ if (!visible || score === null) {
 
 <div class="market-score-badge" data-visible={visible}>
   <div class="score-ring-container">
-    <svg class="score-ring" viewBox="0 0 120 120" width="80" height="80">
+    <svg class="score-ring" viewBox="0 0 120 120" width="var(--size-20)" height="var(--size-20)">
       <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border-default)" stroke-width="6" />
       <circle
         id="score-progress"
@@ -45,18 +45,18 @@ if (!visible || score === null) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1.25rem;
+    gap: var(--space-3);
+    padding: var(--space-5);
     background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    min-width: 140px;
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    min-width: var(--size-35);
   }
 
   .score-ring-container {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: var(--size-20);
+    height: var(--size-20);
   }
 
   .score-ring {
@@ -69,7 +69,7 @@ if (!visible || score === null) {
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: var(--font-mono);
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--text-primary);
   }
@@ -78,29 +78,29 @@ if (!visible || score === null) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--space-1);
   }
 
   .score-label {
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-tight);
     color: var(--text-secondary);
   }
 
   .score-grade {
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     font-weight: 700;
   }
 
   .score-hint {
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
     text-align: center;
     margin: 0;
-    max-width: 160px;
+    max-width: var(--size-40);
   }
 
   /* Color definitions via CSS variables set by parent */

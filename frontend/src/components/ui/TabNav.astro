@@ -53,7 +53,7 @@ const { tabs = [], activeTab = '' } = Astro.props;
   .tab-nav {
     display: flex;
     gap: 0;
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: var(--border-width) solid var(--border-default);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -64,21 +64,21 @@ const { tabs = [], activeTab = '' } = Astro.props;
 
   .tab-nav-item {
     flex-shrink: 0;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--text-secondary);
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: var(--border-width-thick) solid transparent;
     cursor: pointer;
-    transition: color 150ms ease, border-color 150ms ease;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
     white-space: nowrap;
-    min-height: 44px;
+    min-height: var(--size-11);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    font-family: inherit;
+    font-family: var(--font-sans);
   }
 
   .tab-nav-item:hover {
@@ -86,8 +86,8 @@ const { tabs = [], activeTab = '' } = Astro.props;
   }
 
   .tab-nav-item:focus-visible {
-    outline: 2px solid rgba(212, 168, 83, 0.6);
-    outline-offset: 2px;
+    outline: var(--border-width-thick) solid var(--focus-ring);
+    outline-offset: var(--border-width-thick);
   }
 
   .tab-nav-active {

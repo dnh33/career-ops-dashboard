@@ -1,5 +1,6 @@
 ---
 import PageLayout from '../components/layout/PageLayout.astro';
+import CommandLineBar from '../components/layout/CommandLineBar.astro';
 
 interface Props {
   title?: string;
@@ -22,19 +23,19 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <link rel="preload" href="/fonts/Collapse-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Sora-Variable.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <script is:inline>
       (function () {
         try {
-          var stored = localStorage.getItem('hermes-theme');
-          var dark =
-            stored === 'dark' ||
-            (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          if (dark) document.documentElement.classList.add('dark');
+          // Theme: [data-theme] on <html>
+          var storedTheme = localStorage.getItem('career-ops-theme');
+          var theme = storedTheme || 'dark'; // default: dark observatory
+          document.documentElement.setAttribute('data-theme', theme);
 
-          var density = localStorage.getItem('hermes-density') || 'comfortable';
-          document.body.classList.add('page-density-' + density);
+          // Density: [data-density] on <html>
+          var storedDensity = localStorage.getItem('career-ops-density') || 'comfortable';
+          document.documentElement.setAttribute('data-density', storedDensity);
         } catch (e) {
           /* storage unavailable */
         }
@@ -44,6 +45,7 @@ const {
   <body>
     <PageLayout title={pageTitle} description={description} currentPath={currentPath}>
       <slot />
+      <CommandLineBar slot="command-line-bar" />
     </PageLayout>
   </body>
 </html>

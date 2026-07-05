@@ -1,132 +1,171 @@
 ---
-import HermesLayout from '../layouts/HermesLayout.astro';
+import PageLayout from '../components/layout/PageLayout.astro';
 import MarketScoreBadge from '../components/market/MarketScoreBadge.astro';
 import GapAnalysisPanel from '../components/market/GapAnalysisPanel.astro';
-
-const API_BASE = '';
+import Loader from '../components/primitives/Loader.astro';
+import ErrorState from '../components/primitives/ErrorState.astro';
+import SearchField from '../components/primitives/SearchField.astro';
+import SegmentedControl from '../components/primitives/SegmentedControl.astro';
+import EmptyState from '../components/primitives/EmptyState.astro';
 ---
 
-<HermesLayout title="Evaluate" currentPath="/evaluate" pageTitle="Job Evaluation" description="Paste a job description or fetch one from a URL to get an A-G evaluation report.">
-  <main class="content-container">
-    <div class="mb-6 sm:mb-8">
-      <h2 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-2">Job Evaluation</h2>
-      <p class="text-[var(--text-secondary)] text-sm max-w-2xl">Paste a job description or fetch one from a URL to get an A-G evaluation report.</p>
-    </div>
+<PageLayout
+  title="Evaluate"
+  pageTitle="Job Evaluation"
+  description="Paste a job description or fetch one from a URL to get an A-G evaluation report."
+  currentPath="/evaluate"
+>
+  <div slot="hero" class="evaluate-page__hero">
+    <h1 class="evaluate-page__title">Job Evaluation</h1>
+    <p class="evaluate-page__subtitle">Paste a job description or fetch one from a URL to get an A-G evaluation report.</p>
+  </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- LEFT: Input form -->
-      <section class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6 h-fit">
-        <div class="flex gap-1 mb-4 border-b border-[var(--border-default)]" role="tablist" aria-label="Input method">
-          <button id="tab-paste" role="tab" aria-selected="true" aria-controls="panel-paste" class="px-4 py-2 text-sm font-medium text-[var(--text-primary)] border-b-2 border-[var(--accent-primary)] transition-colors">Paste Text</button>
-          <button id="tab-url" role="tab" aria-selected="false" aria-controls="panel-url" class="px-4 py-2 text-sm font-medium text-[var(--text-muted)] border-b-2 border-transparent hover:text-[var(--text-primary)] transition-colors">From URL</button>
+  <div slot="actions" class="evaluate-page__actions">
+    <SearchField
+      id="company-select"
+      name="company-select"
+      placeholder="Re-evaluate for target company..."
+      class="evaluate-page__company-search"
+    />
+  </div>
+
+  <div class="evaluate-page__grid">
+    <!-- LEFT: Input form -->
+    <section class="evaluate-page__input-section" aria-labelledby="input-heading">
+      <h2 id="input-heading" class="evaluate-page__section-title">Input</h2>
+
+      <div class="evaluate-page__tabs" role="tablist" aria-label="Input method">
+        <button id="tab-paste" role="tab" aria-selected="true" aria-controls="panel-paste" class="evaluate-page__tab evaluate-page__tab--active">Paste Text</button>
+        <button id="tab-url" role="tab" aria-selected="false" aria-controls="panel-url" class="evaluate-page__tab">From URL</button>
+      </div>
+
+      <div id="panel-paste" role="tabpanel" aria-labelledby="tab-paste">
+        <label for="jd-textarea" class="evaluate-page__label">Job Description</label>
+        <textarea id="jd-textarea" rows="12" placeholder="Paste the full job description here..." class="evaluate-page__textarea"></textarea>
+        <div class="evaluate-page__textarea-footer">
+          <span id="char-count" class="evaluate-page__char-count">0 characters</span>
+          <button type="button" id="clear-btn" class="evaluate-page__clear-btn hidden">Clear</button>
         </div>
-        <div id="panel-paste" role="tabpanel" aria-labelledby="tab-paste">
-          <label for="jd-textarea" class="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Job Description</label>
-          <textarea id="jd-textarea" rows="12" placeholder="Paste the full job description here..." class="w-full px-4 py-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 font-mono text-sm transition-colors resize-y min-h-[200px]"></textarea>
-          <div class="flex items-center justify-between mt-2">
-            <span id="char-count" class="text-xs text-[var(--text-muted)]">0 characters</span>
-            <button type="button" id="clear-btn" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors hidden">Clear</button>
+      </div>
+
+      <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" hidden>
+        <label for="jd-url" class="evaluate-page__label">Job Posting URL</label>
+        <div class="evaluate-page__url-input-group">
+          <input id="jd-url" type="url" placeholder="https://careers.company.com/jobs/12345" class="evaluate-page__url-input" />
+          <button type="button" id="fetch-btn" class="evaluate-page__fetch-btn">Fetch</button>
+        </div>
+        <p id="fetch-error" class="evaluate-page__error hidden" role="alert">Could not fetch from this URL. Check the link or paste the text directly.</p>
+      </div>
+
+      <div class="evaluate-page__evaluate-wrapper">
+        <button type="button" id="evaluate-btn" class="evaluate-page__evaluate-btn">Evaluate Job Description</button>
+        <p class="evaluate-page__hint hidden" id="evaluate-hint">Enter at least 50 characters to evaluate</p>
+      </div>
+    </section>
+
+    <!-- RIGHT: Results area -->
+    <section class="evaluate-page__results-section" aria-labelledby="results-heading">
+      <h2 id="results-heading" class="sr-only">Results</h2>
+
+      <div id="eval-empty" class="evaluate-page__state evaluate-page__state--empty">
+        <svg class="evaluate-page__empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <p class="evaluate-page__state-title">Paste a JD to get started</p>
+        <p class="evaluate-page__state-desc">Enter a job description and click Evaluate to see your A-G score and detailed feedback.</p>
+      </div>
+
+      <div id="eval-loading" class="evaluate-page__state evaluate-page__state--loading hidden" aria-busy="true" aria-label="Evaluating job description">
+        <div class="evaluate-page__loading-content">
+          <div class="evaluate-page__loading-header">
+            <div class="evaluate-page__spinner"></div>
+            <span class="evaluate-page__loading-title">Analyzing job description...</span>
+          </div>
+          <div class="evaluate-page__progress-bar-container">
+            <div id="loading-bar" class="evaluate-page__progress-bar" style="width: 0%;"></div>
+          </div>
+          <p id="loading-status" class="evaluate-page__loading-status">Parsing content...</p>
+        </div>
+        <div class="evaluate-page__skeleton-grid">
+          <div class="evaluate-page__skeleton-card"></div>
+          <div class="evaluate-page__skeleton-card"></div>
+          <div class="evaluate-page__skeleton-card"></div>
+        </div>
+        <div class="evaluate-page__skeleton-text-group">
+          <div class="evaluate-page__skeleton-text"></div>
+          <div class="evaluate-page__skeleton-text"></div>
+          <div class="evaluate-page__skeleton-text"></div>
+        </div>
+      </div>
+
+      <div id="eval-results" class="hidden" aria-label="Evaluation results">
+        <!-- Market Score & Gap Analysis -->
+        <div class="evaluate-page__market-insights hidden" id="market-insights">
+          <div>
+            <MarketScoreBadge id="market-badge" score={0} grade={null} visible={false} />
+          </div>
+          <div>
+            <GapAnalysisPanel id="gap-panel" gaps={[]} suggestions={[]} strengths={[]} visible={false} />
           </div>
         </div>
-        <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" class="hidden">
-          <label for="jd-url" class="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-2">Job Posting URL</label>
-          <div class="flex gap-2">
-            <input id="jd-url" type="url" placeholder="https://careers.company.com/jobs/12345" class="flex-1 h-11 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 font-mono text-sm transition-colors" />
-            <button type="button" id="fetch-btn" class="h-11 px-5 bg-[var(--border-hover)] hover:bg-[var(--border-hover)] text-[var(--text-primary)] text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">Fetch</button>
-          </div>
-          <p id="fetch-error" class="mt-2 text-xs text-red-400 hidden" role="alert">Could not fetch from this URL. Check the link or paste the text directly.</p>
-        </div>
-        <div class="mt-5 pt-4 border-t border-[var(--border-default)]">
-          <button type="button" id="evaluate-btn" class="card-interactive w-full sm:w-auto h-12 px-8 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] font-semibold text-sm rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40 disabled:opacity-40 disabled:cursor-not-allowed">Evaluate Job Description</button>
-          <p class="mt-2 text-xs text-[var(--text-muted)] hidden" id="evaluate-hint">Enter at least 50 characters to evaluate</p>
-        </div>
-      </section>
 
-      <!-- RIGHT: Results area -->
-      <section class="space-y-6">
-        <div id="eval-empty" class="flex flex-col items-center justify-center py-16 text-center bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg">
-          <svg class="w-16 h-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-          <p class="text-[var(--text-secondary)] text-lg font-medium mb-1">Paste a JD to get started</p>
-          <p class="text-[var(--text-muted)] text-sm">Enter a job description and click Evaluate to see your A-G score and detailed feedback.</p>
-        </div>
-
-        <div id="eval-loading" class="hidden space-y-4" aria-busy="true" aria-label="Evaluating job description">
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
-            <div class="flex items-center gap-3 mb-4"><div class="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></div><span class="text-sm font-medium text-[var(--text-primary)]">Analyzing job description...</span></div>
-            <div class="w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden"><div id="loading-bar" class="h-full w-[0%] bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-hover)] rounded-full transition-all duration-300 ease-out"></div></div>
-            <p id="loading-status" class="mt-2 text-xs text-[var(--text-muted)]">Parsing content...</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div><div class="skeleton skeleton-card bg-[var(--bg-elevated)] h-24 rounded-lg"></div></div>
-          <div class="space-y-2"><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-full rounded"></div><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-4/5 rounded"></div><div class="skeleton skeleton-text bg-[var(--bg-elevated)] h-4 w-3/5 rounded"></div></div>
-        </div>
-
-        <div id="eval-results" class="hidden space-y-6" aria-label="Evaluation results">
-          <!-- Market Score & Gap Analysis -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" id="market-insights" class="hidden">
-            <div class="lg:col-span-1">
-              <MarketScoreBadge id="market-badge" score={0} grade={null} visible={false} />
-            </div>
-            <div class="lg:col-span-2">
-              <GapAnalysisPanel id="gap-panel" gaps={[]} suggestions={[]} strengths={[]} visible={false} />
-            </div>
-          </div>
-
-          <!-- Company Fit Section -->
-          <div id="company-fit-section" class="hidden">
-            <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
-              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Company Fit</h3>
-                <div class="flex items-center gap-3">
-                  <label for="company-select" class="text-sm text-[var(--text-secondary)]">Re-evaluate for:</label>
-                  <select id="company-select" class="h-10 px-4 rounded-md bg-[var(--bg-input)] border border-[var(--border-hover)] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 transition-colors">
-                    <option value="">Select a target company...</option>
-                  </select>
-                </div>
+        <!-- Company Fit Section -->
+        <div id="company-fit-section" class="hidden">
+          <div class="evaluate-page__company-fit">
+            <div class="evaluate-page__company-fit-header">
+              <h3 class="evaluate-page__company-fit-title">Company Fit</h3>
+              <div class="evaluate-page__company-select-wrapper">
+                <label for="company-select" class="evaluate-page__company-select-label">Re-evaluate for:</label>
+                <select id="company-select" class="evaluate-page__company-select">
+                  <option value="">Select a target company...</option>
+                </select>
               </div>
-              <div id="company-fit-content" class="space-y-4"></div>
             </div>
-          </div>
-
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-6 sm:p-8">
-            <div class="flex flex-col items-center gap-6">
-              <div id="score-card" class="flex flex-col items-center" role="img" aria-label="Overall grade">
-                <div id="grade-ring" class="relative flex items-center justify-center rounded-full w-[120px] h-[120px]">
-                  <svg width="120" height="120" class="absolute inset-0 -rotate-90" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" /><circle id="grade-progress" cx="60" cy="60" r="54" fill="none" stroke="var(--grade-mid)" stroke-width="6" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" class="grade-ring-progress" /></svg>
-                  <span id="grade-letter" class="relative font-bold text-4xl">C</span>
-                </div>
-                <span id="score-value" class="mt-2 text-sm font-mono text-[var(--text-secondary)]">50 / 100</span>
-              </div>
-              <div class="flex-1 text-center">
-                <h3 class="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-1">Overall Evaluation Score</h3>
-                <p id="score-summary" class="text-[var(--text-secondary)] text-sm">This job description covers most key areas but has room for improvement.</p>
-                <div class="mt-3 flex flex-wrap gap-2 justify-center" id="score-tags"></div>
-              </div>
-            </div>
-          </div>
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 sm:p-6">
-            <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-4">Detailed Breakdown</h3>
-            <div id="report-sections" class="space-y-3"></div>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button type="button" id="re-evaluate-btn" class="card-interactive h-10 px-6 bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--bg-primary)] text-sm font-semibold rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/40">Re-evaluate</button>
-            <a href="/output" class="h-10 px-6 inline-flex items-center justify-center border border-[var(--border-hover)] hover:border-[var(--border-hover)] text-[var(--text-primary)] text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/20">Generate Tailored Resume</a>
+            <div id="company-fit-content" class="evaluate-page__company-fit-content"></div>
           </div>
         </div>
 
-        <div id="eval-error" class="hidden bg-[var(--bg-surface)] border border-red-900/40 rounded-lg p-6" role="alert">
-          <div class="flex items-start gap-4">
-            <svg class="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16c-.77.833.192 2.5 1.732 2.5z" /></svg>
-            <div class="flex-1">
-              <h4 class="text-red-400 font-semibold mb-1">Evaluation failed</h4>
-              <p class="text-[var(--text-secondary)] text-sm mb-3">Could not process the job description. Ensure the content is valid and try again.</p>
-              <button type="button" id="error-retry-btn" class="px-4 py-2 text-sm font-medium text-red-400 border border-red-900/40 rounded-md hover:bg-red-900/20 transition-colors focus:outline-none focus-ring-danger">Try Again</button>
+        <div class="evaluate-page__score-section">
+          <div class="evaluate-page__score-card" role="img" aria-label="Overall grade">
+            <div id="grade-ring" class="evaluate-page__grade-ring">
+              <svg width="120" height="120" class="evaluate-page__grade-ring-svg" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border-default)" stroke-width="6" />
+                <circle id="grade-progress" cx="60" cy="60" r="54" fill="none" stroke="var(--grade-mid)" stroke-width="6" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" class="evaluate-page__grade-ring-progress" />
+              </svg>
+              <span id="grade-letter" class="evaluate-page__grade-letter">C</span>
             </div>
+            <span id="score-value" class="evaluate-page__score-value">50 / 100</span>
+          </div>
+          <div class="evaluate-page__score-summary">
+            <h3 class="evaluate-page__score-title">Overall Evaluation Score</h3>
+            <p id="score-summary" class="evaluate-page__score-desc">This job description covers most key areas but has room for improvement.</p>
+            <div class="evaluate-page__score-tags" id="score-tags"></div>
           </div>
         </div>
-      </section>
-    </div>
-  </main>
-</HermesLayout>
+
+        <div class="evaluate-page__breakdown-section">
+          <h3 class="evaluate-page__section-title">Detailed Breakdown</h3>
+          <div id="report-sections" class="evaluate-page__breakdown-content"></div>
+        </div>
+
+        <div class="evaluate-page__action-bar">
+          <button type="button" id="re-evaluate-btn" class="evaluate-page__re-evaluate-btn">Re-evaluate</button>
+          <a href="/output" class="evaluate-page__output-link">Generate Tailored Resume</a>
+        </div>
+      </div>
+
+      <div id="eval-error" class="evaluate-page__state evaluate-page__state--error hidden" role="alert">
+        <div class="evaluate-page__error-content">
+          <svg class="evaluate-page__error-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          <div class="evaluate-page__error-text">
+            <h4 class="evaluate-page__error-title">Evaluation failed</h4>
+            <p class="evaluate-page__error-message">Could not process the job description. Ensure the content is valid and try again.</p>
+            <button type="button" id="error-retry-btn" class="evaluate-page__error-retry-btn hidden">Retry Evaluation</button>
+            <button type="button" id="error-back-btn" class="evaluate-page__error-back-btn">Try Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</PageLayout>
 
 <script>
   import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
@@ -158,30 +197,25 @@ const API_BASE = '';
   const scoreValue = document.getElementById('score-value')!;
   const scoreSummary = document.getElementById('score-summary')!;
   const scoreTags = document.getElementById('score-tags')!;
-  const marketBadgeContainer = document.getElementById('market-badge-container')!
-  const gapPanelContainer = document.getElementById('gap-panel-container')!
-  const companyFitSection = document.getElementById('company-fit-section')!
-  const companyFitContent = document.getElementById('company-fit-content')!
-  const companySelect = document.getElementById('company-select')!
+  const marketBadgeContainer = document.getElementById('market-badge')!;
+  const gapPanelContainer = document.getElementById('gap-panel')!;
+  const companyFitSection = document.getElementById('company-fit-section')!;
+  const companyFitContent = document.getElementById('company-fit-content')!;
+  const companySelect = document.getElementById('company-select')!;
   const reportSections = document.getElementById('report-sections')!;
   const reEvaluateBtn = document.getElementById('re-evaluate-btn') as HTMLButtonElement;
   const errorRetryBtn = document.getElementById('error-retry-btn') as HTMLButtonElement;
+  const errorBackBtn = document.getElementById('error-back-btn') as HTMLButtonElement;
 
   // ===== Tab switching =====
   function switchTab(which: string): void {
     const isPaste = which === 'paste';
     tabPaste.setAttribute('aria-selected', String(isPaste));
     tabUrl.setAttribute('aria-selected', String(!isPaste));
-    tabPaste.classList.toggle('text-[var(--text-primary)]', isPaste);
-    tabPaste.classList.toggle('border-[var(--accent-primary)]', isPaste);
-    tabPaste.classList.toggle('text-[var(--text-muted)]', !isPaste);
-    tabPaste.classList.toggle('border-transparent', !isPaste);
-    tabUrl.classList.toggle('text-[var(--text-primary)]', !isPaste);
-    tabUrl.classList.toggle('border-[var(--accent-primary)]', !isPaste);
-    tabUrl.classList.toggle('text-[var(--text-muted)]', isPaste);
-    tabUrl.classList.toggle('border-transparent', isPaste);
-    panelPaste.classList.toggle('hidden', !isPaste);
-    panelUrl.classList.toggle('hidden', isPaste);
+    tabPaste.classList.toggle('evaluate-page__tab--active', isPaste);
+    tabUrl.classList.toggle('evaluate-page__tab--active', !isPaste);
+    panelPaste.hidden = !isPaste;
+    panelUrl.hidden = isPaste;
   }
 
   tabPaste.addEventListener('click', () => switchTab('paste'));
@@ -191,14 +225,14 @@ const API_BASE = '';
   textarea.addEventListener('input', () => {
     const len = textarea.value.length;
     charCount.textContent = len + ' character' + (len !== 1 ? 's' : '');
-    clearBtn.classList.toggle('hidden', len === 0);
-    evaluateHint.classList.toggle('hidden', len >= 50);
+    clearBtn.hidden = len === 0;
+    evaluateHint.hidden = len >= 50;
   });
 
   clearBtn.addEventListener('click', () => {
     textarea.value = '';
     charCount.textContent = '0 characters';
-    clearBtn.classList.add('hidden');
+    clearBtn.hidden = true;
     textarea.focus();
   });
 
@@ -208,20 +242,21 @@ const API_BASE = '';
     if (!url) return;
     fetchBtn.disabled = true;
     fetchBtn.textContent = 'Fetching...';
-    fetchError.classList.add('hidden');
+    fetchError.hidden = true;
     setTimeout(() => {
       textarea.value = '[Fetched from ' + url + ']\n\nSenior Software Engineer\n\nWe are looking for an experienced software engineer to join our growing team.\n\nRequirements:\n- 5+ years TypeScript\n- React and Node.js\n- Strong problem-solving skills\n\nBenefits:\n- Competitive salary\n- Flexible hours\n- Remote-first';
       charCount.textContent = textarea.value.length + ' characters';
-      clearBtn.classList.remove('hidden');
+      clearBtn.hidden = false;
       switchTab('paste');
       fetchBtn.disabled = false;
       fetchBtn.textContent = 'Fetch';
     }, 800);
   });
+
   // ===== Company select =====
   let targetCompany = null;
 
-  async function populateCompanySelect(): void {
+  async function populateCompanySelect(): Promise<void> {
     try {
       const resp = await fetch('/api/market/overview');
       if (!resp.ok) throw new Error('Failed to fetch companies');
@@ -229,21 +264,21 @@ const API_BASE = '';
       const companies = data.companies || [];
       // Sort by priority descending, then name
       companies.sort((a, b) => (b.priority || 0) - (a.priority || 0) || a.name.localeCompare(b.name));
-      const options = companies.map(company => `<option value=${company.slug}>${company.name}</option>`).join('');
-      companySelect.innerHTML = `<option value=''>Select a target company...</option>` + options;
+      const options = companies.map(company => `<option value="${company.slug}">${company.name}</option>`).join('');
+      companySelect.innerHTML = `<option value="">Select a target company...</option>` + options;
     } catch (err) {
       console.error('Failed to populate company select:', err);
       // Fallback to a static list
       companySelect.innerHTML = `
-        <option value=''>Select a target company...</option>
-        <option value='corti'>Corti</option>
-        <option value='zendesk'>Zendesk</option>
-        <option value='novonordisk'>Novo Nordisk</option>
-        <option value='maersk'>Maersk</option>
-        <option value='universalrobots'>Universal Robots</option>
-        <option value='microsoft'>Microsoft DK</option>
-        <option value='spotify'>Spotify</option>
-        <option value='trustpilot'>Trustpilot</option>
+        <option value="">Select a target company...</option>
+        <option value="corti">Corti</option>
+        <option value="zendesk">Zendesk</option>
+        <option value="novonordisk">Novo Nordisk</option>
+        <option value="maersk">Maersk</option>
+        <option value="universalrobots">Universal Robots</option>
+        <option value="microsoft">Microsoft DK</option>
+        <option value="spotify">Spotify</option>
+        <option value="trustpilot">Trustpilot</option>
       `;
     }
   }
@@ -259,9 +294,9 @@ const API_BASE = '';
 
   // ===== Section visibility =====
   function showSection(id: string): void {
-    [emptyState, loadingSection, resultsSection, errorSection].forEach((el) => el.classList.add('hidden'));
+    [emptyState, loadingSection, resultsSection, errorSection].forEach((el) => el.hidden = true);
     const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
+    if (el) el.hidden = false;
   }
 
   // ===== Score coloring — uses shared utility =====
@@ -317,7 +352,7 @@ const API_BASE = '';
     loadingTimeout = setTimeout(() => {
       if (loadingInterval) {
         loadingStatus.textContent = 'Still evaluating — this can take several minutes. Check back later.';
-        loadingStatus.classList.add('text-yellow-400');
+        loadingStatus.classList.add('text-[var(--grade-mid)]');
         loadingStatus.classList.remove('text-[var(--text-muted)]');
       }
     }, STALL_THRESHOLD_MS);
@@ -329,40 +364,27 @@ const API_BASE = '';
     abortController = null;
     loadingBar.style.width = '100%';
     loadingStatus.textContent = 'Done!';
-    loadingStatus.classList.remove('text-yellow-400');
+    loadingStatus.classList.remove('text-[var(--grade-mid)]');
     loadingStatus.classList.add('text-[var(--text-muted)]');
   }
 
   // ===== Evaluation flow =====
-async function runEvaluation(targetCompanyOverride = null): Promise<void> {
-  const companyToUse = targetCompanyOverride ?? targetCompany;
+  async function runEvaluation(targetCompanyOverride = null): Promise<void> {
+    const companyToUse = targetCompanyOverride ?? targetCompany;
 
     const content = textarea.value.trim();
-    if (content.length < 50) { evaluateHint.classList.remove('hidden'); textarea.focus(); return; }
+    if (content.length < 50) { evaluateHint.hidden = false; textarea.focus(); return; }
 
     evaluateBtn.disabled = true;
     evaluateBtn.textContent = 'Evaluating...';
 
-    animateLoading();
-
-    abortController = new AbortController();
-    const hardKill = setTimeout(() => abortController?.abort(), FETCH_TIMEOUT_MS);
-
+    // Start async evaluation and get job_id
     try {
-      const resp = await fetch('/api/evaluate', {
+      const resp = await fetch('/api/evaluate/async', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: content }),
-        signal: abortController.signal,
+        body: JSON.stringify({ text: content, target_role: 'FE-DEV', target_company: companyToUse }),
       });
-
-      clearTimeout(hardKill);
-
-      if (resp.status === 504) {
-        stopLoading();
-        setTimeout(() => renderError('Evaluation timed out on the server. This can happen with complex job descriptions. Please try again.', true), 350);
-        return;
-      }
 
       if (!resp.ok) {
         let errMsg = `Server error (${resp.status})`;
@@ -371,16 +393,221 @@ async function runEvaluation(targetCompanyOverride = null): Promise<void> {
       }
 
       const data = await resp.json();
-      stopLoading();
-      setTimeout(() => renderResults(data), 350);
+      const jobId = data.job_id;
+      if (!jobId) throw new Error('No job_id returned from server');
+
+      // Connect to SSE stream
+      await connectToSSEStream(jobId);
     } catch (e: any) {
-      clearTimeout(hardKill);
       stopLoading();
-      if (e.name === 'AbortError') {
-        setTimeout(() => renderError('Evaluation took too long and was cancelled. Please try again or with a shorter job description.', true), 350);
-      } else {
-        setTimeout(() => renderError(e.message || 'Evaluation failed'), 350);
+      setTimeout(() => renderError(e.message || 'Evaluation failed'), 350);
+    }
+  }
+
+  // ===== SSE Streaming =====
+  let eventSource: EventSource | null = null;
+  let sseReconnectAttempts = 0;
+  const MAX_SSE_RECONNECT_ATTEMPTS = 5;
+  const SSE_RECONNECT_BASE_DELAY = 1000; // 1 second
+
+  async function connectToSSEStream(jobId: string): Promise<void> {
+    animateLoading();
+
+    const streamUrl = `/api/evaluate/${jobId}/stream`;
+
+    function createEventSource(): EventSource {
+      const es = new EventSource(streamUrl);
+
+      es.onopen = () => {
+        console.log('[SSE] Connected to stream');
+        sseReconnectAttempts = 0;
+      };
+
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleSSEEvent(data);
+        } catch (e) {
+          console.warn('[SSE] Failed to parse event:', event.data);
+        }
+      };
+
+      es.onerror = (err) => {
+        console.error('[SSE] Connection error:', err);
+        es.close();
+
+        if (sseReconnectAttempts < MAX_SSE_RECONNECT_ATTEMPTS) {
+          const delay = SSE_RECONNECT_BASE_DELAY * Math.pow(2, sseReconnectAttempts);
+          sseReconnectAttempts++;
+          console.log(`[SSE] Reconnecting in ${delay}ms (attempt ${sseReconnectAttempts}/${MAX_SSE_RECONNECT_ATTEMPTS})`);
+          setTimeout(() => {
+            eventSource = createEventSource();
+          }, delay);
+        } else {
+          // Max retries exceeded - fallback to polling
+          console.warn('[SSE] Max reconnect attempts reached, falling back to polling');
+          fallbackToPolling(jobId);
+        }
+      };
+
+      return es;
+    }
+
+    eventSource = createEventSource();
+  }
+
+  function handleSSEEvent(data: any): void {
+    const { type, stage, progress, message, content, job_id } = data;
+
+    console.log('[SSE] Event:', type, stage, progress, message);
+
+    switch (type) {
+      case 'init':
+        // Initial connection - update loading status
+        loadingStatus.textContent = message || 'Connected to evaluation stream...';
+        break;
+
+      case 'stage':
+        // Stage update - update progress bar and status
+        if (progress !== undefined) {
+          loadingBar.style.width = Math.min(progress, 95) + '%';
+        }
+        if (message) {
+          loadingStatus.textContent = message;
+        }
+        // Update stage badge if needed
+        updateStageBadge(stage);
+        break;
+
+      case 'token':
+        // Token streaming - append to live display
+        if (content) {
+          appendTokenToLiveDisplay(content);
+        }
+        break;
+
+      case 'complete':
+        // Evaluation complete - stop loading, show results
+        stopLoading();
+        // Fetch final result
+        fetchFinalResult(job_id);
+        break;
+
+      case 'error':
+        stopLoading();
+        setTimeout(() => renderError(message || 'Evaluation failed'), 350);
+        break;
+    }
+  }
+
+  function updateStageBadge(stage: string): void {
+    // Could update a visual stage indicator in the loading section
+    const stageLabels: Record<string, string> = {
+      'init': 'Initializing...',
+      'owl_alpha': 'Analyzing with owl-alpha...',
+      'cursor_eval': 'Running Cursor evaluation...',
+      'validating': 'Validating report...',
+      'saving': 'Saving report...',
+      'market_scoring': 'Computing market score...',
+      'complete': 'Complete!',
+    };
+    if (stageLabels[stage]) {
+      loadingStatus.textContent = stageLabels[stage];
+    }
+  }
+
+  let liveDisplayBuffer = '';
+  let liveDisplayElement: HTMLElement | null = null;
+
+  function appendTokenToLiveDisplay(token: string): void {
+    liveDisplayBuffer += token;
+
+    if (!liveDisplayElement) {
+      // Create live display element in the loading section
+      const loadingSection = document.getElementById('eval-loading')!;
+      liveDisplayElement = document.createElement('div');
+      liveDisplayElement.className = 'mt-4 p-4 bg-[var(--bg-elevated)] rounded-lg font-mono text-sm text-[var(--text-primary)] whitespace-pre-wrap max-h-64 overflow-y-auto border border-[var(--border-default)]';
+      liveDisplayElement.style.fontFamily = 'monospace';
+      liveDisplayElement.textContent = 'Streaming evaluation...\n\n';
+      loadingSection.appendChild(liveDisplayElement);
+    }
+
+    liveDisplayElement.textContent = liveDisplayBuffer;
+    // Auto-scroll to bottom
+    liveDisplayElement.scrollTop = liveDisplayElement.scrollHeight;
+  }
+
+  function fallbackToPolling(jobId: string): void {
+    loadingStatus.textContent = 'SSE unavailable, falling back to polling...';
+    loadingStatus.classList.add('text-[var(--grade-mid)]');
+    loadingStatus.classList.remove('text-[var(--text-muted)]');
+
+    // Poll for completion every 3 seconds using the status endpoint
+    const pollInterval = setInterval(async () => {
+      try {
+        const jobResp = await fetch(`/api/evaluate/${jobId}/status`);
+        if (!jobResp.ok) return;
+
+        const job = await jobResp.json();
+        if (job.status === 'completed' || job.status === 'failed') {
+          clearInterval(pollInterval);
+          stopLoading();
+          if (job.status === 'completed') {
+            // Convert job to result format
+            const resultData = {
+              report: job.report,
+              company: job.company,
+              role: job.role,
+              report_path: job.report_path,
+              legitimacy: job.legitimacy,
+              scam_warning: job.scam_warning,
+              market_score: job.market_score,
+              market_grade: job.market_grade,
+              top_gaps: job.top_gaps,
+              top_strengths: job.top_strengths,
+              company_fit: job.company_fit,
+            };
+            renderResults(resultData);
+          } else {
+            renderError(job.error || 'Evaluation failed');
+          }
+        }
+      } catch (e) {
+        console.warn('[Polling] Error:', e);
       }
+    }, 3000);
+
+    // Cleanup after 10 minutes max
+    setTimeout(() => clearInterval(pollInterval), 10 * 60 * 1000);
+  }
+
+  async function fetchFinalResult(jobId: string): Promise<void> {
+    try {
+      // We could either get the result from the SSE complete event or fetch it
+      // For now, we'll use the buffered content if we have it
+      if (liveDisplayBuffer && liveDisplayBuffer.length > 50) {
+        // Create a mock result from the streamed content
+        const mockData = {
+          report: liveDisplayBuffer,
+          company: 'Streamed Result',
+          role: '',
+          report_path: '',
+          legitimacy: { tier: 'uncertain', score: 3, reasoning: '' },
+          scam_warning: false,
+          market_score: null,
+          market_grade: null,
+          top_gaps: [],
+          top_strengths: [],
+          company_fit: null,
+        };
+        setTimeout(() => renderResults(mockData), 350);
+      } else {
+        // Fallback: we'd need a job status endpoint
+        console.warn('[SSE] No buffered content, would need job status endpoint');
+        setTimeout(() => renderError('Evaluation completed but no content received'), 350);
+      }
+    } catch (e) {
+      setTimeout(() => renderError('Failed to fetch final result'), 350);
     }
   }
 
@@ -405,88 +632,88 @@ async function runEvaluation(targetCompanyOverride = null): Promise<void> {
     const marketInsightsSection = document.getElementById('market-insights');
     if (marketInsightsSection) {
       if (data.market_score !== null && data.market_score !== undefined) {
-        marketInsightsSection.classList.remove('hidden');
+        marketInsightsSection.hidden = false;
         // Update the MarketScoreBadge container
-        marketBadgeContainer.innerHTML = `<MarketScoreBadge score=\"${data.market_score}\" grade=\"${data.market_grade || ''}\" visible=\"true\" />`;
+        marketBadgeContainer.innerHTML = `<MarketScoreBadge score="${data.market_score}" grade="${data.market_grade || ''}" visible="true" />`;
       } else {
-        marketInsightsSection.classList.add('hidden');
+        marketInsightsSection.hidden = true;
       }
     }
 
     // Show gap analysis panel if we have gaps or strengths
-    const gapAnalysisSection = document.getElementById('gap-panel-container');
+    const gapAnalysisSection = document.getElementById('gap-panel');
     if (gapAnalysisSection) {
       const hasGaps = data.top_gaps && data.top_gaps.length > 0;
       const hasStrengths = data.top_strengths && data.top_strengths.length > 0;
       if (hasGaps || hasStrengths) {
-        gapAnalysisSection.classList.remove('hidden');
+        gapAnalysisSection.hidden = false;
         // Update the GapAnalysisPanel container
-        gapPanelContainer.innerHTML = `<GapAnalysisPanel gaps=\"${JSON.stringify(data.top_gaps)}\" suggestions=\"[]\" strengths=\"${JSON.stringify(data.top_strengths)}\" visible=\"true\" />`;
+        gapPanelContainer.innerHTML = `<GapAnalysisPanel gaps="${JSON.stringify(data.top_gaps)}" suggestions="[]" strengths="${JSON.stringify(data.top_strengths)}" visible="true" />`;
       } else {
-        gapAnalysisSection.classList.add('hidden');
+        gapAnalysisSection.hidden = true;
       }
     }
 
     // Show company fit section if we have company_fit
     if (companyFitSection) {
       if (data.company_fit) {
-        companyFitSection.classList.remove('hidden');
+        companyFitSection.hidden = false;
         // Render company fit content
         const cf = data.company_fit;
         const fitColor = cf.cultureFitScore >= 80 ? 'var(--success)' : cf.cultureFitScore >= 60 ? 'var(--warning)' : 'var(--error)';
         const salaryDiffClass = cf.salaryComparison.difference >= 0 ? 'positive' : 'negative';
         companyFitContent.innerHTML = `
-          <div class=\"company-fit\">
-            <div class=\"fit-score\">
-              <h3 class=\"section-title\">Culture Fit Score</h3>
-              <div class=\"score-container\">
-                <div class=\"score-bar\">
-                  <div class=\"score-fill\" style=\"width: ${cf.cultureFitScore}%; background-color: ${fitColor};\"></div>
+          <div class="company-fit">
+            <div class="fit-score">
+              <h3 class="section-title">Culture Fit Score</h3>
+              <div class="score-container">
+                <div class="score-bar">
+                  <div class="score-fill" style="width: ${cf.cultureFitScore}%; background-color: ${fitColor};"></div>
                 </div>
-                <div class=\"score-value\">${cf.cultureFitScore}/100</div>
+                <div class="score-value">${cf.cultureFitScore}/100</div>
               </div>
             </div>
-            <div class=\"fit-factors\">
-              <h3 class=\"section-title\">Culture Fit Factors</h3>
-              <ul class=\"factors-list\">
+            <div class="fit-factors">
+              <h3 class="section-title">Culture Fit Factors</h3>
+              <ul class="factors-list">
                 ${cf.cultureFitFactors.map(factor => `<li>${factor}</li>`).join('')}
               </ul>
             </div>
-            <div class=\"open-roles\">
-              <h3 class=\"section-title\">Roles Hiring</h3>
-              <div class=\"roles-tags\">
-                ${cf.openRoles.map(role => `<span class=\"role-tag\">${role}</span>`).join('')}
+            <div class="open-roles">
+              <h3 class="section-title">Roles Hiring</h3>
+              <div class="roles-tags">
+                ${cf.openRoles.map(role => `<span class="role-tag">${role}</span>`).join('')}
               </div>
             </div>
-            <div class=\"salary-comparison\">
-              <h3 class=\"section-title\">Salary Comparison</h3>
-              <div class=\"salary-chart\">
-                <div class=\"salary-bar company\">
+            <div class="salary-comparison">
+              <h3 class="section-title">Salary Comparison</h3>
+              <div class="salary-chart">
+                <div class="salary-bar company">
                   <label>Company Median</label>
-                  <div class=\"bar\" style=\"height: ${Math.min(cf.salaryComparison.companyMedian / 1000 * 10, 80)}px;\"></div>
-                  <span class=\"value\">${cf.salaryComparison.companyMedian} DKK</span>
+                  <div class="bar" style="height: ${Math.min(cf.salaryComparison.companyMedian / 1000 * 10, 80)}px;"></div>
+                  <span class="value">${cf.salaryComparison.companyMedian} DKK</span>
                 </div>
-                <div class=\"salary-bar market\">
+                <div class="salary-bar market">
                   <label>Market Average</label>
-                  <div class=\"bar\" style=\"height: ${Math.min(cf.salaryComparison.marketAverage / 1000 * 10, 80)}px;\"></div>
-                  <span class=\"value\">${cf.salaryComparison.marketAverage} DKK</span>
+                  <div class="bar" style="height: ${Math.min(cf.salaryComparison.marketAverage / 1000 * 10, 80)}px;"></div>
+                  <span class="value">${cf.salaryComparison.marketAverage} DKK</span>
                 </div>
               </div>
-              <p class=\"salary-diff ${salaryDiffClass}\">
-                ${cf.salaryComparison.difference >= 0 ? 
-                  `Above market by ${cf.salaryComparison.difference} DKK (${cf.salaryComparison.vsMarketPct}%)` : 
-                  `Below market by ${Math.abs(cf.salaryComparison.difference)} DKK (${cf.salaryComparison.vsMarketPct}%)`}
+              <p class="salary-diff ${salaryDiffClass}">
+                ${cf.salaryComparison.difference >= 0
+                  ? `Above market by ${cf.salaryComparison.difference} DKK (${cf.salaryComparison.vsMarketPct}%)`
+                  : `Below market by ${Math.abs(cf.salaryComparison.difference)} DKK (${cf.salaryComparison.vsMarketPct}%)`}
               </p>
             </div>
-            <div class=\"apply-section\">
-              <a href=\"${cf.applyUrl}\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"btn btn-primary\">
+            <div class="apply-section">
+              <a href="${cf.applyUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                 Apply Now
               </a>
             </div>
           </div>
         `;
       } else {
-        companyFitSection.classList.add('hidden');
+        companyFitSection.hidden = true;
         companyFitContent.innerHTML = '';
       }
     }
@@ -527,21 +754,21 @@ async function runEvaluation(targetCompanyOverride = null): Promise<void> {
 
   // ===== Render error =====
   function renderError(message: string, isTimeout: boolean = false): void {
-    const msgEl = errorSection.querySelector('p.text-[var(--text-secondary)]') as HTMLElement;
+    const msgEl = errorSection.querySelector('.evaluate-page__error-message') as HTMLElement;
     msgEl.textContent = message;
 
     // Update heading based on error type
-    const headingEl = errorSection.querySelector('h4') as HTMLElement;
+    const headingEl = errorSection.querySelector('.evaluate-page__error-title') as HTMLElement;
     headingEl.textContent = isTimeout ? 'Evaluation timed out' : 'Evaluation failed';
 
     // Show/hide retry button (only for timeout)
-    errorRetryBtn.classList.toggle('hidden', !isTimeout);
+    errorRetryBtn.hidden = !isTimeout;
     if (isTimeout) {
       errorRetryBtn.textContent = 'Retry Evaluation';
-      errorRetryBtn.onclick = () => { errorSection.classList.add('hidden'); runEvaluation(); };
+      errorRetryBtn.dataset.action = 'eval-retry';
     } else {
       errorRetryBtn.textContent = 'Try Again';
-      errorRetryBtn.onclick = () => { errorSection.classList.add('hidden'); showSection('eval-empty'); };
+      errorRetryBtn.dataset.action = 'eval-empty';
     }
 
     showSection('eval-error');
@@ -552,8 +779,673 @@ async function runEvaluation(targetCompanyOverride = null): Promise<void> {
   // ===== Event wiring =====
   evaluateBtn.addEventListener('click', () => runEvaluation());
   reEvaluateBtn.addEventListener('click', () => showSection('eval-empty'));
-  errorRetryBtn.addEventListener('click', () => { errorSection.classList.add('hidden'); showSection('eval-empty'); });
+  errorRetryBtn.addEventListener('click', () => {
+    const action = errorRetryBtn.dataset.action;
+    if (action === 'eval-retry') {
+      errorSection.hidden = true;
+      runEvaluation();
+    } else if (action === 'eval-empty') {
+      errorSection.hidden = true;
+      showSection('eval-empty');
+    }
+  });
+  errorBackBtn.addEventListener('click', () => {
+    errorSection.hidden = true;
+    showSection('eval-empty');
+  });
   textarea.addEventListener('keydown', (e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runEvaluation();
   });
 </script>
+
+<style>
+  .evaluate-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .evaluate-page__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 1024px) {
+    .evaluate-page__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .evaluate-page__hero {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .evaluate-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .evaluate-page__company-search {
+    width: 100%;
+    max-width: var(--size-80);
+  }
+
+  .evaluate-page__input-section {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .evaluate-page__section-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__tabs {
+    display: flex;
+    gap: var(--space-1);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .evaluate-page__tab {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: var(--border-width-thick) solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .evaluate-page__tab:hover {
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__tab--active {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-primary);
+  }
+
+  .evaluate-page__label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+
+  .evaluate-page__textarea {
+    width: 100%;
+    min-height: var(--size-50);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    resize: vertical;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .evaluate-page__textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 var(--border-width-thick) var(--accent-primary) / 20%;
+  }
+
+  .evaluate-page__textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .evaluate-page__textarea-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-2);
+  }
+
+  .evaluate-page__char-count {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .evaluate-page__clear-btn {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+
+  .evaluate-page__clear-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__url-input-group {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .evaluate-page__url-input {
+    flex: 1;
+    height: var(--size-11);
+    padding: 0 var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .evaluate-page__url-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 var(--border-width-thick) var(--accent-primary) / 20%;
+  }
+
+  .evaluate-page__fetch-btn {
+    height: var(--size-11);
+    padding: 0 var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+    white-space: nowrap;
+  }
+
+  .evaluate-page__fetch-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+  }
+
+  .evaluate-page__fetch-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .evaluate-page__error {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--grade-low);
+  }
+
+  .evaluate-page__evaluate-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-top: var(--space-4);
+    border-top: var(--border-width) solid var(--border-default);
+  }
+
+  .evaluate-page__evaluate-btn {
+    width: 100%;
+    max-width: 100%;
+    height: var(--size-12);
+    padding: 0 var(--space-8);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-inverse);
+    background: var(--accent-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+  }
+
+  .evaluate-page__evaluate-btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  .evaluate-page__evaluate-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 640px) {
+    .evaluate-page__evaluate-btn {
+      width: auto;
+    }
+  }
+
+  .evaluate-page__hint {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .evaluate-page__results-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .evaluate-page__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-10);
+  }
+
+  .evaluate-page__empty-icon {
+    width: var(--size-16);
+    height: var(--size-16);
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .evaluate-page__state-title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__state-desc {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .evaluate-page__loading-content {
+    background: var(--bg-surface);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+    width: 100%;
+    max-width: var(--size-160);
+  }
+
+  .evaluate-page__loading-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .evaluate-page__spinner {
+    width: var(--size-2);
+    height: var(--size-2);
+    border-radius: var(--radius-full);
+    background: var(--accent-primary);
+    animation: evaluate-page__pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes evaluate-page__pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .evaluate-page__loading-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__progress-bar-container {
+    width: 100%;
+    height: var(--size-2);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .evaluate-page__progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent-primary), var(--accent-hover));
+    border-radius: var(--radius-full);
+    transition: width 300ms ease-out;
+  }
+
+  .evaluate-page__loading-status {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .evaluate-page__skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .evaluate-page__skeleton-card {
+    background: var(--bg-elevated);
+    height: var(--size-24);
+    border-radius: var(--radius-lg);
+    animation: evaluate-page__shimmer 2s ease-in-out infinite;
+  }
+
+  .evaluate-page__skeleton-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .evaluate-page__skeleton-text {
+    background: var(--bg-elevated);
+    height: var(--size-4);
+    width: 100%;
+    border-radius: var(--radius-sm);
+    animation: evaluate-page__shimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes evaluate-page__shimmer {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+
+  .evaluate-page__market-insights {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 1024px) {
+    .evaluate-page__market-insights {
+      grid-template-columns: 1fr 2fr;
+    }
+  }
+
+  .evaluate-page__company-fit {
+    background: var(--bg-surface);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .evaluate-page__company-fit-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .evaluate-page__company-fit-header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .evaluate-page__company-fit-title {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__company-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .evaluate-page__company-select-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__company-select {
+    height: var(--size-10);
+    padding: 0 var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .evaluate-page__company-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 var(--border-width-thick) var(--accent-primary) / 20%;
+  }
+
+  .evaluate-page__score-section {
+    background: var(--bg-surface);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-8);
+  }
+
+  .evaluate-page__score-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .evaluate-page__grade-ring {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-30);
+    height: var(--size-30);
+    border-radius: var(--radius-full);
+  }
+
+  .evaluate-page__grade-ring-svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+  }
+
+  .evaluate-page__grade-ring-progress {
+    transition: stroke-dashoffset 500ms ease-out, stroke 300ms ease;
+  }
+
+  .evaluate-page__grade-letter {
+    position: relative;
+    font-size: var(--text-4xl);
+    font-weight: 700;
+  }
+
+  .evaluate-page__score-value {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__score-summary {
+    text-align: center;
+  }
+
+  .evaluate-page__score-title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .evaluate-page__score-desc {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__score-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+  }
+
+  .evaluate-page__breakdown-section {
+    background: var(--bg-surface);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .evaluate-page__breakdown-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .evaluate-page__breakdown-content details {
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .evaluate-page__breakdown-content summary {
+    list-style: none;
+  }
+
+  .evaluate-page__breakdown-content summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .evaluate-page__action-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 640px) {
+    .evaluate-page__action-bar {
+      flex-direction: row;
+    }
+  }
+
+  .evaluate-page__re-evaluate-btn {
+    height: var(--size-10);
+    padding: 0 var(--space-6);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-inverse);
+    background: var(--accent-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+  }
+
+  .evaluate-page__re-evaluate-btn:hover {
+    background: var(--accent-hover);
+  }
+
+  .evaluate-page__output-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--size-10);
+    padding: 0 var(--space-6);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-base), background-color var(--transition-base);
+  }
+
+  .evaluate-page__output-link:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle);
+  }
+
+  .evaluate-page__error-content {
+    display: flex;
+    gap: var(--space-4);
+    max-width: var(--size-120);
+  }
+
+  .evaluate-page__error-icon {
+    width: var(--size-6);
+    height: var(--size-6);
+    color: var(--grade-low);
+    flex-shrink: 0;
+    margin-top: var(--space-0-5);
+  }
+
+  .evaluate-page__error-text {
+    flex: 1;
+  }
+
+  .evaluate-page__error-title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--grade-low);
+  }
+
+  .evaluate-page__error-message {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .evaluate-page__error-retry-btn,
+  .evaluate-page__error-back-btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .evaluate-page__error-retry-btn {
+    color: var(--grade-low);
+    border: var(--border-width) solid var(--grade-low-border);
+    background: transparent;
+  }
+
+  .evaluate-page__error-retry-btn:hover {
+    background: var(--grade-low-bg);
+  }
+
+  .evaluate-page__error-back-btn {
+    color: var(--text-primary);
+    border: var(--border-width) solid var(--border-hover);
+    background: var(--bg-surface);
+  }
+
+  .evaluate-page__error-back-btn:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle);
+  }
+</style>

@@ -1,0 +1,235 @@
+---
+// CommandLineBar.astro — Persistent bottom bar with theme/density/budget
+// Design System Foundation §3.3 & §4.3
+// Astro + module script, semantic tokens only
+
+import ThemeSwitcher from '../ui/ThemeSwitcher.astro'
+import DensitySwitcher from '../ui/DensitySwitcher.astro'
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<footer
+  class:list={['command-line-bar', className]}
+  data-component="command-line-bar"
+  role="status"
+  aria-label="Command line bar"
+>
+  <div class="command-line-bar__left">
+    <ThemeSwitcher />
+    <DensitySwitcher />
+  </div>
+
+  <div class="command-line-bar__center">
+    <kbd class="command-line-bar__shortcut" aria-hidden="true">
+      <span class="command-line-bar__kbd">⌘</span>K
+    </kbd>
+    <span class="command-line-bar__hint">Command Palette</span>
+  </div>
+
+  <div class="command-line-bar__right">
+    <div class="command-line-bar__budget" id="api-budget-indicator" aria-live="polite">
+      <span class="command-line-bar__budget-label">API Budget</span>
+      <span class="command-line-bar__budget-value" data-budget-used="0">0</span>
+      <span class="command-line-bar__budget-separator">/</span>
+      <span class="command-line-bar__budget-max" data-budget-max="100">100</span>
+      <div class="command-line-bar__budget-bar" aria-hidden="true">
+        <div class="command-line-bar__budget-fill" style="width: 0%;" data-budget-fill></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .command-line-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-6);
+    background: var(--bg-surface);
+    border-top: var(--border-width) solid var(--border-default);
+    z-index: var(--z-sticky);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .command-line-bar__left,
+  .command-line-bar__center,
+  .command-line-bar__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .command-line-bar__center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .command-line-bar__shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .command-line-bar__kbd {
+    font-weight: var(--font-bold);
+  }
+
+  .command-line-bar__hint {
+    display: none;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 640px) {
+    .command-line-bar__hint {
+      display: inline;
+    }
+  }
+
+  .command-line-bar__budget {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    min-width: var(--size-45);
+  }
+
+  .command-line-bar__budget-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-secondary); /* Use text-secondary for sufficient contrast */
+  }
+
+  .command-line-bar__budget-value {
+    font-family: var(--font-mono);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+  }
+
+  .command-line-bar__budget-separator {
+    color: var(--text-secondary);
+  }
+
+  .command-line-bar__budget-max {
+    font-family: var(--font-mono);
+    color: var(--text-secondary); /* Use text-secondary for sufficient contrast */
+  }
+
+  .command-line-bar__budget-bar {
+    position: relative;
+    width: var(--size-15);
+    height: var(--size-1);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .command-line-bar__budget-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: var(--radius-full);
+    transition: width var(--duration-base) var(--ease-out), background var(--duration-fast) var(--ease-out);
+  }
+
+  /* Warning states */
+  .command-line-bar__budget-fill[data-warning="true"] {
+    background: var(--grade-mid);
+  }
+
+  .command-line-bar__budget-fill[data-critical="true"] {
+    background: var(--grade-low);
+  }
+</style>
+
+<script>
+  import { getBudgetStatus } from '../../lib/api-budget.ts';
+
+  export function initCommandLineBar(root: HTMLElement): () => void {
+    const bar = root.querySelector('[data-component="command-line-bar"]') as HTMLElement;
+    if (!bar) return () => {};
+
+    const usedEl = bar.querySelector('[data-budget-used]') as HTMLElement;
+    const maxEl = bar.querySelector('[data-budget-max]') as HTMLElement;
+    const fillEl = bar.querySelector('[data-budget-fill]') as HTMLElement;
+
+    const updateBudget = () => {
+      const status = getBudgetStatus();
+      const used = status.used;
+      const max = status.max;
+      const percent = max > 0 ? (used / max) * 100 : 0;
+
+      usedEl.textContent = String(used);
+      maxEl.textContent = String(max);
+      fillEl.style.width = `${percent}%`;
+
+      // Warning states
+      fillEl.dataset.warning = String(percent >= 70);
+      fillEl.dataset.critical = String(percent >= 90);
+
+      // Update fill color via CSS
+      if (percent >= 90) {
+        fillEl.style.background = 'var(--grade-low)';
+      } else if (percent >= 70) {
+        fillEl.style.background = 'var(--grade-mid)';
+      } else {
+        fillEl.style.background = 'var(--accent-primary)';
+      }
+    };
+
+    // Initial update
+    updateBudget();
+
+    // Listen for budget changes
+    const handleBudgetChange = (event: CustomEvent) => {
+      if (event.detail) {
+        updateBudget();
+      }
+    };
+    window.addEventListener('budget:change', handleBudgetChange as EventListener);
+
+    // Periodic update (in case of external changes)
+    const interval = setInterval(updateBudget, 5000);
+
+    return () => {
+      window.removeEventListener('budget:change', handleBudgetChange as EventListener);
+      clearInterval(interval);
+    };
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-component="command-line-bar"]').forEach((el) => {
+        initCommandLineBar(el as HTMLElement);
+      });
+    });
+
+    window.addEventListener('pagelayout:ready', () => {
+      document.querySelectorAll('[data-component="command-line-bar"]').forEach((el) => {
+        initCommandLineBar(el as HTMLElement);
+      });
+    });
+  }
+</script>

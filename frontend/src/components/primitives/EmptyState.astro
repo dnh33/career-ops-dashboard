@@ -1,5 +1,5 @@
 ---
-import type { EmptyStateProps } from './types';
+import type { EmptyStateProps } from './types'
 
 interface Props extends EmptyStateProps {}
 
@@ -35,26 +35,26 @@ const {
     text-align: center;
     padding: var(--space-12) var(--space-6);
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
+    border: var(--border-width) solid var(--border-default);
   }
 
   .empty-state__icon {
-    font-size: 2rem;
-    color: var(--text-quaternary);
+    font-size: var(--text-2xl);
+    color: var(--text-muted);
     margin-bottom: var(--space-4);
   }
 
   .empty-state__title {
     margin: 0 0 var(--space-2);
     font-size: var(--text-lg);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-weight: 600;
     color: var(--text-primary);
   }
 
   .empty-state__description {
     margin: 0 0 var(--space-4);
-    max-width: 28rem;
+    max-width: var(--size-112);
     font-size: var(--text-sm);
     color: var(--text-secondary);
     line-height: 1.6;
@@ -66,7 +66,7 @@ const {
     gap: var(--space-2);
     font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--color-primary);
+    color: var(--accent-primary);
     text-decoration: none;
     min-height: auto;
   }

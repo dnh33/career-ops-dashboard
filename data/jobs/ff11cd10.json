@@ -1,0 +1,29 @@
+{
+  "job_id": "ff11cd10",
+  "jd_text": "Software engineer position at a tech company. Requires Python and React.",
+  "target_role": "FE-DEV",
+  "target_company": null,
+  "status": "running",
+  "stage": "cursor_eval",
+  "progress": 30,
+  "message": "Running Cursor evaluation...",
+  "report": null,
+  "company": "The user wants me to extract a company name from the job description provided. The description is: \"Software engineer position at a tech company. Requires Python and React.\"\n\nThere is no specific company name mentioned (like \"Google\", \"Microsoft\",",
+  "role": "",
+  "report_path": "",
+  "legitimacy": {
+    "tier": "uncertain",
+    "score": 2,
+    "reasoning": "The description is extremely vague, lacking company name, location, salary, responsibilities, or specific requirements beyond two common technologies, which is a red flag for potential scams or low-quality postings."
+  },
+  "scam_warning": false,
+  "market_score": null,
+  "market_grade": null,
+  "top_gaps": [],
+  "top_strengths": [],
+  "company_fit": null,
+  "error": null,
+  "created_at": "2026-07-03T11:37:02.236222",
+  "started_at": "2026-07-03T11:37:02.237466",
+  "completed_at": null
+}

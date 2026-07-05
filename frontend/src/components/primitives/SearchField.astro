@@ -1,5 +1,5 @@
 ---
-import type { SearchFieldProps } from './types';
+import type { SearchFieldProps } from './types'
 
 interface Props extends SearchFieldProps {}
 
@@ -29,18 +29,18 @@ const {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     padding: var(--space-2) 0;
-    min-height: 44px;
+    min-height: var(--size-11);
     transition: border-color var(--transition-base);
   }
 
   .search-field:focus-within {
-    border-bottom-color: var(--color-primary);
+    border-bottom-color: var(--accent-primary);
   }
 
   .search-field__icon {
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     font-size: var(--text-base);
     flex-shrink: 0;
   }
@@ -50,7 +50,7 @@ const {
     border: none;
     background: transparent;
     color: var(--text-primary);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
     min-height: auto;
     padding: 0;
@@ -58,6 +58,6 @@ const {
   }
 
   .search-field__input::placeholder {
-    color: var(--text-quaternary);
+    color: var(--text-muted);
   }
 </style>

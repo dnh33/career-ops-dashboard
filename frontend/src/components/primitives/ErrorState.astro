@@ -1,5 +1,5 @@
 ---
-import type { ErrorStateProps } from './types';
+import type { ErrorStateProps } from './types'
 
 interface Props extends ErrorStateProps {}
 
@@ -37,27 +37,27 @@ const {
     text-align: center;
     padding: var(--space-10) var(--space-6);
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
   }
 
   .error-state__icon {
-    font-size: 2rem;
-    color: var(--ui-error);
+    font-size: var(--text-2xl);
+    color: var(--grade-low);
     margin-bottom: var(--space-3);
   }
 
   .error-state__title {
     margin: 0 0 var(--space-2);
     font-size: var(--text-lg);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-weight: 600;
     color: var(--text-primary);
   }
 
   .error-state__message {
     margin: 0 0 var(--space-4);
-    max-width: 28rem;
+    max-width: var(--size-112);
     font-size: var(--text-sm);
     color: var(--text-secondary);
     line-height: 1.6;
@@ -68,18 +68,18 @@ const {
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--stroke-nous);
+    border: var(--border-width) solid var(--border-default);
     background: var(--bg-elevated);
     color: var(--text-primary);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
-    box-shadow: var(--shadow-nous);
+    box-shadow: var(--shadow-md);
     border-radius: var(--radius-sm);
   }
 
   .error-state__retry:hover {
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 </style>

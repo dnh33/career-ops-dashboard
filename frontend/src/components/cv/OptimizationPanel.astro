@@ -1,14 +1,14 @@
 ---
-import SegmentedControl from '../primitives/SegmentedControl.astro';
-import StatusPill from '../primitives/StatusPill.astro';
-import CodeBlock from '../primitives/CodeBlock.astro';
-import Overlay from '../primitives/Overlay.astro';
+import SegmentedControl from '../primitives/SegmentedControl.astro'
+import StatusPill from '../primitives/StatusPill.astro'
+import CodeBlock from '../primitives/CodeBlock.astro'
+import Overlay from '../primitives/Overlay.astro'
 
 interface Props {
-  role?: string;
+  role?: string
 }
 
-const { role = 'ai-engineer' } = Astro.props;
+const { role = 'ai-engineer' } = Astro.props
 ---
 
 <Overlay id="cv-rule-diff-overlay" class="cv-rule-diff-overlay" aria-label="Rule diff preview">
@@ -115,7 +115,7 @@ const { role = 'ai-engineer' } = Astro.props;
 <style>
   .cv-optimization-panel {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-md);
     padding: var(--space-4);
     height: 100%;
@@ -130,7 +130,7 @@ const { role = 'ai-engineer' } = Astro.props;
     align-items: flex-start;
     gap: var(--space-4);
     padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .cv-optimization-title {
@@ -146,14 +146,14 @@ const { role = 'ai-engineer' } = Astro.props;
     background: var(--bg-elevated);
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
   }
 
   .cv-optimization-score-value {
     font-family: var(--font-mono);
     font-size: var(--text-2xl);
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--accent-primary);
   }
 
   .cv-optimization-score-label {
@@ -169,7 +169,7 @@ const { role = 'ai-engineer' } = Astro.props;
 
   .cv-metric {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-md);
     padding: var(--space-3);
     text-align: center;
@@ -201,13 +201,13 @@ const { role = 'ai-engineer' } = Astro.props;
     flex-wrap: wrap;
     gap: var(--space-2);
     padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: var(--border-width) solid var(--border-default);
     margin-bottom: var(--space-2);
   }
 
   .cv-optimization-tab {
     background: transparent;
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-sm);
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
@@ -219,18 +219,18 @@ const { role = 'ai-engineer' } = Astro.props;
   }
 
   .cv-optimization-tab:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
   }
 
   .cv-optimization-tab.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
     color: var(--bg-primary);
   }
 
   .cv-optimization-rules {
-    flex: 1;
+    flex: 1: 1;
     overflow-y: auto;
     min-height: 0;
   }
@@ -255,14 +255,14 @@ const { role = 'ai-engineer' } = Astro.props;
 
   .cv-rule-item {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-md);
     padding: var(--space-3);
     transition: border-color var(--transition-fast);
   }
 
   .cv-rule-item:hover {
-    border-color: var(--color-primary);
+    border-color: var(--accent-primary);
   }
 
   .cv-rule-item.applied {
@@ -303,9 +303,9 @@ const { role = 'ai-engineer' } = Astro.props;
     font-weight: 600;
   }
 
-  .cv-rule-gap.critical { color: var(--color-error); }
-  .cv-rule-gap.high { color: var(--color-warning); }
-  .cv-rule-gap.medium { color: var(--color-info); }
+  .cv-rule-gap.critical { color: var(--grade-low); }
+  .cv-rule-gap.high { color: var(--grade-mid); }
+  .cv-rule-gap.medium { color: var(--grade-high); }
   .cv-rule-gap.low { color: var(--text-secondary); }
 
   .cv-rule-actions {
@@ -319,9 +319,9 @@ const { role = 'ai-engineer' } = Astro.props;
     min-height: auto;
   }
 
-  .cv-rule-action:not-applied-badge {
+  .cv-rule-action.applied-badge {
     font-size: var(--text-xs);
-    color: var(--color-success);
+    color: var(--grade-high);
     font-weight: 500;
   }
 
@@ -335,7 +335,7 @@ const { role = 'ai-engineer' } = Astro.props;
     display: flex;
     justify-content: flex-end;
     padding-top: var(--space-3);
-    border-top: 1px solid var(--border-default);
+    border-top: var(--border-width) solid var(--border-default);
     margin-top: auto;
   }
 
@@ -343,7 +343,7 @@ const { role = 'ai-engineer' } = Astro.props;
   .cv-rule-diff-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -357,11 +357,11 @@ const { role = 'ai-engineer' } = Astro.props;
 
   .cv-rule-diff-modal {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-nous);
+    box-shadow: var(--shadow-md);
     width: 100%;
-    max-width: 720px;
+    max-width: var(--size-180);
     max-height: 90vh;
     overflow: hidden;
     display: flex;
@@ -373,7 +373,7 @@ const { role = 'ai-engineer' } = Astro.props;
     align-items: center;
     justify-content: space-between;
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .cv-rule-diff-title {
@@ -413,7 +413,7 @@ const { role = 'ai-engineer' } = Astro.props;
     font-size: var(--text-xs);
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-tight);
   }
 
   .cv-rule-diff-rule {
@@ -435,28 +435,28 @@ const { role = 'ai-engineer' } = Astro.props;
     color: var(--text-secondary);
     margin: 0 0 var(--space-2);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-tight);
   }
 
   .cv-rule-diff-code {
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-default);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-md);
     padding: var(--space-3);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     line-height: 1.5;
     white-space: pre-wrap;
-    max-height: 300px;
+    max-height: var(--size-75);
     overflow: auto;
   }
 
   .cv-rule-diff-code:first-of-type {
-    border-left: 3px solid var(--color-error);
+    border-left: var(--border-width-thick) solid var(--grade-low);
   }
 
   .cv-rule-diff-code:last-of-type {
-    border-left: 3px solid var(--color-success);
+    border-left: var(--border-width-thick) solid var(--grade-high);
   }
 
   .cv-rule-diff-note {
@@ -473,10 +473,10 @@ const { role = 'ai-engineer' } = Astro.props;
     justify-content: flex-end;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    border-top: 1px solid var(--border-default);
+    border-top: var(--border-width) solid var(--border-default);
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .cv-rule-diff-diff {
       grid-template-columns: 1fr;
     }

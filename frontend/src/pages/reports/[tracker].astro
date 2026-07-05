@@ -1,0 +1,489 @@
+---
+import PageLayout from '../../components/layout/PageLayout.astro';
+import SearchField from '../../components/primitives/SearchField.astro';
+import SegmentedControl from '../../components/primitives/SegmentedControl.astro';
+import Loader from '../../components/primitives/Loader.astro';
+import ErrorState from '../../components/primitives/ErrorState.astro';
+
+export const prerender = false;
+---
+
+<PageLayout
+  title="Tracker Report"
+  pageTitle="Tracker Report"
+  description="View detailed report for a specific application tracker entry."
+  currentPath="/reports/[tracker]"
+>
+  <div slot="hero" class="reports-page__hero">
+    <h1 class="reports-page__title">Tracker Report</h1>
+    <p class="reports-page__subtitle">View detailed report for a specific application tracker entry.</p>
+  </div>
+
+  <div slot="actions" class="reports-page__toolbar">
+    <SearchField
+      id="filter-search"
+      name="filter-search"
+      placeholder="Search by company or role..."
+      class="reports-page__search"
+    />
+    <select id="filter-status" class="reports-page__status-filter">
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <section class="reports-page__table-section" aria-label="Tracker reports">
+    <header class="reports-page__section-header">
+      <h2 class="reports-page__section-title">Tracker Reports</h2>
+      <span id="reports-count" class="reports-page__count hermes-mono" data-mono="true">0</span>
+    </header>
+    <div class="data-table-panel">
+      <div class="data-table-panel__scroll">
+        <table class="data-table" id="reports-table" aria-label="Tracker reports">
+          <thead>
+            <tr>
+              <th scope="col" data-sort-key="number" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1"># <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" data-sort-key="date" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1">Date <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" data-sort-key="company" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1">Company <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" data-sort-key="role" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1">Role <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" data-sort-key="score" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1">Score <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" data-sort-key="status" tabindex="0" role="button">
+                <span class="inline-flex items-center gap-1">Status <svg class="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
+              </th>
+              <th scope="col" class="data-table__th--right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reports-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="reports-empty" class="hidden flex flex-col items-center justify-center py-16 text-center">
+      <svg class="w-16 h-16 text-[var(--text-muted)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+      <p class="text-[var(--text-secondary)] text-lg mb-2">No reports tracked yet</p>
+      <p class="text-[var(--text-muted)] text-sm">Add applications via the API to see them here.</p>
+    </div>
+  </section>
+</PageLayout>
+
+<script>
+  interface TrackerReport {
+    number: number;
+    date: string;
+    company: string;
+    role: string;
+    score: number | null;
+    status: string;
+    applied: string;
+    link: string;
+  }
+
+  let allItems: TrackerReport[] = [];
+  let filterStatus = 'all';
+  let filterSearch = '';
+  let sortKey: keyof TrackerReport = 'number';
+  let sortDir: 'asc' | 'desc' = 'asc';
+
+  // ===== Element refs =====
+  const tbody = document.getElementById('reports-table-body') as HTMLTableSectionElement;
+  const emptyEl = document.getElementById('reports-empty') as HTMLDivElement;
+  const countEl = document.getElementById('reports-count') as HTMLSpanElement;
+  const searchEl = document.getElementById('filter-search') as HTMLInputElement;
+  const statusEl = document.getElementById('filter-status') as HTMLSelectElement;
+
+  // ===== Status color mapping (uses semantic grade tokens from globals.css) =====
+  const statusStyles: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+    Evaluated: { bg: 'bg-[var(--grade-mid-bg)]', text: 'text-[var(--grade-mid-text)]', border: 'border-[var(--grade-mid-border)]', dot: 'bg-[var(--grade-mid)]' },
+    Applied:   { bg: 'bg-[var(--grade-high-bg)]', text: 'text-[var(--grade-high-text)]', border: 'border-[var(--grade-high-border)]', dot: 'bg-[var(--grade-high)]' },
+    Responded: { bg: 'bg-[var(--grade-mid-bg)]', text: 'text-[var(--grade-mid-text)]', border: 'border-[var(--grade-mid-border)]', dot: 'bg-[var(--grade-mid)]' },
+    Interview: { bg: 'bg-[var(--grade-mid-bg)]', text: 'text-[var(--grade-mid-text)]', border: 'border-[var(--grade-mid-border)]', dot: 'bg-[var(--grade-mid)]' },
+    Offer:     { bg: 'bg-[var(--grade-high-bg)]', text: 'text-[var(--grade-high-text)]', border: 'border-[var(--grade-high-border)]', dot: 'bg-[var(--grade-high)]' },
+    Rejected:  { bg: 'bg-[var(--grade-low-bg)]', text: 'text-[var(--grade-low-text)]', border: 'border-[var(--grade-low-border)]', dot: 'bg-[var(--grade-low)]' },
+    Discarded: { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-secondary)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--text-muted)]' },
+    SKIP:      { bg: 'bg-[var(--bg-tertiary)]/60', text: 'text-[var(--text-muted)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--border-hover)]' },
+  };
+
+  // Read accent from CSS custom property (single source of truth in globals.css)
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim();
+
+  // ===== Score coloring (uses shared utility) =====
+  function scoreColor(score: number | null): { bg: string; text: string } {
+    if (score === null) return { bg: 'var(--bg-tertiary)', text: 'var(--text-muted)' };
+    const grade = scoreToGrade(score);
+    const el = document.createElement('div');
+    el.className = gradeClass(grade);
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundColor, text: cs.color };
+  }
+
+  function scorePill(score: number | null): string {
+    if (score === null) return '<span class="text-xs text-[var(--text-muted)]">—</span>';
+    const grade = scoreToGrade(score);
+    return '<span class="' + gradeClass(grade) + ' inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-md">' + score.toFixed(1) + '</span>';
+  }
+
+  const VALID_STATUSES = ['Evaluated', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
+
+  // ===== Render helpers =====
+  function statusBadge(status: string): string { const s = statusStyles[status] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]', border: 'border-[var(--border-hover)]', dot: 'bg-[var(--text-secondary)]' };
+    return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full border ' + s.bg + ' ' + s.text + ' ' + s.border + '"><span class="w-1.5 h-1.5 rounded-full ' + s.dot + '"></span>' + status + '</span>';
+  }
+
+  function statusSelect(num: number, current: string): string {
+    const opts = VALID_STATUSES.map(s =>
+      '<option value="' + s + '"' + (s === current ? ' selected' : '') + '>' + s + '</option>'
+    ).join('');
+    const s = statusStyles[current] || { bg: 'bg-[var(--bg-tertiary)]', text: 'text-[var(--text-primary)]' };
+    return '<select class="status-select ' + s.bg + ' ' + s.text + ' inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border border-none hover:border-[var(--border-hover)] text-[var(--text-secondary)] focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]/20 cursor-pointer appearance-none pr-5" data-number="' + num + '" title="Change status">' + opts + '</select>';
+  }
+
+  function fmtDate(d: string): string {
+    if (!d) return '—';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return d;
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - dt.getTime()) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    if (diff < 7) return diff + 'd ago';
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: dt.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+  }
+
+  // ===== Filtering =====
+  function getFiltered(): TrackerReport[] {
+    let items = allItems;
+    if (filterStatus !== 'all') {
+      items = items.filter(i => i.status === filterStatus);
+    }
+    if (filterSearch) {
+      const q = filterSearch.toLowerCase();
+      items = items.filter(i => i.company.toLowerCase().includes(q) || i.role.toLowerCase().includes(q));
+    }
+    return items;
+  }
+
+  // ===== Sorting =====
+  function sortItems(items: TrackerReport[]): TrackerReport[] {
+    return items.slice().sort((a, b) => {
+      let cmp = 0;
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      if (aVal === null || aVal === undefined) cmp = -1;
+      else if (bVal === null || bVal === undefined) cmp = 1;
+      else if (typeof aVal === 'number' && typeof bVal === 'number') cmp = aVal - bVal;
+      else cmp = String(aVal).localeCompare(String(bVal));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  // ===== Populate status filter =====
+  function populateStatusFilter(): void {
+    const statuses = new Set(allItems.map(i => i.status).filter(Boolean));
+    const sorted = Array.from(statuses).sort();
+    statusEl.innerHTML = '<option value="all">All</option>';
+    for (const s of sorted) {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      statusEl.appendChild(opt);
+    }
+  }
+
+  // ===== Render =====
+  function render(): void {
+    const filtered = sortItems(getFiltered());
+    countEl.textContent = filtered.length + ' report' + (filtered.length !== 1 ? 's' : '');
+
+    if (filtered.length === 0) {
+      emptyEl.classList.remove('hidden');
+      emptyEl.classList.add('flex');
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    emptyEl.classList.remove('flex');
+
+    // Desktop table rows
+    tbody.innerHTML = filtered.map((item, i) => {
+      const bgClass = i % 2 === 0 ? '' : 'bg-[var(--text-inverse)]/30';
+      return '<tr class="' + bgClass + ' hover:bg-[var(--bg-tertiary)]/50 transition-colors group cursor-pointer card-interactive" data-number="' + item.number + '" title="View report for ' + item.company + '">' +
+        '<td class="px-4 py-3 text-[var(--text-muted)] font-mono text-xs">' + item.number + '</td>' +
+        '<td class="px-4 py-3 text-[var(--text-secondary)] text-xs whitespace-nowrap">' + fmtDate(item.date) + '</td>' +
+        '<td class="px-4 py-3 font-medium text-[var(--text-primary)] whitespace-nowrap truncate max-w-[var(--max-width-card)]">' + escapeHtml(item.company) + '</td>' +
+        '<td class="px-4 py-3 text-[var(--text-primary)] truncate max-w-[calc(var(--max-width-card)*0.9)]">' + escapeHtml(item.role) + '</td>' +
+        '<td class="px-4 py-3">' + scorePill(item.score) + '</td>' +
+        '<td class="px-4 py-3">' + statusSelect(item.number, item.status) + '</td>' +
+        '<td class="px-4 py-3 text-right">' +
+          '<a href="/reports/by-tracker/' + item.number + '" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-' + accentColor + ' hover:bg-' + accentColor + '/10 rounded transition-colors" title="View report" data-action="view-report">' +
+            '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>' +
+            'View' +
+          '</a>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    // Update sort indicators
+    document.querySelectorAll('[data-sort]').forEach(th => {
+      const key = th.getAttribute('data-sort') as keyof TrackerReport;
+      const icon = th.querySelector('svg');
+      if (!icon) return;
+      if (key === sortKey) {
+        icon.style.opacity = '1';
+        icon.innerHTML = sortDir === 'asc'
+          ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>'
+          : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>';
+      } else {
+        icon.style.opacity = '0.5';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>';
+      }
+    });
+  }
+
+  function escapeHtml(s: string): string {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // ===== Row click → navigate to report =====
+  function handleRowClick(e: Event): void {
+    const row = (e.target as HTMLElement).closest('[data-number]');
+    if (!row) return;
+    const num = row.getAttribute('data-number');
+    if (num) window.location.href = '/reports/by-tracker/' + num;
+  }
+
+  tbody.addEventListener('click', handleRowClick);
+
+  // ===== Status change handler (PATCH /api/tracker) =====
+  async function handleStatusChange(e: Event): Promise<void> {
+    const select = (e.target as HTMLElement).closest('.status-select') as HTMLSelectElement;
+    if (!select) return;
+    const num = parseInt(select.getAttribute('data-number') || '0', 10);
+    const newStatus = select.value;
+    e.stopPropagation();
+    select.disabled = true;
+    try {
+      const resp = await fetch('/api/tracker', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: num, status: newStatus }),
+      });
+      if (!resp.ok) throw new Error('Patch failed: ' + resp.status);
+      // Update local state
+      const item = allItems.find(i => i.number === num);
+      if (item) item.status = newStatus;
+      render();
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      select.disabled = false;
+    }
+  }
+
+  // Re-attach on each render via event delegation
+  tbody.addEventListener('change', handleStatusChange);
+
+  // ===== Sort handlers =====
+  document.querySelectorAll('[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.getAttribute('data-sort') as keyof TrackerReport;
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = key === 'gap' || key === 'priority' ? 'desc' : 'asc';
+      }
+      render();
+    });
+  });
+
+  // ===== Filter handlers =====
+  searchEl.addEventListener('input', () => { filterSearch = searchEl.value; render(); });
+  statusEl.addEventListener('change', () => { filterStatus = statusEl.value; render(); });
+
+  // ===== Fetch data =====
+  async function fetchData(): Promise<void> {
+    loadingEl.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+    wrapper.classList.add('hidden');
+    cards.classList.add('hidden');
+    emptyEl.classList.add('hidden');
+
+    try {
+      const resp = await fetch('/api/reports');
+      if (!resp.ok) throw new Error('Server returned ' + resp.status);
+      const data = await resp.json();
+      allItems = data.items || [];
+      populateStatusFilter();
+      loadingEl.classList.add('hidden');
+      render();
+    } catch (err: any) {
+      loadingEl.classList.add('hidden');
+      errorMsg.textContent = err.message || 'Could not fetch data from the server.';
+      errorEl.classList.remove('hidden');
+    }
+  }
+
+  retryBtn.addEventListener('click', fetchData);
+
+  // ===== Init =====
+  fetchData();
+</script>
+
+<style>
+  .reports-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .reports-page__hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .reports-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .reports-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .reports-page__count {
+    padding: var(--space-1-5) var(--space-3);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .reports-page__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .reports-page__search {
+    flex: 1;
+    min-width: min(100%, var(--size-80));
+  }
+
+  .reports-page__status-filter {
+    font-family: var(--font-sans);
+    min-width: var(--size-36);
+  }
+
+  .reports-page__table-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .reports-page__state {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-10);
+  }
+
+  .data-table-panel {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
+  }
+
+  .data-table-panel__scroll {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .data-table thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-muted);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+    background: var(--bg-card);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .data-table__th--right,
+  .data-table__td--right {
+    text-align: right;
+  }
+
+  .data-table tbody td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  .data-table tbody tr:hover td {
+    background: var(--bg-tertiary);
+  }
+
+  .status-select {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition-base);
+  }
+
+  .status-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+  }
+
+  .empty-row {
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 1024px) {
+    .reports-page__toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

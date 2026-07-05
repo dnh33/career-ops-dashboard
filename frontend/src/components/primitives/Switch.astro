@@ -49,7 +49,7 @@ const inputId = `switch-${Math.random().toString(36).slice(2, 9)}`;
     align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     cursor: pointer;
     min-height: auto;
   }
@@ -65,10 +65,10 @@ const inputId = `switch-${Math.random().toString(36).slice(2, 9)}`;
 
   .hermes-switch__input {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: var(--border-width);
+    height: var(--border-width);
     padding: 0;
-    margin: -1px;
+    margin: calc(-1 * var(--border-width));
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
@@ -79,42 +79,42 @@ const inputId = `switch-${Math.random().toString(36).slice(2, 9)}`;
   .hermes-switch__track {
     flex-shrink: 0;
     position: relative;
-    width: 2.75rem;
-    height: 1.5rem;
-    margin-top: 2px;
-    background: var(--bg-hover);
-    border: 1px solid var(--stroke-hairline);
+    width: var(--size-44);
+    height: var(--size-6);
+    margin-top: var(--space-0-5);
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-full);
     transition: background-color var(--transition-base), border-color var(--transition-base);
   }
 
   .hermes-switch__thumb {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: calc(1.5rem - 6px);
-    height: calc(1.5rem - 6px);
+    top: var(--border-width);
+    left: var(--border-width);
+    width: calc(var(--size-6) - calc(var(--space-1) * 2));
+    height: calc(var(--size-6) - calc(var(--space-1) * 2));
     background: var(--bg-elevated);
-    border: 1px solid var(--stroke-nous);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-full);
-    box-shadow: var(--shadow-nous);
+    box-shadow: var(--shadow-md);
     transition: transform var(--transition-base);
   }
 
   .hermes-switch__input:checked + .hermes-switch__track {
-    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
-    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    border-color: color-mix(in srgb, var(--accent-primary) 40%, transparent);
   }
 
   .hermes-switch__input:checked + .hermes-switch__track .hermes-switch__thumb {
-    transform: translateX(1.25rem);
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    transform: translateX(var(--size-20));
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
   }
 
   .hermes-switch__input:focus-visible + .hermes-switch__track {
-    outline: 2px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
-    outline-offset: 2px;
+    outline: var(--border-width-thick) solid color-mix(in srgb, var(--accent-primary) 50%, transparent);
+    outline-offset: var(--border-width-thick);
   }
 
   .hermes-switch__content {
@@ -126,16 +126,16 @@ const inputId = `switch-${Math.random().toString(36).slice(2, 9)}`;
   }
 
   .hermes-switch__label {
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: 500;
     color: var(--text-primary);
   }
 
   .hermes-switch__description {
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     line-height: 1.4;
   }
 </style>

@@ -1,0 +1,294 @@
+/* ===== DASHBOARD DATA VIEW ===== */
+/* Information-dense layouts optimized for data oversight */
+
+/* ── Data Table ── */
+.dash-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  --row-height: var(--rh-row);
+}
+
+/* Density overrides */
+.density-compact .dash-table { --row-height: var(--rh-compact); }
+.density-comfortable .dash-table { --row-height: var(--rh-comfortable); }
+.density-spacious .dash-table { --row-height: var(--rh-spacious); }
+
+.dash-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.dash-table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border-bottom: var(--border-default) solid;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dash-table thead th.sortable {
+  cursor: pointer;
+}
+
+.dash-table thead th.sortable:hover {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.dash-table thead th.sorted {
+  color: var(--accent-primary);
+}
+
+.dash-table thead th.sortable::after {
+  content: '';
+  margin-left: var(--space-1);
+  opacity: 0.3;
+  font-size: var(--text-xs);
+}
+
+.dash-table thead th.sorted.asc::after {
+  content: '↑';
+  opacity: 1;
+}
+
+.dash-table thead th.sorted.desc::after {
+  content: '↓';
+  opacity: 1;
+}
+
+.dash-table tbody tr {
+  height: var(--row-height);
+  border-bottom: var(--border-default) solid;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.dash-table tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+.dash-table tbody td {
+  padding: var(--space-2) var(--space-3);
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: var(--max-width-card);
+}
+
+.dash-table tbody td.wrap {
+  white-space: normal;
+}
+
+/* ── Compact Data Row (no table) ── */
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2-5) var(--space-3-5);
+  border-bottom: var(--border-default) solid;
+  font-size: var(--text-sm);
+  min-height: var(--rh-row);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.data-row:hover {
+  background: var(--bg-tertiary);
+}
+
+.data-row-header {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: var(--space-1-5) var(--space-3-5);
+  border-bottom: var(--border-default) solid;
+  background: var(--bg-surface);
+}
+
+/* ── Stat Tile (compact inline stat) ── */
+.stat-tile {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+  padding: var(--space-2-5) var(--space-3-5);
+}
+
+.stat-tile-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-tile-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.stat-tile-delta {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.stat-tile-delta.up { color: var(--grade-high); }
+.stat-tile-delta.down { color: var(--grade-low); }
+
+/* ── Status Pipeline (flow visualization) ── */
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: var(--space-3) 0;
+  overflow-x: auto;
+}
+
+.pipeline-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: var(--size-5);
+  position: relative;
+}
+
+.pipeline-stage::after {
+  content: '';
+  position: absolute;
+  top: var(--space-3-5);
+  left: calc(50% + var(--space-2));
+  width: calc(100% - var(--space-4));
+  height: var(--border-high, var(--border-hover))
+  background: var(--border-default);
+}
+
+.pipeline-stage:last-child::after {
+  display: none;
+}
+
+.pipeline-stage-dot {
+  width: var(--size-6);
+  height: var(--size-6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-default);
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.pipeline-stage.active .pipeline-stage-dot {
+  border-color: var(--accent-primary);
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+.pipeline-stage.done .pipeline-stage-dot {
+  border-color: var(--grade-high);
+  background: var(--grade-high-bg);
+  color: var(--grade-high);
+}
+
+.pipeline-stage-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Inline Filter Bar ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1-5) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.filter-chip:hover {
+  border-color: var(--border-focus);
+  color: var(--text-primary);
+}
+
+.filter-chip.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.filter-chip-count {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+/* ── Mini Sparkline (pure CSS) ── */
+.sparkline {
+  display: flex;
+  align-items: end;
+  gap: var(--space-0-5);
+  height: var(--size-6);
+}
+
+.sparkline-bar {
+  width: var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--accent-primary);
+  opacity: 0.6;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.sparkline-bar:hover {
+  opacity: 1;
+}
+
+/* ── Score Ring (circular progress) ── */
+.score-ring {
+  position: relative;
+  width: var(--size-12);
+  height: var(--size-12);
+  flex-shrink: 0;
+}
+
+.score-ring svg {
+  transform: rotate(-90deg);
+}

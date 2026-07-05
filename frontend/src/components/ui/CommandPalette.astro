@@ -1,0 +1,277 @@
+---
+// CommandPalette.astro — Cmd+K Signal Command Palette
+// Design System Foundation §3.3.2 & §4.2.2
+// Astro + module script, data-* attributes for config
+
+interface Props {
+  /** Initial commands data */
+  commands?: Array<{
+    id: string;
+    label: string;
+    description: string;
+    category: 'skills' | 'companies' | 'actions' | 'reports' | 'settings';
+    action: string;
+    shortcut?: string;
+  }>;
+  /** Optional custom class */
+  class?: string;
+}
+
+const { commands = [], class: className = '' } = Astro.props;
+
+const paletteId = `command-palette-${Math.random().toString(36).substring(2, 9)}`;
+const commandsJson = JSON.stringify(commands);
+---
+
+<div
+  class:list={['command-palette', className]}
+  data-component="command-palette"
+  data-commands={commandsJson}
+  id={paletteId}
+  role="dialog"
+  aria-modal="true"
+  aria-label="Command palette"
+  hidden
+  data-visible="false"
+>
+  <div class="command-palette__overlay" data-close="true" />
+  <div class="command-palette__panel">
+    <header class="command-palette__header">
+      <kbd class="command-palette__kbd">
+        <span>⌘</span>K
+      </kbd>
+      <input
+        type="search"
+        class="command-palette__input"
+        placeholder="Search skills, companies, actions..."
+        aria-label="Command palette search"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="command-palette__kbd command-palette__kbd--close" data-close="true">
+        <span>Esc</span>
+      </kbd>
+    </header>
+    <div class="command-palette__results" role="listbox" aria-label="Results"></div>
+    <footer class="command-palette__footer">
+      <span class="command-palette__hint">Navigate with ↑↓, Enter to select, Esc to close</span>
+    </footer>
+  </div>
+</div>
+
+<style>
+  .command-palette {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+    opacity: 0;
+  }
+
+  .command-palette[data-visible="true"] {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .command-palette__overlay {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+    backdrop-filter: blur(var(--size-1));
+  }
+
+  .command-palette__panel {
+    position: absolute;
+    top: 15vh;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    width: min(90vw, var(--size-180));
+    max-height: 70vh;
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    pointer-events: auto;
+    transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
+    opacity: 0;
+  }
+
+  .command-palette[data-visible="true"] .command-palette__panel {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  .command-palette__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .command-palette__kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--size-9);
+    height: var(--size-9);
+    padding: 0 var(--space-2);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .command-palette__kbd--close {
+    margin-left: auto;
+    cursor: pointer;
+  }
+
+  .command-palette__kbd--close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .command-palette__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+  }
+
+  .command-palette__input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .command-palette__results {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-2);
+  }
+
+  .command-palette__category {
+    margin-bottom: var(--space-3);
+  }
+
+  .command-palette__category:first-child {
+    margin-top: 0;
+  }
+
+  .command-palette__category-label {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+  }
+
+  .command-palette__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out);
+    role: option;
+  }
+
+  .command-palette__item:hover,
+  .command-palette__item[data-selected="true"] {
+    background: var(--accent-subtle);
+    color: var(--accent-primary);
+  }
+
+  .command-palette__item-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .command-palette__item-label {
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .command-palette__item-description {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .command-palette__item-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-input);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .command-palette__footer {
+    padding: var(--space-3) var(--space-5);
+    border-top: var(--border-width) solid var(--border-default);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* Empty state */
+  .command-palette__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .command-palette__empty-icon {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .command-palette,
+    .command-palette__panel,
+    .command-palette__item {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Module script auto-initializes via command-palette.js
+  // The initCommandPalette function is registered in registry.ts
+  // and auto-inits on DOMContentLoaded and pagelayout:ready
+</script>

@@ -1,7 +1,7 @@
 ---
-import type { DataTableProps, RichCell } from './types';
-import StatusPill from './StatusPill.astro';
-import CodeBlock from './CodeBlock.astro';
+import type { DataTableProps, RichCell } from './types'
+import StatusPill from './StatusPill.astro'
+import CodeBlock from './CodeBlock.astro'
 
 interface Props extends DataTableProps {}
 
@@ -151,14 +151,14 @@ function renderCell(cell: RichCell | undefined) {
 <style>
   .data-table-panel {
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
   }
 
   .data-table-panel__empty {
     padding: var(--space-8);
     text-align: center;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     font-size: var(--text-sm);
     margin: 0;
   }
@@ -178,13 +178,13 @@ function renderCell(cell: RichCell | undefined) {
     font-weight: 600;
     font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-tertiary);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-muted);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
-    background: var(--bg-panel);
+    border-bottom: var(--border-width) solid var(--border-default);
+    background: var(--bg-card);
     white-space: nowrap;
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
   }
 
   .data-table__th--sortable {
@@ -197,7 +197,7 @@ function renderCell(cell: RichCell | undefined) {
   }
 
   .data-table__th--sorted {
-    color: var(--color-primary);
+    color: var(--accent-primary);
   }
 
   .data-table__th--right,
@@ -212,9 +212,9 @@ function renderCell(cell: RichCell | undefined) {
 
   .data-table tbody td {
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     color: var(--text-primary);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
   }
 
   .data-table tbody tr:last-child td {
@@ -222,11 +222,11 @@ function renderCell(cell: RichCell | undefined) {
   }
 
   .data-table tbody tr:hover td {
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .data-table__link {
-    color: var(--color-primary);
+    color: var(--accent-primary);
     text-decoration: none;
     min-height: auto;
     font-size: inherit;

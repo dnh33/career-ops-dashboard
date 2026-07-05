@@ -1,0 +1,344 @@
+#!/usr/bin/env node
+/**
+ * Token Audit Script
+ * Scans for hardcoded values, deprecated tokens, and forbidden patterns
+ * Design System Foundation §4.1
+ */
+import { glob } from 'glob';
+import { resolve } from 'path';
+import { readFileSync } from 'fs';
+
+interface Violation {
+  file: string;
+  line: number;
+  column: number;
+  type: 'deprecated-token' | 'hardcoded-value' | 'forbidden-pattern';
+  token: string;
+  context: string;
+}
+
+// Deprecated tokens from OLD system (Collapse font, blue primary, .dark class, page-density-*)
+const DEPRECATED_TOKENS = [
+  // Old font
+  '--font-display: "Cutive Mono"',
+  '--font-ui',
+  // Old colors
+  '--color-primary: #0053fd',
+  '--color-warm: #cf806d',
+  '--bg-chrome',
+  '--bg-elevated: #ffffff',
+  '--bg-card: #ffffff',
+  '--bg-input: #ffffff',
+  '--text-primary: #1a1a1a',
+  '--text-secondary: #5c5c5c',
+  '--text-tertiary: #8a8a8a',
+  '--text-quaternary: #b3b3b3',
+  '--stroke-hairline',
+  '--stroke-nous',
+  '--shadow-nous',
+  '--ui-success: #107c10',
+  '--ui-warning: #c19c00',
+  '--ui-error: #c42b1c',
+  '--ui-info',
+  // Old legacy aliases
+  '--accent-primary: var(--color-primary)',
+  '--accent-hover: color-mix(in srgb, var(--color-primary) 88%, white)',
+  '--accent-muted',
+  '--bg-primary: var(--bg-chrome)',
+  '--bg-secondary: var(--bg-panel)',
+  '--bg-surface: var(--bg-card)',
+  '--bg-tertiary: var(--bg-hover)',
+  '--text-muted: var(--text-tertiary)',
+  '--text-inverse: var(--bg-chrome)',
+  '--border-default: var(--stroke-hairline)',
+  '--border-hover: var(--stroke-nous)',
+  '--border-focus: var(--color-primary)',
+  '--success: var(--ui-success)',
+  '--warning: var(--ui-warning)',
+  '--error: var(--ui-error)',
+  '--info: var(--ui-info)',
+  // Old grade tokens (wrong names)
+  '--grade-high: var(--ui-success)',
+  '--grade-high-text: color-mix(in srgb, var(--ui-success) 60%, white)',
+  '--grade-high-bg: color-mix(in srgb, var(--ui-success) 20%, transparent)',
+  '--grade-mid: var(--ui-warning)',
+  '--grade-mid-text: color-mix(in srgb, var(--ui-warning) 70%, white)',
+  '--grade-mid-bg: color-mix(in srgb, var(--ui-warning) 20%, transparent)',
+  '--grade-low: var(--ui-error)',
+  '--grade-low-text: color-mix(in srgb, var(--ui-error) 60%, white)',
+  '--grade-low-bg: color-mix(in srgb, var(--ui-error) 20%, transparent)',
+  // Old dark mode
+  '.dark {',
+  '--bg-chrome: #0d0d0d',
+  '--bg-elevated: #1a1a1a',
+  '--bg-card: #1e1e1e',
+  '--bg-panel: #141414',
+  '--bg-input: #1e1e1e',
+  '--bg-hover: #2a2a2a',
+  '--text-primary: #e8e8e8',
+  '--text-secondary: #a8a8a8',
+  '--text-tertiary: #787878',
+  '--text-quaternary: #555555',
+  '--stroke-hairline: color-mix(in srgb, #ffffff 8%, transparent)',
+  '--stroke-nous: color-mix(in srgb, #ffffff 14%, transparent)',
+  '--shadow-nous: 0 0 0 1px var(--stroke-nous), 0 4px 16px color-mix(in srgb, #000000 40%, transparent)',
+  '--accent-hover: color-mix(in srgb, var(--color-primary) 88%, white)',
+  // Old page density
+  'page-density-compact',
+  'page-distance-comfortable',
+  '--page-density',
+  // Old radius
+  '--radius-none: 0',
+  '--radius-sm: 2px',
+  '--radius-md: 4px',
+  '--radius-lg: 6px',
+  '--radius-full: 9999px',
+  // Old motion
+  '--transition-fast: 100ms ease',
+  '--transition-base: 150ms ease-out',
+  '--transition-slow: 180ms ease-out',
+  // Old shadows
+  '--shadow-sm: var(--shadow-nous)',
+  '--shadow-md: var(--shadow-nous)',
+  '--shadow-lg: var(--shadow-nous)',
+  '--shadow-focus: 0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+  // Old z-index
+  '--z-base: 0',
+  '--z-dropdown: 100',
+  '--z-sticky: 200',
+  '--z-overlay: 300',
+  '--z-modal: 400',
+  '--z-toast: 500',
+  '--z-tooltip: 600',
+  // Old breakpoints
+  '--bp-sm: 640px',
+  '--bp-md: 768px',
+  '--bp-lg: 1024px',
+  '--bp-xl: 1280px',
+  // Old tag tokens
+  '--tag-success-bg',
+  '--tag-warning-bg',
+  '--tag-error-bg',
+  '--tag-info-bg',
+  '--tag-violet-bg',
+  '--tag-muted-bg',
+  '--tag-success-fg',
+  '--tag-warning-fg',
+  '--tag-error-fg',
+  '--tag-info-fg',
+  '--tag-violet-fg',
+  '--tag-muted-fg',
+  // Old skeleton
+  '.skeleton',
+  // Old app shell
+  '.app-shell',
+  '.sidebar',
+  '.sidebar-brand',
+  '.sidebar-brand-text',
+  '.sidebar-nav',
+  '.sidebar-link',
+  '.sidebar-link:hover',
+  '.sidebar-link-active',
+  '.sidebar-link-icon',
+  '.app-main',
+  '.bottom-nav',
+  '.bottom-nav-link',
+  '.bottom-nav-link-active',
+  '.content-container',
+  '.sidebar-status',
+  '.sidebar-status__row',
+  '.status-dot',
+  '.status-dot-connecting',
+  '.status-dot-connected',
+  '.status-dot-error',
+  '.status-label',
+];
+
+// Files to ignore entirely (e.g., font files, third-party)
+const IGNORED_FILES = new Set([
+  'codicons.css',
+]);
+
+// Hardcoded values that should be semantic tokens
+const HARDCODED_PATTERNS = [
+  // Hardcoded hex colors (3-8 hex digits)
+  { pattern: /#[0-9a-fA-F]{3,8}\b/g, description: 'Hardcoded hex color' },
+  // Hardcoded rgb/rgba
+  { pattern: /rgba?\([^)]+\)/g, description: 'Hardcoded rgb/rgba' },
+  // Hardcoded pixel values (except 0 and media queries)
+  // Media queries cannot use CSS custom properties, so pixel values in @media are legitimate
+  { pattern: /\b\d+px\b/g, description: 'Hardcoded pixel value' },
+  // Hardcoded rem/em values (except in @theme)
+  { pattern: /\b\d+(\.\d+)?(rem|em)\b/g, description: 'Hardcoded rem/em' },
+  // Hardcoded font-family names (not CSS variables) - broad pattern, filtered in code
+  { pattern: /font-family:\s*['"]?[^;]+['"]?/g, description: 'Hardcoded font-family' },
+  // Hardcoded color names (but not when part of a hyphenated property like white-space)
+  // Note: "transparent" is a valid CSS keyword and should not be flagged
+  { pattern: /\b(red|green|blue|yellow|orange|purple|pink|gray|grey|black|white)\b(?![-][a-zA-Z])/g, description: 'Hardcoded color name' },
+];
+
+// Forbidden patterns per Design System Foundation
+const FORBIDDEN_PATTERNS = [
+  { pattern: /client:load/g, description: 'client:load directive (use module scripts)' },
+  { pattern: /onclick\s*=/g, description: 'Inline onclick (use module script)' },
+  { pattern: /onchange\s*=/g, description: 'Inline onchange (use module script)' },
+  { pattern: /onsubmit\s*=/g, description: 'Inline onsubmit (use module script)' },
+  { pattern: /Playfair|Garamond|Lora|Merriweather/gi, description: 'Forbidden display font' },
+  { pattern: /\bInter\b(?!.*font-sans)/g, description: 'Inter as display font (use font-display/Sora)' },
+  { pattern: /bounce|elastic|overshoot/gi, description: 'Bounce/elastic easing (use --ease-out/--ease-spring)' },
+  { pattern: /\.dark\s*{/g, description: '.dark class theme (use [data-theme="dark"] on html)' },
+  { pattern: /page-density-/g, description: 'page-density-* classes (use [data-density] on html)' },
+  { pattern: /color-primary/g, description: 'Old --color-primary token (use --accent-primary)' },
+  { pattern: /color-warm/g, description: 'Old --color-warm token (use --grade-mid/--color-accent)' },
+  { pattern: /ui-success|ui-warning|ui-error/g, description: 'Old ui-* tokens (use --grade-high/mid/low)' },
+  { pattern: /stroke-hairline|stroke-nous/g, description: 'Old stroke tokens (use --border-default/--border-hover)' },
+  { pattern: /shadow-nous/g, description: 'Old shadow-nous (use --shadow-md/--shadow-lg)' },
+  { pattern: /text-tertiary|text-quaternary/g, description: 'Old text-tertiary/quaternary (use --color-muted/--text-muted)' },
+];
+
+function scanFile(filePath: string): Violation[] {
+  const violations: Violation[] = [];
+  const content = readFileSync(filePath, 'utf-8');
+  const lines = content.split('\n');
+
+  // Skip globals.css (it's the token definition file)
+  if (filePath.includes('globals.css')) return violations;
+
+  // Check if file is in ignore list
+  const relativePath = filePath.split('/').pop() || '';
+  if (IGNORED_FILES.has(relativePath)) {
+    return violations;
+  }
+
+  // Check deprecated tokens
+  for (const token of DEPRECATED_TOKENS) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'g');
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const lineNum = content.substring(0, match.index).split('\n').length;
+      const lineContent = lines[lineNum - 1] || '';
+      const column = match.index - content.lastIndexOf('\n', match.index);
+      violations.push({
+        file: filePath,
+        line: lineNum,
+        column,
+        type: 'deprecated-token',
+        token: token.length > 60 ? token.substring(0, 60) + '...' : token,
+        context: lineContent.trim(),
+      });
+    }
+  }
+
+  // Check hardcoded patterns
+  for (const { pattern, description } of HARDCODED_PATTERNS) {
+    const regex = new RegExp(pattern);
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const lineNum = content.substring(0, match.index).split('\n').length;
+      const lineContent = lines[lineNum - 1] || '';
+      const column = match.index - content.lastIndexOf('\n', match.index);
+
+      // Skip if in a comment or string that looks like documentation
+      if (lineContent.trim().startsWith('//') || lineContent.trim().startsWith('/*')) continue;
+
+      // Skip media queries for hardcoded pixel values (CSS custom properties can't be used in media queries)
+      if (description === 'Hardcoded pixel value' && lineContent.includes('@media')) {
+        continue;
+      }
+
+      // Additional filter for hex colors and color names: skip if in a comment
+      const beforeMatch = lineContent.substring(0, column);
+      const isInLineComment = beforeMatch.includes('//');
+      if ((description === 'Hardcoded hex color' || description === 'Hardcoded color name') && isInLineComment) {
+        continue;
+      }
+
+      // Additional filter for font-family: skip if it's a CSS variable (contains var()
+      if (description === 'Hardcoded font-family' && match[0].includes('var(')) {
+        continue;
+      }
+
+      violations.push({
+        file: filePath,
+        line: lineNum,
+        column,
+        type: 'hardcoded-value',
+        token: description + ': ' + match[0],
+        context: lineContent.trim(),
+      });
+    }
+  }
+
+  // Check forbidden patterns
+  for (const { pattern, description } of FORBIDDEN_PATTERNS) {
+    const regex = new RegExp(pattern);
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      const lineNum = content.substring(0, match.index).split('\n').length;
+      const lineContent = lines[lineNum - 1] || '';
+      const column = match.index - content.lastIndexOf('\n', match.index);
+
+      if (lineContent.trim().startsWith('//') || lineContent.trim().startsWith('/*')) continue;
+
+      violations.push({
+        file: filePath,
+        line: lineNum,
+        column,
+        type: 'forbidden-pattern',
+        token: description,
+        context: lineContent.trim(),
+      });
+    }
+  }
+
+  return violations;
+}
+
+async function main() {
+  const targetPath = process.argv[2] || 'frontend/src';
+  const absolutePath = resolve(targetPath);
+
+  console.log(`🔍 Scanning ${absolutePath} for token violations...\n`);
+
+  const files = await glob('**/*.{astro,js,ts,css}', {
+    cwd: absolutePath,
+    ignore: ['node_modules/**', 'dist/**', '.astro/**', '**/globals.css'],
+    absolute: true,
+  });
+
+  let allViolations: Violation[] = [];
+  let filesScanned = 0;
+
+  for (const file of files) {
+    const violations = scanFile(file);
+    allViolations = allViolations.concat(violations);
+    filesScanned++;
+  }
+
+  // Group by type
+  const deprecated = allViolations.filter(v => v.type === 'deprecated-token');
+  const hardcoded = allViolations.filter(v => v.type === 'hardcoded-value');
+  const forbidden = allViolations.filter(v => v.type === 'forbidden-pattern');
+
+  console.log(`\n📊 Scan complete: ${filesScanned} files scanned`);
+  console.log(`   Deprecated tokens: ${deprecated.length}`);
+  console.log(`   Hardcoded values: ${hardcoded.length}`);
+  console.log(`   Forbidden patterns: ${forbidden.length}`);
+  console.log(`   Total violations: ${allViolations.length}\n`);
+
+  if (allViolations.length > 0) {
+    console.log('🚨 VIOLATIONS:\n');
+    allViolations.forEach(v => {
+      const relPath = v.file.replace(resolve('.') + '/', '');
+      console.log(`  ${relPath}:${v.line}:${v.column} [${v.type}] ${v.token}`);
+      console.log(`    → ${v.context}\n`);
+    });
+    process.exit(1);
+  } else {
+    console.log('✅ All token audits passed!\n');
+    process.exit(0);
+  }
+}
+
+main().catch(console.error);

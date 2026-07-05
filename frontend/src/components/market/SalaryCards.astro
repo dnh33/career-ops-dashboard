@@ -13,50 +13,50 @@
 <style>
   .salary-cards-grid {
     display: grid;
-    gap: 1rem;
-    padding: 0.75rem 0.875rem;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-3-5);
   }
 
   .salary-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    padding: 0.75rem 0.875rem;
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-3-5);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
   }
 
   .salary-card:hover {
     border-color: color-mix(in srgb, var(--accent-primary) 25%, var(--border-default));
-    box-shadow: 0 0 16px rgba(212, 168, 83, 0.06);
+    box-shadow: 0 0 var(--size-4) color-mix(in srgb, var(--accent-primary) 6%, transparent);
   }
 
   .salary-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .salary-card-title {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-primary);
   }
 
   .salary-card-location {
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid var(--border-hover);
-    border-radius: 4px;
+    letter-spacing: var(--letter-spacing-tight);
+    padding: var(--space-1) var(--space-2);
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-sm);
   }
 
   .salary-card-ranges {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-2);
   }
 
   .salary-range {
@@ -67,34 +67,34 @@
   }
 
   .salary-range-label {
-    font-size: 0.6875rem;
+    font-size: var(--text-xs);
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.25rem;
+    letter-spacing: var(--letter-spacing-tight);
+    margin-bottom: var(--space-1);
   }
 
   .salary-range-value {
     font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-primary);
     background: var(--bg-tertiary);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    min-width: 60px;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    min-width: var(--size-15);
     text-align: center;
   }
 
   .salary-card-footer {
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
     text-align: center;
   }
 
   .salary-card-placeholder {
     text-align: center;
-    padding: 2rem;
+    padding: var(--space-8);
     color: var(--text-muted);
   }
 

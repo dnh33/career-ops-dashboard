@@ -1,9 +1,10 @@
 ---
-import HermesLayout from '../layouts/HermesLayout.astro';
+import PageLayout from '../components/layout/PageLayout.astro';
 import SearchField from '../components/primitives/SearchField.astro';
 import SegmentedControl from '../components/primitives/SegmentedControl.astro';
 import Loader from '../components/primitives/Loader.astro';
 import ErrorState from '../components/primitives/ErrorState.astro';
+import MetricCard from '../components/primitives/MetricCard.astro';
 
 const tierFilters = [
   { id: 'all', label: 'All' },
@@ -14,69 +15,68 @@ const tierFilters = [
 ];
 ---
 
-<HermesLayout
+<PageLayout
   title="Company Targets"
   pageTitle="Company Targets"
   description="40 target companies across 4 tiers — salary bands, open roles, and skill signals from DK market research."
   currentPath="/companies"
 >
-  <section class="companies-page">
-    <div class="companies-page__metrics" id="companies-metrics">
-      <Loader label="Loading tier summary" size="sm" />
-    </div>
+  <div slot="hero" class="companies-page__hero">
+    <h1 class="companies-page__title">Company Targets</h1>
+    <p class="companies-page__subtitle">40 target companies across 4 tiers — salary bands, open roles, and skill signals from DK market research.</p>
+  </div>
 
-    <div class="companies-page__toolbar">
-      <SearchField
-        name="companies-search"
-        placeholder="Filter companies..."
-        ariaLabel="Filter companies"
-        class="companies-page__search"
-      />
-      <SegmentedControl
-        options={tierFilters}
-        value="all"
-        name="companies-tier"
-        compact
-        ariaLabel="Filter by tier"
-        class="companies-page__tier"
-      />
-    </div>
+  <div slot="actions" class="companies-page__toolbar">
+    <SearchField
+      name="companies-search"
+      placeholder="Filter companies..."
+      ariaLabel="Filter companies"
+      class="companies-page__search"
+    />
+    <SegmentedControl
+      options={tierFilters}
+      value="all"
+      name="companies-tier"
+      compact
+      ariaLabel="Filter by tier"
+      class="companies-page__tier"
+    />
+  </div>
 
-    <div id="companies-loading" class="companies-page__state">
-      <Loader label="Loading company targets" size="lg" />
-    </div>
+  <div id="companies-loading" class="companies-page__state">
+    <Loader label="Loading company targets" size="lg" />
+  </div>
 
-    <div id="companies-error" class="companies-page__state" hidden>
-      <ErrorState title="Company data unavailable" message="Could not fetch company targets." />
-    </div>
+  <div id="companies-error" class="companies-page__state" hidden>
+    <ErrorState title="Company data unavailable" message="Could not fetch company targets." />
+  </div>
 
-    <section id="companies-content" class="companies-page__table-section" aria-label="Company targets" hidden>
-      <header class="companies-page__section-header">
-        <h2 class="companies-page__section-title">Target Companies</h2>
-        <span class="companies-page__count hermes-mono" data-mono="true" id="companies-row-count">0</span>
-      </header>
-      <div class="data-table-panel">
-        <div class="data-table-panel__scroll">
-          <table class="data-table" id="companies-table" aria-label="Company targets">
-            <thead>
-              <tr>
-                <th scope="col" data-sort-key="name" tabindex="0" role="button">Company</th>
-                <th scope="col" data-sort-key="tier" tabindex="0" role="button">Tier</th>
-                <th scope="col" data-sort-key="location" tabindex="0" role="button">Location</th>
-                <th scope="col" class="hermes-mono" data-sort-key="size" tabindex="0" role="button" data-mono="true">Size</th>
-                <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="avgSalary" tabindex="0" role="button" data-mono="true">Avg Salary</th>
-                <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="openRoles" tabindex="0" role="button" data-mono="true">Open Roles</th>
-                <th scope="col" data-sort-key="skills" tabindex="0" role="button">Skills</th>
-                <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="lastPosted" tabindex="0" role="button" data-mono="true">Last Posted</th>
-              </tr>
-            </thead>
-            <tbody id="companies-table-body"></tbody>
-          </table>
-        </div>
+  <section id="companies-content" class="companies-page__table-section" aria-label="Company targets" hidden>
+    <header class="companies-page__section-header">
+      <h2 class="companies-page__section-title">Target Companies</h2>
+      <span class="companies-page__count hermes-mono" data-mono="true" id="companies-row-count">0</span>
+    </header>
+    <div class="data-table-panel">
+      <div class="data-table-panel__scroll">
+        <table class="data-table" id="companies-table" aria-label="Company targets">
+          <thead>
+            <tr>
+              <th scope="col" data-sort-key="name" tabindex="0" role="button">Company</th>
+              <th scope="col" data-sort-key="tier" tabindex="0" role="button">Tier</th>
+              <th scope="col" data-sort-key="location" tabindex="0" role="button">Location</th>
+              <th scope="col" class="hermes-mono" data-sort-key="size" tabindex="0" role="button" data-mono="true">Size</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="avgSalary" tabindex="0" role="button" data-mono="true">Avg Salary</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="openRoles" tabindex="0" role="button" data-mono="true">Open Roles</th>
+              <th scope="col" data-sort-key="skills" tabindex="0" role="button">Skills</th>
+              <th scope="col" class="data-table__th--right hermes-mono" data-sort-key="lastPosted" tabindex="0" role="button" data-mono="true">Last Posted</th>
+            </tr>
+          </thead>
+          <tbody id="companies-table-body"></tbody>
+        </table>
       </div>
-    </section>
+    </div>
   </section>
-</HermesLayout>
+</PageLayout>
 
 <script>
   let allCompanies = [];
@@ -124,7 +124,7 @@ const tierFilters = [
       const y = height - ((value - min) / range) * height;
       return `${x},${y}`;
     }).join(' ');
-    return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-hidden="true"><polyline fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${points}"></polyline></svg>`;
+    return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-hidden="true"><polyline fill="none" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="${points}"></polyline></svg>`;
   }
 
   function renderMetrics(summary) {
@@ -139,15 +139,9 @@ const tierFilters = [
       const item = summary[key];
       const spark = [item.count, item.openRoles, item.avgSalary / 1000, item.count + 2, item.openRoles - 1, item.count, item.openRoles].map(Math.round);
       return `
-        <article class="metric-card metric-card--${variant}">
-          <header class="metric-card__header"><span class="metric-card__label">${label}</span></header>
-          <div class="metric-card__body">
-            <span class="metric-card__value hermes-mono" data-mono="true">${item.count}</span>
-            <span class="metric-card__unit hermes-mono" data-mono="true">cos</span>
-            <span class="metric-card__trend hermes-mono" data-mono="true">${formatSalary(item.avgSalary)} DKK · ${item.openRoles} roles</span>
-          </div>
-          <footer class="metric-card__sparkline">${sparklineSvg(spark)}</footer>
-        </article>
+        <MetricCard label="${label}" value="${item.count}" unit="cos" variant="${variant}" sparklineData=${JSON.stringify(spark)}>
+          <span slot="trend" class="metric-card__trend hermes-mono" data-mono="true">${formatSalary(item.avgSalary)} DKK · ${item.openRoles} roles</span>
+        </MetricCard>
       `;
     }).join('');
   }
@@ -273,6 +267,25 @@ const tierFilters = [
     gap: var(--space-5);
   }
 
+  .companies-page__hero {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .companies-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .companies-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
   .companies-page__metrics {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -281,8 +294,8 @@ const tierFilters = [
 
   .companies-page__metrics :global(.metric-card) {
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
     padding: var(--space-4);
     display: flex;
     flex-direction: column;
@@ -290,11 +303,11 @@ const tierFilters = [
   }
 
   .companies-page__metrics :global(.metric-card--primary) {
-    border-left: 3px solid var(--color-primary);
+    border-left: var(--border-width-thick) solid var(--accent-primary);
   }
 
   .companies-page__metrics :global(.metric-card--warning) {
-    border-left: 3px solid var(--ui-warning);
+    border-left: var(--border-width-thick) solid var(--grade-mid);
   }
 
   .companies-page__metrics :global(.metric-card__label) {
@@ -311,7 +324,7 @@ const tierFilters = [
   .companies-page__metrics :global(.metric-card__unit),
   .companies-page__metrics :global(.metric-card__trend) {
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
+    color: var(--text-muted);
   }
 
   .companies-page__metrics :global(.metric-card__trend) {
@@ -324,7 +337,7 @@ const tierFilters = [
     }
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .companies-page__metrics {
       grid-template-columns: 1fr;
     }
@@ -337,12 +350,12 @@ const tierFilters = [
     justify-content: space-between;
     gap: var(--space-4);
     padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .companies-page__search {
     flex: 1;
-    min-width: min(100%, 20rem);
+    min-width: min(100%, var(--size-80));
   }
 
   .companies-page__state {
@@ -371,13 +384,13 @@ const tierFilters = [
 
   .companies-page__count {
     font-size: var(--text-sm);
-    color: var(--text-tertiary);
+    color: var(--text-muted);
   }
 
   .data-table-panel {
     background: var(--bg-card);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
   }
 
   .data-table-panel__scroll {
@@ -395,11 +408,11 @@ const tierFilters = [
     font-weight: 600;
     font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-tertiary);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--text-muted);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
-    background: var(--bg-panel);
+    border-bottom: var(--border-width) solid var(--border-default);
+    background: var(--bg-card);
     white-space: nowrap;
     cursor: pointer;
   }
@@ -411,7 +424,7 @@ const tierFilters = [
 
   .data-table tbody td {
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     color: var(--text-primary);
   }
 
@@ -422,11 +435,11 @@ const tierFilters = [
 
   .data-table tbody tr:hover td,
   .data-table tbody tr:focus-visible td {
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .companies-page__skills {
-    max-width: 14rem;
+    max-width: var(--size-56);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -438,33 +451,45 @@ const tierFilters = [
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
     font-weight: 500;
-    border: 1px solid var(--stroke-hairline);
+    border: var(--border-width) solid var(--border-default);
     border-radius: var(--radius-sm);
-    background: var(--bg-panel);
+    background: var(--bg-card);
     white-space: nowrap;
   }
 
   .status-pill--primary {
-    color: var(--color-primary);
-    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle);
   }
 
   .status-pill--info {
-    color: var(--tag-info-fg);
-    border-color: color-mix(in srgb, var(--ui-info) 30%, transparent);
-    background: var(--tag-info-bg);
+    color: var(--text-muted);
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
   }
 
   .status-pill--neutral {
-    color: var(--tag-muted-fg);
-    border-color: color-mix(in srgb, var(--text-tertiary) 30%, transparent);
-    background: var(--tag-muted-bg);
+    color: var(--text-muted);
+    border-color: var(--border-hover);
+    background: var(--bg-surface);
   }
 
   .status-pill--warning {
-    color: var(--ui-warning);
-    border-color: color-mix(in srgb, var(--ui-warning) 30%, transparent);
-    background: var(--tag-warning-bg);
+    color: var(--grade-mid);
+    border-color: var(--grade-mid-border);
+    background: var(--grade-mid-bg);
+  }
+
+  @media (max-width: 1024px) {
+    .companies-page__metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .companies-page__metrics {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

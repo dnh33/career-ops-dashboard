@@ -1,5 +1,5 @@
 ---
-import type { OverlayProps } from './types';
+import type { OverlayProps } from './types'
 
 interface Props extends OverlayProps {
   class?: string;
@@ -65,15 +65,15 @@ const overlayId = `overlay-${Math.random().toString(36).slice(2, 9)}`;
     align-items: center;
     justify-content: center;
     padding: var(--space-4);
-    background: color-mix(in srgb, var(--bg-chrome) 55%, transparent);
+    background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
   }
 
   .overlay {
     width: 100%;
-    max-width: 32rem;
+    max-width: var(--size-128);
     background: var(--bg-elevated);
-    border: 1px solid var(--stroke-nous);
-    box-shadow: var(--shadow-nous);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
     animation: overlay-in var(--transition-base);
   }
 
@@ -93,13 +93,13 @@ const overlayId = `overlay-${Math.random().toString(36).slice(2, 9)}`;
     align-items: center;
     justify-content: space-between;
     padding: var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .overlay__title {
     margin: 0;
     font-size: var(--text-lg);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -108,19 +108,19 @@ const overlayId = `overlay-${Math.random().toString(36).slice(2, 9)}`;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: var(--size-8);
+    height: var(--size-8);
     min-height: auto;
     border: none;
     background: transparent;
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     cursor: pointer;
     border-radius: var(--radius-sm);
   }
 
   .overlay__close:hover {
     color: var(--text-primary);
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .overlay__body {

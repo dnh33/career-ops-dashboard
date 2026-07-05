@@ -64,7 +64,7 @@ class MarketOverview {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.5rem;
+          font-size: var(--text-2xl);
           font-weight: 700;
           color: var(--text-primary);
         ">
@@ -95,26 +95,26 @@ class MarketOverview {
     if (!container) return;
     
     container.innerHTML = `
-      <div class="skill-bars" style="display: flex; flex-direction: column; gap: 0.75rem;">
+      <div class="skill-bars" style="display: flex; flex-direction: column; gap: var(--space-3);">
         ${this.marketData.skillDemand.map(skill => {
           const categoryColors = {
             frontend: 'var(--accent-primary)',
-            backend: 'var(--info)',
-            devops: 'var(--success)',
-            cloud: 'var(--warning)',
-            data: 'var(--info)'
+            backend: 'var(--grade-mid)',
+            devops: 'var(--grade-high)',
+            cloud: 'var(--grade-mid)',
+            data: 'var(--grade-mid)'
           };
           
           const gapClasses = {
-            none: 'tag-gray',
-            low: 'tag-green',
-            medium: 'tag-amber',
-            high: 'tag-red'
+            none: 'tag-neutral',
+            low: 'tag-high',
+            medium: 'tag-mid',
+            high: 'tag-low'
           };
           
           return `
             <div class="skill-bar">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1);">
                 <span>${skill.skill}</span>
                 <span class="skill-category">[${skill.category}]</span>
               </div>
@@ -122,13 +122,13 @@ class MarketOverview {
                 <div class="bar-fill" style="
                   width: ${skill.pct}%; 
                   background: ${categoryColors[skill.category] || 'var(--text-muted)'}; 
-                  height: 28px; 
-                  border-radius: 4px;
+                  height: var(--size-7); 
+                  border-radius: var(--radius-sm);
                 "></div>
               </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted);">
+              <div style="display: flex; justify-content: space-between; font-size: var(--text-sm); color: var(--text-muted);">
                 <span>${skill.pct}%</span>
-                <span class="tag ${gapClasses[skill.gap] || 'tag-gray'}">${skill.gap}</span>
+                <span class="tag ${gapClasses[skill.gap] || 'tag-neutral'}">${skill.gap}</span>
               </div>
             </div>
           `;
@@ -224,7 +224,7 @@ class MarketOverview {
       };
       
       return `
-        <div class="company-card" data-slug="${company.slug}" onclick="window.location.href='/market/company/${company.slug}'">
+        <div class="company-card" data-slug="${company.slug}" data-component="company-card-link">
           <div class="company-card-header">
             <span class="company-card-title">${company.name}</span>
             <span class="company-card-temperature ${temperatureClasses[company.temperature]}">
@@ -299,6 +299,20 @@ class MarketOverview {
         this.currentLocationFilter = e.target.value;
         this.renderSalaryCards();
         this.renderCompanyHeatmap(); // Also filter companies by location
+      });
+    }
+    
+    // Company card clicks (delegated)
+    const companyGrid = document.getElementById('companyGridContainer');
+    if (companyGrid) {
+      companyGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-component="company-card-link"]');
+        if (card) {
+          const slug = card.getAttribute('data-slug');
+          if (slug) {
+            window.location.href = `/market/company/${slug}`;
+          }
+        }
       });
     }
     

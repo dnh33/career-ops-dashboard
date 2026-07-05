@@ -1,5 +1,5 @@
 ---
-import type { LoaderProps } from './types';
+import type { LoaderProps } from './types'
 
 interface Props extends LoaderProps {}
 
@@ -21,31 +21,31 @@ const {
     align-items: center;
     gap: var(--space-3);
     color: var(--text-secondary);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
   }
 
   .loader__spinner {
     display: inline-block;
-    border: 2px solid var(--stroke-hairline);
-    border-top-color: var(--color-primary);
+    border: var(--border-width-double) solid var(--border-default);
+    border-top-color: var(--accent-primary);
     border-radius: var(--radius-full);
-    animation: loader-spin var(--transition-slow) linear infinite;
+    animation: loader-spin var(--duration-slow) linear infinite;
   }
 
   .loader--sm .loader__spinner {
-    width: 1rem;
-    height: 1rem;
+    width: var(--size-4);
+    height: var(--size-4);
   }
 
   .loader--md .loader__spinner {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: var(--size-5);
+    height: var(--size-5);
   }
 
   .loader--lg .loader__spinner {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--size-7);
+    height: var(--size-7);
   }
 
   @keyframes loader-spin {

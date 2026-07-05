@@ -1,0 +1,98 @@
+---
+// SkillGapRadar.astro — Radar Sweep Signature Moment Wrapper
+// Design System Foundation §3.3.1 & §4.2.1
+// Astro + module script, data-* attributes for config
+
+interface Props {
+  /** Gap data for radar visualization */
+  gaps: Array<{
+    skill: string;
+    demandPct: number;
+    yourPct: number;
+    gapPct: number;
+    grade: 'high' | 'mid' | 'low';
+  }>;
+  /** Optional custom class */
+  class?: string;
+}
+
+const { gaps, class: className = '' } = Astro.props;
+
+const radarId = `skill-gap-radar-${Math.random().toString(36).substring(2, 9)}`;
+const gapsJson = JSON.stringify({ gaps });
+---
+
+<div
+  class:list={['skill-gap-radar', className]}
+  data-component="skill-gap-radar"
+  data-gaps={gapsJson}
+  id={radarId}
+  role="region"
+  aria-label="Skill gap radar - animated rings show market demand vs your coverage"
+></div>
+
+<style>
+  .skill-gap-radar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: var(--max-width-card);
+    width: 100%;
+  }
+
+  .skill-gap-radar-svg {
+    width: 100%;
+    height: auto;
+    max-width: var(--size-80);
+  }
+
+  .skill-gap-radar-tooltip {
+    position: absolute;
+    pointer-events: none;
+    z-index: var(--z-tooltip);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-elevated);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .skill-gap-radar-tooltip strong {
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+  }
+
+  .tooltip-label {
+    color: var(--text-muted);
+  }
+
+  .tooltip-value {
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-gap-radar-tooltip {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Module script auto-initializes via skill-gap-radar.js
+  // The initSkillGapRadar function is registered in registry.ts
+  // and auto-inits on DOMContentLoaded and pagelayout:ready
+</script>

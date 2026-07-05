@@ -74,8 +74,8 @@ if (!visible) {
 <style>
   .gap-analysis-panel {
     background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-lg);
     overflow: hidden;
   }
 
@@ -96,20 +96,20 @@ if (!visible) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.25rem;
+    padding: var(--space-4) var(--space-5);
     background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: var(--border-width) solid var(--border-default);
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     user-select: none;
   }
 
   .gap-chevron {
-    width: 20px;
-    height: 20px;
+    width: var(--size-5);
+    height: var(--size-5);
     color: var(--text-muted);
-    transition: transform 200ms ease;
+    transition: transform var(--transition-base);
   }
 
   .gap-details[open] .gap-chevron {
@@ -117,11 +117,11 @@ if (!visible) {
   }
 
   .gap-content {
-    padding: 1.25rem;
+    padding: var(--space-5);
   }
 
   .gap-section {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-5);
   }
 
   .gap-section:last-child {
@@ -129,11 +129,11 @@ if (!visible) {
   }
 
   .gap-section-title {
-    margin: 0 0 0.75rem;
-    font-size: 0.75rem;
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-tight);
     color: var(--text-secondary);
   }
 
@@ -143,66 +143,65 @@ if (!visible) {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .gap-item {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-hover);
-    border-radius: 8px;
-    font-size: 0.8125rem;
+    border: var(--border-width) solid var(--border-hover);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
     color: var(--text-secondary);
     line-height: 1.5;
   }
 
   .gap-index {
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    width: var(--size-5);
+    height: var(--size-5);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--accent-primary);
     color: var(--bg-primary);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     font-family: var(--font-mono);
   }
 
   .strengths-section .gap-section-title {
-    color: var(--success);
+    color: var(--grade-high);
   }
 
   .strengths-list .gap-item {
-    background: color-mix(in srgb, var(--success) 10%, var(--bg-tertiary));
-    border-color: color-mix(in srgb, var(--success) 20%, var(--border-hover));
+    background: color-mix(in srgb, var(--grade-high) 10%, var(--bg-tertiary));
+    border-color: color-mix(in srgb, var(--grade-high) 20%, var(--border-hover));
   }
 
   .strength-item {
     display: flex;
     align-items: flex-start;
-    !important;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   .strength-icon {
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    color: var(--success);
-    margin-top: 2px;
+    width: var(--size-5);
+    height: var(--size-5);
+    color: var(--grade-high);
+    margin-top: var(--border-width-double);
   }
 
   .gap-empty {
     margin: 0;
-    padding: 1.5rem;
+    padding: var(--space-6);
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 </style>

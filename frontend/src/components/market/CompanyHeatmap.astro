@@ -13,21 +13,21 @@
 <style>
   .company-grid {
     display: grid;
-    gap: 1rem;
-    padding: 0.75rem 0.875rem;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-3-5);
   }
 
   .company-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    padding: 0.75rem 0.875rem;
-    transition: transform 200ms ease, border-color 200ms ease;
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-3-5);
+    transition: transform var(--transition-base), border-color var(--transition-base);
     cursor: pointer;
   }
 
   .company-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(calc(-1 * var(--size-1)));
     border-color: color-mix(in srgb, var(--accent-primary) 25%, var(--border-default));
   }
 
@@ -39,60 +39,60 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .company-card-title {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-primary);
   }
 
   .company-card-temperature {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
     font-weight: 600;
     text-transform: uppercase;
   }
 
   .company-card-temperature.hot {
-    background: var(--error);
-    color: var(--text-primary);
+    background: var(--grade-low);
+    color: var(--grade-low-text);
   }
 
   .company-card-temperature.warm {
-    background: var(--warning);
-    color: var(--text-primary);
+    background: var(--grade-mid);
+    color: var(--grade-mid-text);
   }
 
   .company-card-temperature.cool {
-    background: var(--info);
-    color: var(--text-primary);
+    background: var(--grade-high);
+    color: var(--grade-high-text);
   }
 
   .company-card-roles {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.75rem;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
     color: var(--text-secondary);
   }
 
   .company-card-salary {
     font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
   }
 
   .company-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
   }
 
@@ -103,7 +103,7 @@
 
   .company-card-placeholder {
     text-align: center;
-    padding: 2rem;
+    padding: var(--space-8);
     color: var(--text-muted);
   }
 
@@ -125,17 +125,17 @@
   }
 
   /* Horizontal scroll for mobile */
-  @media (max-width: 639px) {
+  @media (max-width: 768px) {
     .company-grid {
       display: flex;
       overflow-x: auto;
-      gap: 0.75rem;
-      padding: 0.75rem 0;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
       scroll-snap-type: x mandatory;
     }
 
     .company-card {
-      flex: 0 0 200px;
+      flex: 0 0 var(--size-50);
       scroll-snap-align: start;
     }
   }

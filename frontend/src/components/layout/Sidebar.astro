@@ -82,12 +82,12 @@ function isActive(href: string): boolean {
 <style>
   .hermes-sidebar {
     position: fixed;
-    inset: var(--topbar-height) auto 0 0;
+    inset: var(--space-6) auto 0 0;
     width: var(--sidebar-width);
     display: none;
     flex-direction: column;
-    background: var(--bg-panel);
-    border-right: 1px solid var(--stroke-hairline);
+    background: var(--bg-card);
+    border-right: var(--border-width) solid var(--border-default);
     z-index: var(--z-sticky);
     transition: width var(--transition-base);
   }
@@ -99,7 +99,7 @@ function isActive(href: string): boolean {
   }
 
   .hermes-sidebar--collapsed {
-    width: 3.5rem;
+    width: var(--size-14);
   }
 
   .hermes-sidebar__brand {
@@ -107,11 +107,11 @@ function isActive(href: string): boolean {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
   }
 
   .hermes-sidebar__title {
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-primary);
@@ -130,13 +130,13 @@ function isActive(href: string): boolean {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--size-7);
+    height: var(--size-7);
     min-height: auto;
     padding: 0;
-    border: 1px solid var(--stroke-hairline);
+    border: var(--border-width) solid var(--border-default);
     background: var(--bg-elevated);
-    color: var(--text-tertiary);
+    color: var(--text-muted);
     cursor: pointer;
     border-radius: var(--radius-sm);
   }
@@ -159,26 +159,26 @@ function isActive(href: string): boolean {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
-    border-left: 3px solid transparent;
+    border-left: var(--border-width-thick) solid transparent;
     color: var(--text-secondary);
     font-size: var(--text-sm);
     font-weight: 500;
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     text-decoration: none;
-    min-height: 36px;
+    min-height: var(--size-9);
     transition: color var(--transition-base), background-color var(--transition-base);
   }
 
   .hermes-sidebar__link:hover {
     color: var(--text-primary);
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .hermes-sidebar__link--active {
-    color: var(--color-primary);
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-    border-left-color: var(--color-primary);
-    padding-left: calc(var(--space-3) - 3px);
+    color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+    border-left-color: var(--accent-primary);
+    padding-left: calc(var(--space-3) - var(--border-width-thick));
   }
 
   .hermes-sidebar__icon {

@@ -1,5 +1,5 @@
 ---
-import type { CodeBlockProps } from './types';
+import type { CodeBlockProps } from './types'
 
 interface Props extends CodeBlockProps {}
 
@@ -57,9 +57,9 @@ const blockId = `code-block-${Math.random().toString(36).slice(2, 9)}`;
 <style>
   .code-block {
     margin: 0;
-    background: var(--bg-panel);
-    border: 1px solid var(--stroke-hairline);
-    box-shadow: var(--shadow-nous);
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-default);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
   }
 
@@ -68,16 +68,16 @@ const blockId = `code-block-${Math.random().toString(36).slice(2, 9)}`;
     align-items: center;
     justify-content: space-between;
     padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--stroke-hairline);
+    border-bottom: var(--border-width) solid var(--border-default);
     background: var(--bg-card);
   }
 
   .code-block__lang {
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    font-family: var(--font-ui);
+    color: var(--text-muted);
+    font-family: var(--font-sans);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-tight);
   }
 
   .code-block__copy {
@@ -88,7 +88,7 @@ const blockId = `code-block-${Math.random().toString(36).slice(2, 9)}`;
     background: transparent;
     color: var(--text-secondary);
     font-size: var(--text-xs);
-    font-family: var(--font-ui);
+    font-family: var(--font-sans);
     min-height: auto;
     padding: var(--space-1) var(--space-2);
     cursor: pointer;
@@ -97,7 +97,7 @@ const blockId = `code-block-${Math.random().toString(36).slice(2, 9)}`;
 
   .code-block__copy:hover {
     color: var(--text-primary);
-    background: var(--bg-hover);
+    background: var(--bg-tertiary);
   }
 
   .code-block__pre {
@@ -123,7 +123,7 @@ const blockId = `code-block-${Math.random().toString(36).slice(2, 9)}`;
     flex-shrink: 0;
     width: 2ch;
     text-align: right;
-    color: var(--text-quaternary);
+    color: var(--text-muted);
     user-select: none;
   }
 

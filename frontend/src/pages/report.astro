@@ -1,37 +1,51 @@
 ---
-import HermesLayout from '../layouts/HermesLayout.astro';
+import PageLayout from '../components/layout/PageLayout.astro';
+import SearchField from '../components/primitives/SearchField.astro';
+import SegmentedControl from '../components/primitives/SegmentedControl.astro';
+import MetricCard from '../components/primitives/MetricCard.astro';
+import DataTable from '../components/primitives/DataTable.astro';
+import EmptyState from '../components/primitives/EmptyState.astro';
+import StatusPill from '../components/primitives/StatusPill.astro';
+import Loader from '../components/primitives/Loader.astro';
+import ErrorState from '../components/primitives/ErrorState.astro';
 ---
 
-<HermesLayout title="Report" currentPath="/report" pageTitle="Report" description="View detailed evaluation report.">
-  <div class="content-container max-w-4xl mx-auto space-y-6">
-    <a href="/reports" class="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors">
+<PageLayout
+  title="Report"
+  pageTitle="Report"
+  description="View detailed evaluation report."
+  currentPath="/report"
+>
+  <div slot="hero" class="report-page__hero">
+    <h1 class="report-page__title">Report</h1>
+    <p class="report-page__subtitle">View detailed evaluation report.</p>
+  </div>
+
+  <div slot="actions" class="report-page__actions">
+    <a href="/reports" class="toolbar-btn">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
       Back to Reports
     </a>
+    <button id="pdf-btn" class="toolbar-btn toolbar-btn-primary">Generate PDF</button>
+  </div>
 
+  <section class="report-page__table-section" aria-label="Report content">
     <!-- Loading -->
-    <div id="report-loading" class="text-center py-16">
-      <div class="skeleton skeleton-card h-32 rounded-lg mb-4"></div>
-      <p class="text-[var(--text-muted)] text-sm">Loading report...</p>
+    <div id="report-loading" class="report-page__state">
+      <Loader label="Loading report" size="lg" />
     </div>
 
     <!-- Error -->
-    <div id="report-error" class="hidden text-center py-16">
-      <svg class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <p class="text-[var(--text-secondary)] text-lg" id="error-msg">Unable to connect to backend</p>
-      <a href="/reports" class="inline-block mt-4 px-5 py-2 bg-[var(--accent-primary)] text-[var(--text-inverse)] rounded-lg font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">
-        Back to Reports
-      </a>
+    <div id="report-error" class="report-page__state" hidden>
+      <ErrorState title="Report unavailable" message="Could not load the evaluation report." />
     </div>
 
     <!-- Report content (populated client-side) -->
     <div id="report-content" class="hidden space-y-6">
       <!-- Score Hero -->
-      <div class="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-8">
+      <div class="report-page__score-section">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex-1 min-w-0">
             <h1 class="text-2xl font-bold text-[var(--text-primary)] truncate" id="report-title">—</h1>
@@ -42,41 +56,35 @@ import HermesLayout from '../layouts/HermesLayout.astro';
           <div class="text-center shrink-0" id="report-score-section">
             <div class="text-5xl font-bold text-[var(--accent-primary)]" id="report-score">—</div>
             <span class="inline-block mt-2 px-3 py-0.5 text-xs border border-[var(--accent-primary)] text-[var(--accent-primary)] rounded-full" id="report-grade"></span>
-            <p class="text-xs text-[var(--text-secondary)] mt-2 max-w-[160px] mx-auto" id="report-archetype"></p>
+            <p class="text-xs text-[var(--text-secondary)] mt-2 max-w-[var(--max-width-card)] mx-auto" id="report-archetype"></p>
           </div>
         </div>
       </div>
 
       <!-- Action Bar -->
       <div class="flex flex-wrap gap-3">
-        <button id="pdf-btn" class="px-4 py-2 bg-[var(--accent-primary)] text-[var(--text-inverse)] rounded-lg font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors cursor-pointer">
-          Generate PDF
-        </button>
-        <a href="/tracker" class="px-4 py-2 border border-[var(--border-hover)] text-[var(--text-primary)] rounded-lg font-medium text-sm hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] transition-colors">
-          Track this
-        </a>
-        <a href="/reports" class="px-4 py-2 border border-[var(--border-hover)] text-[var(--text-primary)] rounded-lg font-medium text-sm hover:border-[var(--border-hover)] hover:text-[var(--text-primary)] transition-colors">
-          Compare reports
-        </a>
+        <button id="pdf-btn" class="toolbar-btn toolbar-btn-primary">Generate PDF</button>
+        <a href="/tracker" class="toolbar-btn">Track this</a>
+        <a href="/reports" class="toolbar-btn">Compare</a>
       </div>
 
       <!-- Report Content Blocks -->
       <div id="report-blocks" class="space-y-4"></div>
     </div>
-  </div>
-</HermesLayout>
+  </section>
+</PageLayout>
 
 <script>
   import { scoreToGrade, gradeClass, gradeColorVars } from '../utils/colors';
 
   function escapeHtml(s: string) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(s).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/\"/g, '"');
   }
 
   function renderMd(md: string) {
     return md
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+      .replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)]">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 bg-[var(--bg-tertiary)] rounded text-xs font-mono text-[var(--text-primary)]">$1</code>')
       .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
@@ -114,7 +122,7 @@ import HermesLayout from '../layouts/HermesLayout.astro';
     if (!blocksEl) return;
 
     const sections: Array<{ letter: string; title: string; body: string }> = [];
-    const pattern = /^## (?:Block\s+)?([A-G])(?:\)\s*|:\s*|\s+—\s+|\s+)(.+)?$/gm;
+    const pattern = /^## (?:Block\s+)?([A-G])(?:\\)\s*|:\\s*|\\s+—\\s+|\\s+)(.+)?$/gm;
     const matches: Array<{ idx: number; letter: string; title: string; headerLen: number }> = [];
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(content)) !== null) {
@@ -196,3 +204,67 @@ import HermesLayout from '../layouts/HermesLayout.astro';
 
   loadReport();
 </script>
+
+<style>
+  .report-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .report-page__hero {
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--border-default);
+  }
+
+  .report-page__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+  }
+
+  .report-page__subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .report-page__actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .report-page__score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-4);
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-default);
+    border-radius: var(--radius-xl);
+  }
+
+  .report-page__table-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .report-page__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-10);
+  }
+
+  @media (max-width: 1024px) {
+    .report-page__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
